@@ -7,6 +7,7 @@ Proyecto integrador del curso Base de Datos I — Universidad Popular del Cesar.
 - Rafael Alfonso Rivera Restrepo
 - Ivan Andrés Rodriguez Rodriguez
 - Luis Eliecer Mendoza Perpiñán
+- Carlos Eduardo Camelo Montaño
 
 ## Estado del proyecto
 Entrega 1 — Planteamiento y diseño (ver documentacion/Entrega1_REDA.docx)
