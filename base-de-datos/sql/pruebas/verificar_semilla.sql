@@ -85,6 +85,14 @@ WHERE (ec.nombre IN ('Aceptado por abogado', 'Cerrado') AND c.id_caso IN (SELECT
 \echo '14. Solo se postulan abogados activos (verificados). Esperado: 0'
 SELECT count(*) FROM postulaciones p JOIN abogados a USING (id_abogado) WHERE NOT a.activo;
 
+\echo '15. Solo se califica un caso cerrado y al abogado que el ciudadano eligió. Esperado: 0'
+SELECT count(*) FROM calificaciones ca
+JOIN casos c USING (id_caso) JOIN estados_caso ec USING (id_estado_caso)
+WHERE ec.nombre <> 'Cerrado'
+   OR NOT EXISTS (SELECT 1 FROM remisiones rm WHERE rm.id_caso = ca.id_caso AND rm.id_abogado = ca.id_abogado
+                  AND rm.estado_remision = 'ACEPTADA')
+   OR ca.fecha < c.fecha_cierre;
+
 \echo 'Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)'
 SELECT i.id_incidente, count(rr.*) AS antecedentes, min(rc.fecha_reporte)::date AS primero
 FROM incidentes i

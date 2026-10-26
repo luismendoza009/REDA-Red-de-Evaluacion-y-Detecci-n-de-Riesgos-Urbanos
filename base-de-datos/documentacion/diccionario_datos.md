@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -138,10 +138,13 @@ Abogados o firmas aliadas que reciben casos remitidos (especialización 1:1 de u
 | tarjeta_profesional | VARCHAR(20) | No | UQ |  | [PERSONAL] Número de tarjeta profesional (solo dígitos, único). |
 | especialidad | VARCHAR(80) | No |  |  | Área de práctica (p. ej. responsabilidad del Estado, derecho administrativo). |
 | ciudad | VARCHAR(80) | No |  | 'Valledupar' | Ciudad donde ejerce; se usa para asignar casos. |
-| activo | BOOLEAN | No |  | true | false = no recibe nuevas remisiones. |
+| activo | BOOLEAN | No |  | true | false = pendiente de verificación de la tarjeta profesional o suspendido: no ve ni toma casos. |
+| anios_experiencia | SMALLINT | No |  | 0 | Años de ejercicio declarados por el abogado (se muestran al ciudadano al comparar). |
+| presentacion | TEXT | Sí |  |  | Texto con que el abogado se presenta a los ciudadanos. |
 
 **Restricciones:**
 
+- `ck_abogados_experiencia`: `CHECK (((anios_experiencia >= 0) AND (anios_experiencia <= 70)))`
 - `ck_abogados_tarjeta`: `CHECK (((tarjeta_profesional)::text ~ '^[0-9]{4,10}$'::text))`
 - `fk_abogados_usuario`: `FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT`
 - `uq_abogados_tarjeta`: `UNIQUE (tarjeta_profesional)`
@@ -350,10 +353,11 @@ Expediente legal creado a partir de un incidente viable (1:1 con incidentes).
 | id_caso | INTEGER | No | PK | identidad | Identificador único del caso. |
 | id_incidente | INTEGER | No | FK, UQ |  | Incidente que origina el caso (UNIQUE: un incidente, un caso). |
 | id_estado_caso | INTEGER | No | FK |  | Estado actual del caso. |
-| id_operador | INTEGER | No | FK |  | Operador que validó el incidente y abrió el caso. |
+| id_operador | INTEGER | No | FK |  | Operador que validó el incidente del que nace el caso. |
 | fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento en que se abrió el caso. |
 | fecha_cierre | TIMESTAMPTZ | Sí |  |  | Momento de cierre (nulo mientras está abierto). |
 | observacion | TEXT | Sí |  |  | Notas internas del operador sobre el caso. |
+| fecha_consentimiento | TIMESTAMPTZ | Sí |  |  | Momento en que el ciudadano autorizó mostrar un resumen anónimo de su caso a los abogados aliados. |
 
 **Restricciones:**
 
@@ -466,4 +470,82 @@ Historial de cálculos de IRU/IVC por reporte, con el desglose de razones.
 
 - `ix_calculos_reporte`: `btree (id_reporte, fecha_calculo DESC)`
 - `ix_calculos_version`: `btree (id_version)`
+
+## postulaciones
+
+Interés de un abogado en tomar un caso. El ciudadano compara las postulaciones y elige una.
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| id_postulacion | INTEGER | No | PK | identidad | Identificador único de la postulación. |
+| id_caso | INTEGER | No | FK, UQ |  | Caso al que se postula el abogado. |
+| id_abogado | INTEGER | No | FK, UQ |  | Abogado que se postula (no puede postularse dos veces al mismo caso). |
+| mensaje | TEXT | No |  |  | Por qué el abogado quiere el caso y cómo lo llevaría (mínimo 20 caracteres). |
+| estado | VARCHAR(12) | No |  | 'PENDIENTE' | PENDIENTE, ELEGIDA (el ciudadano lo escogió), NO_ELEGIDA (escogió a otro) o RETIRADA (el abogado desistió). |
+| fecha_postulacion | TIMESTAMPTZ | No |  | now() | Momento de la postulación. |
+| fecha_resolucion | TIMESTAMPTZ | Sí |  |  | Momento en que la postulación dejó de estar pendiente. |
+
+**Restricciones:**
+
+- `ck_postulaciones_estado`: `CHECK (((estado)::text = ANY ((ARRAY['PENDIENTE'::character varying, 'ELEGIDA'::character varying, 'NO_ELEGIDA'::character varying, 'RETIRADA'::character varying])::text[])))`
+- `ck_postulaciones_mensaje`: `CHECK ((length(TRIM(BOTH FROM mensaje)) >= 20))`
+- `ck_postulaciones_resolucion`: `CHECK (((((estado)::text = 'PENDIENTE'::text) AND (fecha_resolucion IS NULL)) OR (((estado)::text <> 'PENDIENTE'::text) AND (fecha_resolucion IS NOT NULL) AND (fecha_resolucion >= fecha_postulacion))))`
+- `fk_postulaciones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
+- `fk_postulaciones_caso`: `FOREIGN KEY (id_caso) REFERENCES casos(id_caso) ON DELETE CASCADE`
+- `uq_postulaciones_caso_abogado`: `UNIQUE (id_caso, id_abogado)`
+
+**Índices adicionales:**
+
+- `ix_postulaciones_abogado`: `btree (id_abogado)`
+- `uq_postulaciones_una_elegida`: `btree (id_caso) WHERE ((estado)::text = 'ELEGIDA'::text)`
+
+## tokens_recuperacion
+
+Enlaces de un solo uso para restablecer la contraseña (vencen a los 30 minutos).
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| id_token | INTEGER | No | PK | identidad | Identificador único del token. |
+| id_usuario | INTEGER | No | FK |  | Usuario que pidió restablecer su contraseña. |
+| hash_token | CHAR(64) | No | UQ |  | SHA-256 del token enviado por correo. Protección: el token en claro nunca se guarda. |
+| fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento de la solicitud. |
+| fecha_expiracion | TIMESTAMPTZ | No |  |  | Después de este momento el enlace ya no sirve. |
+| fecha_uso | TIMESTAMPTZ | Sí |  |  | Momento en que se usó (nulo si no se ha usado). Un token usado no vuelve a servir. |
+
+**Restricciones:**
+
+- `ck_tokens_hash`: `CHECK ((hash_token ~ '^[0-9a-f]{64}$'::text))`
+- `ck_tokens_uso`: `CHECK (((fecha_uso IS NULL) OR ((fecha_uso >= fecha_creacion) AND (fecha_uso <= fecha_expiracion))))`
+- `ck_tokens_vigencia`: `CHECK ((fecha_expiracion > fecha_creacion))`
+- `fk_tokens_usuario`: `FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE`
+- `uq_tokens_hash`: `UNIQUE (hash_token)`
+
+**Índices adicionales:**
+
+- `ix_tokens_usuario`: `btree (id_usuario)`
+
+## calificaciones
+
+Calificación que el ciudadano da al abogado que llevó su caso (una por caso).
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| id_calificacion | INTEGER | No | PK | identidad | Identificador único de la calificación. |
+| id_caso | INTEGER | No | FK, UQ |  | Caso calificado (UNIQUE: una calificación por caso). El autor es el dueño del caso. |
+| id_abogado | INTEGER | No | FK |  | Abogado calificado: el que el ciudadano eligió para el caso. |
+| puntaje | SMALLINT | No |  |  | De 1 (muy malo) a 5 (excelente) estrellas. |
+| comentario | TEXT | Sí |  |  | Por qué de la calificación (opcional). Se muestra a otros ciudadanos sin el nombre del autor. |
+| fecha | TIMESTAMPTZ | No |  | now() | Momento de la calificación. |
+
+**Restricciones:**
+
+- `ck_calificaciones_comentario`: `CHECK (((comentario IS NULL) OR ((length(TRIM(BOTH FROM comentario)) >= 3) AND (length(TRIM(BOTH FROM comentario)) <= 1000))))`
+- `ck_calificaciones_puntaje`: `CHECK (((puntaje >= 1) AND (puntaje <= 5)))`
+- `fk_calificaciones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
+- `fk_calificaciones_caso`: `FOREIGN KEY (id_caso) REFERENCES casos(id_caso) ON DELETE RESTRICT`
+- `uq_calificaciones_caso`: `UNIQUE (id_caso)`
+
+**Índices adicionales:**
+
+- `ix_calificaciones_abogado`: `btree (id_abogado, fecha DESC)`
 

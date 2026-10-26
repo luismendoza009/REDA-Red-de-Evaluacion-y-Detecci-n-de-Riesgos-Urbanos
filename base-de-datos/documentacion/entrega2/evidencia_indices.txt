@@ -775,3 +775,262 @@ SELECT count(*) AS reportes_tras_rollback FROM reportes;
                     137
 (1 fila)
 
+/******** QUERY *********/
+BEGIN;
+/************************/
+
+BEGIN
+/******** QUERY *********/
+SELECT setseed(0.2026);
+/************************/
+
+ setseed 
+---------
+ 
+(1 fila)
+
+/******** QUERY *********/
+INSERT INTO reportes (id_usuario, id_categoria, id_zona, id_estado, tipo_reporte, descripcion,
+                      latitud, longitud, fecha_reporte, nivel_gravedad)
+SELECT (SELECT array_agg(id_usuario) FROM usuarios WHERE id_rol = 1)[1 + floor(random() * 45)::int],
+       1 + floor(random() * 8)::int,
+       1 + floor(random() * 30)::int,
+       1 + floor(random() * 6)::int,
+       'CONDICION',
+       'Reporte sintético para la prueba de índices',
+       round((10.43 + random() * 0.08)::numeric, 6),
+       round((-73.29 + random() * 0.07)::numeric, 6),
+       timestamptz '2023-01-01' + random() * interval '1390 days',
+       1 + floor(random() * 5)::int
+FROM generate_series(1, 200000);
+/************************/
+
+INSERT 0 200000
+/******** QUERY *********/
+INSERT INTO evidencias (id_reporte, ruta_imagen, tipo_mime, tamano_bytes, hash_sha256, fecha_carga)
+SELECT r.id_reporte, 'sintetica/' || r.id_reporte || '_' || n || '.jpg', 'image/jpeg',
+       200000 + (r.id_reporte * 7919 + n) % 4000000,
+       encode(sha256(convert_to(r.id_reporte || '-' || n, 'UTF8')), 'hex'),
+       r.fecha_reporte
+FROM reportes r CROSS JOIN generate_series(1, 2) n
+WHERE r.descripcion = 'Reporte sintético para la prueba de índices';
+/************************/
+
+INSERT 0 400000
+/******** QUERY *********/
+ANALYZE reportes;
+/************************/
+
+ANALYZE
+/******** QUERY *********/
+ANALYZE evidencias;
+/************************/
+
+ANALYZE
+/******** QUERY *********/
+SELECT (SELECT count(*) FROM reportes) AS reportes, (SELECT count(*) FROM evidencias) AS evidencias;
+/************************/
+
+ reportes | evidencias 
+----------+------------
+   200137 |     400214
+(1 fila)
+
+/******** QUERY *********/
+DROP INDEX ix_reportes_antecedentes;
+/************************/
+
+DROP INDEX
+/******** QUERY *********/
+EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
+SELECT rc.id_reporte, rc.fecha_reporte
+FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hora_hecho
+                   FROM incidentes i JOIN reportes r USING (id_reporte)
+                   WHERE i.id_incidente = 18) inc
+WHERE rc.id_categoria = inc.id_categoria
+  AND rc.tipo_reporte = 'CONDICION'
+  AND rc.latitud  BETWEEN inc.latitud  - 0.0009 AND inc.latitud  + 0.0009
+  AND rc.longitud BETWEEN inc.longitud - 0.0009 AND inc.longitud + 0.0009
+  AND rc.fecha_reporte < inc.fecha_hora_hecho;
+/************************/
+
+                                                                                                        QUERY PLAN                                                                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop (actual time=0.089..8.366 rows=22.00 loops=1)
+   Join Filter: (rc.fecha_reporte < i.fecha_hora_hecho)
+   Buffers: shared hit=3454 read=23 written=23
+   ->  Nested Loop (actual time=0.045..0.047 rows=1.00 loops=1)
+         Buffers: shared hit=4 read=2 written=2
+         ->  Index Scan using incidentes_pkey on incidentes i (actual time=0.037..0.037 rows=1.00 loops=1)
+               Index Cond: (id_incidente = 18)
+               Index Searches: 1
+               Buffers: shared read=2 written=2
+         ->  Index Scan using uq_reportes_id_tipo on reportes r (actual time=0.006..0.006 rows=1.00 loops=1)
+               Index Cond: (id_reporte = i.id_reporte)
+               Index Searches: 1
+               Buffers: shared hit=4
+   ->  Index Scan using ix_reportes_categoria on reportes rc (actual time=0.041..8.309 rows=22.00 loops=1)
+         Index Cond: (id_categoria = r.id_categoria)
+         Filter: (((tipo_reporte)::text = 'CONDICION'::text) AND (latitud >= (r.latitud - 0.0009)) AND (latitud <= (r.latitud + 0.0009)) AND (longitud >= (r.longitud - 0.0009)) AND (longitud <= (r.longitud + 0.0009)))
+         Rows Removed by Filter: 25052
+         Index Searches: 1
+         Buffers: shared hit=3450 read=21 written=21
+ Planning:
+   Buffers: shared hit=190 read=8 written=8
+ Planning Time: 1.137 ms
+ Execution Time: 8.390 ms
+(23 filas)
+
+/******** QUERY *********/
+CREATE INDEX ix_reportes_antecedentes ON reportes (id_categoria, tipo_reporte, latitud) INCLUDE (longitud, fecha_reporte);
+/************************/
+
+CREATE INDEX
+/******** QUERY *********/
+ANALYZE reportes;
+/************************/
+
+ANALYZE
+/******** QUERY *********/
+EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
+SELECT rc.id_reporte, rc.fecha_reporte
+FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hora_hecho
+                   FROM incidentes i JOIN reportes r USING (id_reporte)
+                   WHERE i.id_incidente = 18) inc
+WHERE rc.id_categoria = inc.id_categoria
+  AND rc.tipo_reporte = 'CONDICION'
+  AND rc.latitud  BETWEEN inc.latitud  - 0.0009 AND inc.latitud  + 0.0009
+  AND rc.longitud BETWEEN inc.longitud - 0.0009 AND inc.longitud + 0.0009
+  AND rc.fecha_reporte < inc.fecha_hora_hecho;
+/************************/
+
+                                                                                    QUERY PLAN                                                                                    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop (actual time=0.071..0.510 rows=22.00 loops=1)
+   Join Filter: (rc.fecha_reporte < i.fecha_hora_hecho)
+   Buffers: shared hit=567 read=7
+   ->  Nested Loop (actual time=0.012..0.013 rows=1.00 loops=1)
+         Buffers: shared hit=6
+         ->  Index Scan using incidentes_pkey on incidentes i (actual time=0.003..0.003 rows=1.00 loops=1)
+               Index Cond: (id_incidente = 18)
+               Index Searches: 1
+               Buffers: shared hit=2
+         ->  Index Scan using uq_reportes_id_tipo on reportes r (actual time=0.007..0.007 rows=1.00 loops=1)
+               Index Cond: (id_reporte = i.id_reporte)
+               Index Searches: 1
+               Buffers: shared hit=4
+   ->  Index Scan using ix_reportes_antecedentes on reportes rc (actual time=0.057..0.493 rows=22.00 loops=1)
+         Index Cond: ((id_categoria = r.id_categoria) AND ((tipo_reporte)::text = 'CONDICION'::text) AND (latitud >= (r.latitud - 0.0009)) AND (latitud <= (r.latitud + 0.0009)))
+         Filter: ((longitud >= (r.longitud - 0.0009)) AND (longitud <= (r.longitud + 0.0009)))
+         Rows Removed by Filter: 539
+         Index Searches: 1
+         Buffers: shared hit=561 read=7
+ Planning:
+   Buffers: shared hit=52 read=1
+ Planning Time: 0.417 ms
+ Execution Time: 0.535 ms
+(23 filas)
+
+/******** QUERY *********/
+DROP INDEX ix_evidencias_reporte;
+/************************/
+
+DROP INDEX
+/******** QUERY *********/
+EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
+SELECT ca.id_caso, ev.ruta_imagen, ev.hash_sha256, ev.fecha_captura
+FROM casos ca
+JOIN incidentes i  ON i.id_incidente = ca.id_incidente
+JOIN evidencias ev ON ev.id_reporte  = i.id_reporte
+WHERE ca.id_caso = 8;
+/************************/
+
+                                               QUERY PLAN                                               
+--------------------------------------------------------------------------------------------------------
+ Gather (actual time=0.499..39.399 rows=1.00 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=7686 read=2
+   ->  Hash Join (actual time=1.988..13.480 rows=0.33 loops=3)
+         Hash Cond: (i.id_incidente = ca.id_incidente)
+         Buffers: shared hit=7686 read=2
+         ->  Hash Join (actual time=1.946..13.439 rows=9.33 loops=3)
+               Hash Cond: (ev.id_reporte = i.id_reporte)
+               Buffers: shared hit=7680
+               ->  Parallel Seq Scan on evidencias ev (actual time=0.009..6.864 rows=133404.67 loops=3)
+                     Buffers: shared hit=7677
+               ->  Hash (actual time=0.458..0.459 rows=18.00 loops=3)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=3
+                     ->  Seq Scan on incidentes i (actual time=0.450..0.452 rows=18.00 loops=3)
+                           Buffers: shared hit=3
+         ->  Hash (actual time=0.033..0.034 rows=1.00 loops=3)
+               Buckets: 1024  Batches: 1  Memory Usage: 9kB
+               Buffers: shared hit=6 read=2
+               ->  Index Scan using casos_pkey on casos ca (actual time=0.028..0.028 rows=1.00 loops=3)
+                     Index Cond: (id_caso = 8)
+                     Index Searches: 3
+                     Buffers: shared hit=6 read=2
+ Planning:
+   Buffers: shared hit=87 read=4
+ Planning Time: 0.851 ms
+ Execution Time: 39.435 ms
+(28 filas)
+
+/******** QUERY *********/
+CREATE INDEX ix_evidencias_reporte ON evidencias (id_reporte);
+/************************/
+
+CREATE INDEX
+/******** QUERY *********/
+ANALYZE evidencias;
+/************************/
+
+ANALYZE
+/******** QUERY *********/
+EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
+SELECT ca.id_caso, ev.ruta_imagen, ev.hash_sha256, ev.fecha_captura
+FROM casos ca
+JOIN incidentes i  ON i.id_incidente = ca.id_incidente
+JOIN evidencias ev ON ev.id_reporte  = i.id_reporte
+WHERE ca.id_caso = 8;
+/************************/
+
+                                                 QUERY PLAN                                                 
+------------------------------------------------------------------------------------------------------------
+ Nested Loop (actual time=0.052..0.053 rows=1.00 loops=1)
+   Buffers: shared hit=5 read=3
+   ->  Nested Loop (actual time=0.011..0.012 rows=1.00 loops=1)
+         Buffers: shared hit=4
+         ->  Index Scan using casos_pkey on casos ca (actual time=0.007..0.007 rows=1.00 loops=1)
+               Index Cond: (id_caso = 8)
+               Index Searches: 1
+               Buffers: shared hit=2
+         ->  Index Scan using incidentes_pkey on incidentes i (actual time=0.002..0.002 rows=1.00 loops=1)
+               Index Cond: (id_incidente = ca.id_incidente)
+               Index Searches: 1
+               Buffers: shared hit=2
+   ->  Index Scan using ix_evidencias_reporte on evidencias ev (actual time=0.040..0.040 rows=1.00 loops=1)
+         Index Cond: (id_reporte = i.id_reporte)
+         Index Searches: 1
+         Buffers: shared hit=1 read=3
+ Planning:
+   Buffers: shared hit=25 read=1
+ Planning Time: 0.265 ms
+ Execution Time: 0.069 ms
+(20 filas)
+
+/******** QUERY *********/
+ROLLBACK;
+/************************/
+
+ROLLBACK
+/******** QUERY *********/
+SELECT count(*) AS reportes_tras_rollback FROM reportes;
+/************************/
+
+ reportes_tras_rollback 
+------------------------
+                    137
+(1 fila)
+

@@ -135,9 +135,9 @@ parrafo(REPO, alinear=False)
 titulo("2. Dónde encontrar cada requisito")
 tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resumen"], [
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
-    ("2. DDL como migraciones numeradas", "migraciones/001_ … 009_*.sql", "9 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
+    ("2. DDL como migraciones numeradas", "migraciones/001_ … 011_*.sql", "11 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
-    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 8 casos; simulados y coherentes"),
+    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 9 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
     ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 20 tablas, con 4 excepciones justificadas"),
     ("5. Banco de consultas", "sql/consultas/banco_consultas.sql", "10 consultas comentadas con la pregunta de negocio"),
@@ -147,7 +147,7 @@ tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resume
     ("7. Diccionario de datos", "documentacion/diccionario_datos.md", "Generado del esquema real con scripts/generar_diccionario.ps1"),
     ("Diagrama EER actualizado", "diagramas/reda_eer.drawio y .png", "20 tablas, 26 relaciones, notación pata de gallo"),
     ("Decisiones técnicas", "documentacion/decisiones.md", "Por qué de cada decisión y supuestos pendientes"),
-    ("Pruebas de restricciones", "sql/pruebas/probar_restricciones.sql", "19 inserciones inválidas que la base debe rechazar"),
+    ("Pruebas de restricciones", "sql/pruebas/probar_restricciones.sql", "27 inserciones inválidas que la base debe rechazar"),
 ], [4.6, 7.0, 4.4])
 
 titulo("3. Cobertura del banco de consultas")
@@ -160,11 +160,11 @@ tabla(["Exigencia de la guía", "Consultas"], [
 ], [7, 9])
 
 titulo("4. Cómo se verificó")
-vineta("**Migraciones sobre base vacía:** scripts/migrar.ps1 -Recrear crea la base desde cero y aplica las 9 "
+vineta("**Migraciones sobre base vacía:** scripts/migrar.ps1 -Recrear crea la base desde cero y aplica las 11 "
        "migraciones sin errores; una segunda ejecución no reaplica ninguna.")
-vineta("**Integridad declarativa:** las 19 pruebas negativas de sql/pruebas/probar_restricciones.sql son rechazadas, cada una "
+vineta("**Integridad declarativa:** las 27 pruebas negativas de sql/pruebas/probar_restricciones.sql son rechazadas, cada una "
        "por la restricción exacta que se esperaba (la prueba compara el nombre de la restricción).")
-vineta("**Coherencia de la semilla:** las 11 comprobaciones de sql/pruebas/verificar_semilla.sql devuelven 0 "
+vineta("**Coherencia de la semilla:** las 15 comprobaciones de sql/pruebas/verificar_semilla.sql devuelven 0 "
        "(estado actual = último cambio del historial, hecho antes que el reporte, antecedentes dentro de 100 m, etc.).")
 vineta("**Consultas:** las 10 verificaciones cruzadas coinciden (por ejemplo, LEFT JOIN … IS NULL = NOT EXISTS = EXCEPT; "
        "el total facturado por abogado = el total cobrado por caso). C02 y C07 se comprobaron además a mano.")
@@ -173,8 +173,8 @@ vineta("**Totales no inflados:** las vistas y consultas que combinan varias rela
 
 titulo("5. Índices: resultados")
 tabla(["Experimento", "Antes", "Después", "Mejora"], [
-    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,29 ms · 3 476 páginas", "0,53 ms · 574 páginas", "15× más rápido"),
-    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "36,42 ms · Seq Scan de ≈ 400 000 filas", "0,055 ms · 8 páginas", "≈ 650× más rápido"),
+    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,39 ms · 3 477 páginas", "0,54 ms · 574 páginas", "15× más rápido"),
+    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "39,44 ms · Seq Scan de ≈ 400 000 filas", "0,069 ms · 8 páginas", "≈ 570× más rápido"),
 ], [6.4, 3.6, 3.6, 2.4])
 parrafo("Las mediciones se hicieron con 200 000 reportes y 400 000 evidencias sintéticos cargados dentro de una "
         "transacción que termina en ROLLBACK, para que el volumen no contamine la base de la demo.")

@@ -405,12 +405,19 @@ def main():
     for r in relacionados:
         if r[2] == "ANTECEDENTE":
             ante_por_reporte[r[0]] = ante_por_reporte.get(r[0], 0) + 1
-    casos, remisiones, postulaciones = [], [], []
+    casos, remisiones, postulaciones, calificaciones = [], [], [], []
+    COMENTARIOS = {
+        5: ["Muy claro desde la primera cita; me explicó cada paso y estuvo pendiente todo el tiempo.",
+            "Excelente. Usó los reportes previos del punto y la entidad aceptó conciliar."],
+        4: ["Buen acompañamiento, aunque a veces tardaba en responder los mensajes.",
+            "Conoce bien estos procesos. Recomendado."],
+        3: ["Cumplió, pero esperaba más comunicación durante el proceso."],
+    }
     # Flujo (migración 010): el ciudadano pide abogado -> el caso queda "Remitido" (publicado a los
     # abogados) -> varios se postulan -> el ciudadano ELIGE uno -> "Aceptado por abogado" y se crea la
     # remisión ACEPTADA, que es lo que se le cobra al abogado. Reparto fijo de estados (no al azar)
     # para que la demo siempre muestre casos buscando abogado, con abogado y cerrados.
-    CICLO_ESTADOS_CASO = [C_CERR, C_ACEP, C_RECH, C_REM, C_ACEP, C_CERR, C_REM, C_EVAL, C_ACEP]
+    CICLO_ESTADOS_CASO = [C_CERR, C_ACEP, C_CERR, C_REM, C_CERR, C_ACEP, C_REM, C_RECH, C_EVAL]
     tarifa = {"LESION": 200000, "AMBOS": 200000, "DANO_MATERIAL": 120000}
     MENSAJES = [
         "Tengo experiencia en demandas de reparación directa contra el municipio por vías en mal estado. "
@@ -451,6 +458,11 @@ def main():
                 remisiones.append([None, cid, filas[elegida][2], eleccion, "ACEPTADA", eleccion, None, tarifa[inc[5]]])
                 if estado == C_CERR:
                     cierre = min(eleccion + timedelta(days=random.randint(15, 40)), FIN)
+                    # el ciudadano califica al abogado unos días después del cierre
+                    puntaje = random.choice([5, 5, 4, 4, 3])
+                    calificaciones.append([None, cid, filas[elegida][2], puntaje,
+                                           random.choice(COMENTARIOS[puntaje]) if random.random() < 2 else None,  # siempre con comentario (el sorteo se conserva solo para que la semilla siga siendo la misma que la versión verificada)
+                                           cierre + timedelta(days=random.randint(1, 4))])
             postulaciones.extend(filas)
         elif estado == C_RECH:
             # ningún abogado se interesó en el plazo: el caso se cierra sin abogado
@@ -458,6 +470,11 @@ def main():
         casos.append((cid, iid, estado, validacion[4], creacion, cierre,
                       "Incidente con antecedentes previos en el punto." if ante_por_reporte.get(rid, 0) else "Incidente sin antecedentes registrados.",
                       creacion))
+    # el caso cerrado más reciente queda SIN calificar, para calificarlo en vivo en la demo
+    calificaciones.sort(key=lambda c: c[5])
+    calificaciones = calificaciones[:-1]
+    for k, c in enumerate(calificaciones, 1):
+        c[0] = k
     for lista in (remisiones, postulaciones):
         lista.sort(key=lambda r: r[3] if lista is remisiones else r[5])
         for k, r in enumerate(lista, 1):
@@ -529,6 +546,8 @@ def main():
                                   "observacion", "fecha_consentimiento"], casos))
         f.write(inserts("postulaciones", ["id_postulacion", "id_caso", "id_abogado", "mensaje", "estado", "fecha_postulacion",
                                           "fecha_resolucion"], postulaciones))
+        f.write(inserts("calificaciones", ["id_calificacion", "id_caso", "id_abogado", "puntaje", "comentario", "fecha"],
+                        calificaciones))
         f.write(inserts("remisiones", ["id_remision", "id_caso", "id_abogado", "fecha_envio", "estado_remision", "fecha_respuesta",
                                        "motivo_rechazo", "valor_cobrado"], remisiones))
 
@@ -541,13 +560,14 @@ def main():
                      ("evidencias", "id_evidencia"), ("evaluaciones", "id_evaluacion"), ("historial_estados", "id_historial"),
                      ("incidentes", "id_incidente"), ("testigos", "id_testigo"), ("casos", "id_caso"),
                      ("remisiones", "id_remision"), ("versiones_indice", "id_version"), ("calculos_indice", "id_calculo"),
-                     ("postulaciones", "id_postulacion"), ("tokens_recuperacion", "id_token")]:
+                     ("postulaciones", "id_postulacion"), ("tokens_recuperacion", "id_token"),
+                     ("calificaciones", "id_calificacion")]:
             f.write(f"  PERFORM setval(pg_get_serial_sequence('{t}', '{c}'), coalesce((SELECT max({c}) FROM {t}), 0) + 1, false);\n")
         f.write("END $$;\n")
 
     print(f"usuarios={len(usuarios)} reportes={len(reportes)} (incidentes={len(incidentes)}) evidencias={len(evidencias)} "
           f"historial={len(historial)} evaluaciones={len(evaluaciones)} relacionados={len(relacionados)} "
-          f"testigos={len(testigos)} casos={len(casos)} remisiones={len(remisiones)} postulaciones={len(postulaciones)}")
+          f"testigos={len(testigos)} casos={len(casos)} remisiones={len(remisiones)} postulaciones={len(postulaciones)} calificaciones={len(calificaciones)}")
     print(f"incidente demo: id_incidente={id_incidente_demo}")
 
 

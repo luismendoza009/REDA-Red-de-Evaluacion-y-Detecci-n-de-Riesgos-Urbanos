@@ -112,6 +112,12 @@ UNION ALL
 SELECT pg_temp.debe_fallar('token que vence antes de crearse', 'ck_tokens_vigencia',
   $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), now() - interval '1 minute')$q$)
 UNION ALL
+SELECT pg_temp.debe_fallar('calificación de 6 estrellas', 'ck_calificaciones_puntaje',
+  $q$UPDATE calificaciones SET puntaje = 6 WHERE id_calificacion = (SELECT min(id_calificacion) FROM calificaciones)$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('calificar dos veces el mismo caso', 'uq_calificaciones_caso',
+  $q$INSERT INTO calificaciones (id_caso, id_abogado, puntaje) SELECT id_caso, id_abogado, 5 FROM calificaciones LIMIT 1$q$)
+UNION ALL
 SELECT pg_temp.debe_fallar('evaluación con todos los puntajes vacíos', 'ck_evaluaciones_alguna',
   $q$INSERT INTO evaluaciones (id_reporte, id_usuario) VALUES (1, 2)$q$);
 
