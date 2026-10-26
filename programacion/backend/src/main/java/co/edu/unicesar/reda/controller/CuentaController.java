@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,14 @@ public class CuentaController {
     public PerfilResponse actualizar(@Valid @RequestBody ActualizarPerfilRequest datos,
                                      @AuthenticationPrincipal UsuarioAutenticado usuario) {
         return perfil.actualizar(usuario.id(), datos);
+    }
+
+    @PatchMapping("/abogado")
+    @PreAuthorize("hasRole('ABOGADO')")
+    @Operation(summary = "Editar mi perfil profesional (solo abogados verificados)")
+    public PerfilResponse actualizarAbogado(@Valid @RequestBody ActualizarPerfilAbogadoRequest datos,
+                                            @AuthenticationPrincipal UsuarioAutenticado usuario) {
+        return perfil.actualizarAbogado(usuario.id(), datos);
     }
 
     @PostMapping("/password")

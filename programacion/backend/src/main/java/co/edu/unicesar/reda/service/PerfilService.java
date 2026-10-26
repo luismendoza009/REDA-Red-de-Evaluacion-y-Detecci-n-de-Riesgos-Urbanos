@@ -2,6 +2,7 @@ package co.edu.unicesar.reda.service;
 
 import co.edu.unicesar.reda.dto.AuthDtos.*;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
+import co.edu.unicesar.reda.model.Abogado;
 import co.edu.unicesar.reda.model.Usuario;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
 import co.edu.unicesar.reda.repository.CalificacionRepository;
@@ -42,6 +43,15 @@ public class PerfilService {
         return perfil(u);
     }
 
+    /** Perfil profesional: solo un abogado verificado puede armarlo (regla en Abogado). */
+    @Transactional
+    public PerfilResponse actualizarAbogado(Integer idUsuario, ActualizarPerfilAbogadoRequest datos) {
+        Abogado a = abogados.findByUsuarioId(idUsuario)
+                .orElseThrow(() -> new ReglaNegocioException("NO_ES_ABOGADO", "Tu cuenta no es de abogado"));
+        a.actualizarPerfil(datos.especialidad(), datos.ciudad(), datos.aniosExperiencia(), datos.presentacion());
+        return perfil(a.getUsuario());
+    }
+
     /** Exige la contraseña actual: si alguien deja la sesión abierta, otro no puede cambiarla. */
     @Transactional
     public MensajeResponse cambiarPassword(Integer idUsuario, CambioPasswordRequest datos) {
@@ -67,6 +77,6 @@ public class PerfilService {
                 })
                 .orElse(null);
         return new PerfilResponse(u.getId(), u.getNombre(), u.getCorreo(), u.getRol().getNombre().name(),
-                u.getFechaRegistro(), abogado);
+                u.getFechaRegistro(), FotoPerfilService.ruta(u), abogado);
     }
 }

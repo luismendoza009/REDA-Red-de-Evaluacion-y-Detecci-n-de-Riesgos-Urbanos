@@ -46,7 +46,8 @@ class CasoMapper {
                                 + c.getCaso().getFechaCreacion().format(MES),
                         c.getFecha()))
                 .toList();
-        return new PerfilPublicoAbogado(a.getId(), a.getUsuario().getNombre(), a.getEspecialidad(), a.getCiudad(),
+        return new PerfilPublicoAbogado(a.getId(), a.getUsuario().getNombre(), FotoPerfilService.ruta(a.getUsuario()),
+                a.isActivo(), a.getEspecialidad(), a.getCiudad(),
                 a.getAniosExperiencia(), a.getPresentacion(), casos.contarCasosTomados(a.getId()),
                 conContacto ? a.getUsuario().getCorreo() : null, promedio, rep.getTotal(), comentarios);
     }

@@ -61,14 +61,19 @@ Contraseña de todas: `Reda2026*` (datos simulados, ninguna persona es real).
 
 | Rol | Correo | Qué mostrar |
 |---|---|---|
-| Ciudadana (caso demo) | `lorena.cuello53@correo.test` | Incidente en el Centro con 4 reportes previos desde el 19 de mayo; sus fotos privadas |
-| Ciudadano | `jose.onate33@correo.test` | Caso con 3 abogados postulados: comparar reputación y **elegir** |
-| Ciudadana | `lorena.quintero18@correo.test` | Caso cerrado sin calificar: **calificar** al abogado |
+| Ciudadana (caso demo) | `lorena.cuello53@correo.test` | Incidente en el Centro con 4 reportes previos desde el 19 de mayo; sus fotos privadas; subir su foto de perfil |
+| Ciudadano | `oscar.castro21@correo.test` | Caso con 3 abogados postulados: comparar foto, insignia de verificado y reputación, y **elegir** |
+| Ciudadano | `jose.onate33@correo.test` | Caso con 2 abogados postulados (Luis Oñate, 4,0 ★, y María Rincones) |
+| Ciudadana | `ana.arzuaga37@correo.test` | Caso cerrado sin calificar: **calificar** al abogado |
 | Operadora | `lorena.arzuaga2@correo.test` | Bandeja de revisión: validar el incidente demo (#137) |
-| Abogado | `jorge.gutierrez6@correo.test` | Casos disponibles (resumen anónimo) y postularse |
-| Abogada | `maria.rincones8@correo.test` | Mis casos: expediente completo, cerrar caso |
-| Abogado sin verificar | `jesus.zuleta10@correo.test` | Cuenta pendiente de verificación |
-| Administrador | `luis.fuentes1@correo.test` | Verificar abogados |
+| Abogado verificado | `jorge.gutierrez6@correo.test` | Casos disponibles (resumen anónimo) y postularse; editar su perfil y su foto |
+| Abogado verificado | `luis.onate7@correo.test` | Postulado en 2 casos; calificación 4,0 de un cliente |
+| Abogada verificada | `maria.rincones8@correo.test` | Mis casos: expediente completo del caso 6, cerrar caso |
+| Abogada verificada | `rosa.zuleta9@correo.test` | Caso 2 en curso (expediente) |
+| Abogado sin verificar | `jesus.zuleta10@correo.test` | Cuenta pendiente: no puede postularse, subir foto ni editar su perfil |
+| Administrador | `luis.fuentes1@correo.test` | Verificar abogados (al verificar a Jesús Zuleta se le habilita el perfil) |
+
+Las fotos de perfil no vienen en la semilla (no se usan fotos de personas): se suben en vivo desde **Mi cuenta**.
 
 ## Pruebas
 
@@ -79,8 +84,8 @@ psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 27 prueba
 psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificación cruzada del banco
 
 cd ..\programacion\backend
-mvn test                                  # 77 pruebas unitarias
-mvn verify -Pintegracion                  # + 16 de integración contra PostgreSQL (base recién creada)
+mvn test                                  # 81 pruebas unitarias
+mvn verify -Pintegracion                  # + 17 de integración contra PostgreSQL (base recién creada)
 ```
 
 ## Regenerar el diagrama

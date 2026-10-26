@@ -5,6 +5,7 @@ import { api } from "../api.js";
 import { $$, escapar, fecha, fechaHora, plural, avisar, dialogo, cargando, vacio, chipSituacion, situacionDeCaso, DANOS,
          mostrarErrores } from "../ui.js";
 import * as mapa from "./mapa.js";
+import { avatar, insigniaVerificado, cargarAvatares } from "../avatares.js";
 
 export async function mostrar(contenedor) {
   contenedor.innerHTML = cargando();
@@ -26,6 +27,7 @@ export async function mostrar(contenedor) {
         : vacio("Aún no tienes casos. Cuando un operador valide uno de tus incidentes, podrás buscar abogado desde Mis reportes.",
           '<a class="boton" href="#/mis-reportes">Ir a Mis reportes</a>')}
     </div>`;
+  cargarAvatares(contenedor);
   $$("[data-elegir]", contenedor).forEach((b) => b.addEventListener("click", () =>
     elegir(Number(b.dataset.caso), Number(b.dataset.elegir), b.dataset.nombre, contenedor)));
   $$("[data-calificar]", contenedor).forEach((form) => form.addEventListener("submit", async (e) => {
@@ -75,9 +77,9 @@ function caso(c) {
 function perfil(a) {
   return `
     <div class="perfil-abogado">
-      <span class="avatar avatar-grande" aria-hidden="true">${escapar(a.nombre.split(" ").slice(0, 2).map((x) => x[0]).join(""))}</span>
+      ${avatar(a.nombre, a.foto, "avatar-grande")}
       <div>
-        <b>${escapar(a.nombre)}</b>
+        <p class="nombre-perfil"><b>${escapar(a.nombre)}</b> ${insigniaVerificado(a.verificado)}</p>
         <p class="texto-2">${escapar(a.especialidad)} · ${escapar(a.ciudad)}</p>
         ${reputacion(a)}
         <p class="datos-linea"><span>${plural(a.aniosExperiencia, "año", "años")} de experiencia</span>

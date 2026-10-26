@@ -648,3 +648,23 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
 .precio p { margin: 0; flex: 1; min-width: 200px; font-size: 12.5px; color: var(--texto-2); }
 .precio-dialogo { padding: 10px 12px; border-radius: 10px; background: var(--superficie-2); border: 1px solid var(--borde-fuerte); color: var(--texto) !important; }
 .resumen-pagos { margin: 10px 0 0; display: inline-block; padding: 8px 12px; border-radius: 10px; background: var(--superficie-solida); border: 1px solid var(--borde); }
+
+/* ---------------------------------------------------------------- foto de perfil e insignia de verificado */
+.avatar { overflow: hidden; }
+.avatar.con-foto { background: var(--superficie-solida); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-xl { width: 96px; height: 96px; font-size: 30px; }
+.nombre-perfil { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.verificado {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: var(--texto); white-space: nowrap;
+  background: rgba(57, 135, 229, .16); border: 1px solid rgba(57, 135, 229, .55);
+}
+.verificado span { color: #6fa8f0; }
+.foto-perfil { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.foto-perfil .fila-acciones { justify-content: flex-start; }
+.bloqueado { opacity: .55; pointer-events: none; }
+#f-abogado fieldset { display: grid; gap: 14px; min-width: 0; }
+#f-abogado fieldset:disabled { opacity: .6; }
+#f-abogado h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.foto-perfil > div { flex: 1 1 260px; min-width: 0; display: grid; gap: 8px; }

@@ -1,5 +1,6 @@
 package co.edu.unicesar.reda.model;
 
+import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import jakarta.persistence.*;
 
 /**
@@ -59,6 +60,25 @@ public class Abogado {
     /** El administrador verificó la tarjeta profesional. */
     public void activar() {
         this.activo = true;
+    }
+
+    /**
+     * Regla del negocio: el perfil público (foto, especialidad, presentación) solo se arma cuando REDA
+     * verificó la tarjeta profesional. Así nadie se presenta ante ciudadanos como abogado sin serlo.
+     */
+    public void verificarPuedeEditarPerfil() {
+        if (!activo) {
+            throw new ReglaNegocioException("ABOGADO_NO_VERIFICADO",
+                    "Tu perfil de abogado se habilita cuando un administrador verifique tu tarjeta profesional");
+        }
+    }
+
+    public void actualizarPerfil(String especialidad, String ciudad, short aniosExperiencia, String presentacion) {
+        verificarPuedeEditarPerfil();
+        this.especialidad = especialidad.trim();
+        this.ciudad = ciudad.trim();
+        this.aniosExperiencia = aniosExperiencia;
+        this.presentacion = presentacion == null || presentacion.isBlank() ? null : presentacion.trim();
     }
 
     public boolean esUsuario(Usuario otro) {

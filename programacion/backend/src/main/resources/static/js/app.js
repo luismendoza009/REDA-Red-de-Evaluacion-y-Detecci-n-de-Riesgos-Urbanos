@@ -5,7 +5,8 @@
 // exige además el rol correspondiente (el backend lo vuelve a verificar: la interfaz no es
 // la que protege los datos, solo evita mostrar opciones que no corresponden).
 // =============================================================================
-import { sesion } from "./api.js";
+import { api, sesion } from "./api.js";
+import { ponerFoto } from "./avatares.js";
 import { $, $$, escapar, avisar } from "./ui.js";
 import * as acceso from "./vistas/acceso.js";
 import * as mapa from "./vistas/mapa.js";
@@ -107,8 +108,14 @@ function armarBarra(s) {
   barraDe = s.token;
   $("#menu").innerHTML = (MENU[s.rol] ?? MENU.ANALISTA).map(([href, texto]) => `<a href="${href}">${escapar(texto)}</a>`).join("");
   $("#usuario-nombre").textContent = s.nombre.split(" ")[0];
-  $("#avatar").textContent = s.nombre.split(" ").slice(0, 2).map((p) => p[0]).join("").toUpperCase();
   $("#usuario-rol").innerHTML = `${escapar(s.nombre)}<small>${ROLES[s.rol] ?? s.rol}</small>`;
+  ponerFoto($("#avatar"), s.nombre, null);
+  // la foto no viene en el token: se pide el perfil una vez por sesión
+  api.perfil().then((p) => {
+    if (barraDe !== s.token) return;
+    ponerFoto($("#avatar"), p.nombre, p.foto);
+    if (p.abogado?.verificado) $("#usuario-rol small").textContent = "Abogado · ✓ verificado";
+  }).catch(() => { /* sin perfil: se quedan las iniciales */ });
 }
 
 // menús desplegables (usuario y, en celular, secciones)

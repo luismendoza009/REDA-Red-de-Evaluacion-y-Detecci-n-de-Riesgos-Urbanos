@@ -80,6 +80,13 @@ export const api = {
   perfil: () => pedir("/api/cuenta"),
   actualizarPerfil: (nombre) => pedir("/api/cuenta", { metodo: "PATCH", json: { nombre } }),
   cambiarPassword: (actual, nueva) => post("/api/cuenta/password", { actual, nueva }),
+  actualizarPerfilAbogado: (datos) => pedir("/api/cuenta/abogado", { metodo: "PATCH", json: datos }),
+  cambiarFoto: (archivo) => {
+    const f = new FormData();
+    f.append("archivo", archivo);
+    return pedir("/api/cuenta/foto", { metodo: "PUT", formulario: f });
+  },
+  quitarFoto: () => pedir("/api/cuenta/foto", { metodo: "DELETE" }),
   // catálogos y mapa
   categorias: () => pedir("/api/catalogos/categorias"),
   zonas: () => pedir("/api/catalogos/zonas"),
