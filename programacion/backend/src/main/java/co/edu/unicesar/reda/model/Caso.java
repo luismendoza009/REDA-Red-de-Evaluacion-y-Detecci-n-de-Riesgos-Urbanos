@@ -184,7 +184,16 @@ public class Caso {
     public Calificacion getCalificacion() { return calificacion; }
 
     public Optional<Abogado> abogadoAsignado() {
-        return remisiones.stream().filter(Remision::estaAceptada).map(Remision::getAbogado).findFirst();
+        return remisionAceptada().map(Remision::getAbogado);
+    }
+
+    /** Lo que REALMENTE se le cobró al abogado (si la tarifa cambia después, este valor no cambia). */
+    public Optional<java.math.BigDecimal> valorCobrado() {
+        return remisionAceptada().map(Remision::getValorCobrado);
+    }
+
+    private Optional<Remision> remisionAceptada() {
+        return remisiones.stream().filter(Remision::estaAceptada).findFirst();
     }
 
     public boolean esAbogadoAsignado(Usuario usuario) {

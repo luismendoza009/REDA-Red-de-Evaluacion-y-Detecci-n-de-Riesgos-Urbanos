@@ -43,7 +43,8 @@ export async function disponibles(contenedor) {
       ${casos.length ? `<div class="rejilla">${casos.map(tarjetaDisponible).join("")}</div>`
         : vacio("Por ahora no hay casos buscando abogado. Vuelve pronto.")}
     </div>`;
-  $$("[data-postular]", contenedor).forEach((b) => b.addEventListener("click", () => postular(Number(b.dataset.postular), contenedor)));
+  $$("[data-postular]", contenedor).forEach((b) => b.addEventListener("click", () =>
+    postular(Number(b.dataset.postular), casos.find((c) => c.id === Number(b.dataset.postular)).tarifa, contenedor)));
   $$("[data-retirar]", contenedor).forEach((b) => b.addEventListener("click", () => retirar(Number(b.dataset.retirar), contenedor)));
 }
 
@@ -64,8 +65,16 @@ function tarjetaDisponible(c) {
         <div><dt>Testigos · fotos</dt><dd>${c.testigos} · ${c.fotos}</dd></div>
         <div><dt>Entidad señalada</dt><dd>${escapar(c.entidadResponsable ?? "Sin identificar")}</dd></div>
       </dl>
+      <div class="precio">
+        <div>
+          <span class="precio-etiqueta">Valor por tomar el caso</span>
+          <span class="precio-valor">${pesos(c.tarifa)}</span>
+        </div>
+        <p>${["LESION", "AMBOS"].includes(c.tipoDano) ? "Tarifa de caso con lesión personal." : "Tarifa de caso con daño material."}
+          Se cobra <b>solo si el ciudadano te elige</b>. No es un porcentaje de tus honorarios.</p>
+      </div>
       <div class="tarjeta-pie">
-        <span class="texto-2 pequeno">${plural(c.postulados, "abogado postulado", "abogados postulados")} · cuota si te eligen: <b>${pesos(c.tarifa)}</b></span>
+        <span class="texto-2 pequeno">${plural(c.postulados, "abogado postulado", "abogados postulados")}</span>
         <span class="espaciador"></span>
         ${c.miPostulacion === "PENDIENTE"
           ? `<span class="etiqueta etiqueta-mia">Te postulaste</span><button class="boton" data-retirar="${c.id}">Retirar</button>`
@@ -75,11 +84,13 @@ function tarjetaDisponible(c) {
     </article>`;
 }
 
-async function postular(idCaso, contenedor) {
+async function postular(idCaso, tarifa, contenedor) {
   const mensaje = await dialogo({
     titulo: "Postularme a este caso",
     aceptar: "Enviar postulación",
-    mensaje: `<p>El ciudadano verá tu nombre, especialidad, años de experiencia, tu presentación y este mensaje.</p>`,
+    mensaje: `<p class="precio-dialogo">Si el ciudadano te elige, REDA te cobrará <b>${pesos(tarifa)}</b> por tomar el caso.
+      Si elige a otro abogado, no pagas nada.</p>
+      <p>El ciudadano verá tu nombre, especialidad, años de experiencia, tu calificación, tu presentación y este mensaje.</p>`,
     campo: { etiqueta: "¿Por qué quieres el caso y cómo lo llevarías?", min: 20, max: 1500, requerido: true,
              ayuda: "Ej.: Llevo casos de reparación directa contra el municipio; con los reportes previos el caso es sólido…" },
   });
@@ -118,6 +129,8 @@ export async function misCasos(contenedor) {
         <p class="etiqueta-superior">Abogado</p>
         <h1>Mis casos</h1>
         <p class="texto-2">Casos en los que el ciudadano te eligió. Tienes acceso al expediente completo.</p>
+        ${casos.length ? `<p class="resumen-pagos">${plural(casos.length, "caso tomado", "casos tomados")} ·
+          total pagado a REDA: <b>${pesos(casos.reduce((t, c) => t + Number(c.valorCobrado ?? 0), 0))}</b></p>` : ""}
       </header>
       ${casos.length ? casos.map(expediente).join("") : vacio("Aún no te han elegido en ningún caso.",
         '<a class="boton" href="#/abogado/disponibles">Ver casos disponibles</a>')}
@@ -138,7 +151,7 @@ function expediente(c) {
           <p class="etiqueta-superior">Caso #${c.id} · ${escapar(c.estado)}</p>
           <h2>${escapar(r.categoria)} · ${escapar(r.zona)}</h2>
           <p class="texto-2">Abierto el ${fecha(c.fechaCreacion)}${c.fechaCierre ? ` · cerrado el ${fecha(c.fechaCierre)}` : ""}
-            ${c.valorCobrado ? ` · cuota REDA ${pesos(c.valorCobrado)}` : ""}</p>
+            ${c.valorCobrado ? ` · valor pagado por tomar el caso: <b>${pesos(c.valorCobrado)}</b>` : ""}</p>
         </div>
         ${c.estado === "Aceptado por abogado" ? `<button class="boton" data-cerrar="${c.id}">Cerrar caso</button>` : ""}
       </header>
@@ -171,7 +184,7 @@ function expediente(c) {
             `<li><span>${escapar(h.estadoNuevo)}</span><time>${fechaHora(h.fecha)}</time></li>`).join("")}</ol>
         </div>
       </div>
-      ${c.estado === "Cerrado" && c.observacion ? `<p class="nota">Cierre: ${escapar(c.observacion)}</p>` : ""}
+      ${c.observacion ? `<p class="nota">Observación del caso: ${escapar(c.observacion)}</p>` : ""}
     </section>`;
 }
 
