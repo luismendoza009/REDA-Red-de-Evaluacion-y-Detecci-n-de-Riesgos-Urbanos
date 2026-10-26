@@ -34,6 +34,7 @@
 | P28 | La respuesta de "recuperar contraseña" es **igual exista o no el correo** | No revela quién tiene cuenta (enumeración de usuarios) | Decir "ese correo no existe" |
 | P29 | Calificaciones: el comentario se muestra **sin el nombre** del cliente ("Cliente en Centro · mayo de 2026") | Da contexto sin exponer a la persona | Mostrar el nombre |
 | P30 | Estrellas: se dibujan redondeando hacia abajo en el medio punto (4,5 → 4 estrellas) y siempre con el número al lado | No exagerar la reputación; la cifra no depende solo del dibujo (accesibilidad) | Redondeo normal |
+| P32 | El barrio se **sugiere** a partir del punto marcado (`GET /api/catalogos/zonas/sugerida`); la regla vive en `Zona` (Experto) | La zona conoce su ubicación, así que sabe a qué distancia queda un punto. Solo se sugiere si un barrio queda a ≤ 600 m (`reda.zonas.radio-sugerencia-metros`); si el ciudadano eligió a mano, no se le cambia | Calcularlo en JavaScript; obligar el barrio por distancia |
 | P31 | Pruebas de interfaz con Edge controlado por CDP (`--remote-debugging-port`), emulando celular de 390 px | Edge sin ventana impone un ancho mínimo que impedía probar el celular; con CDP se emula el dispositivo y se inicia sesión de cada rol | Revisar a mano |
 
 ## Pendiente (siguientes iteraciones)

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -66,7 +67,8 @@ public class ManejadorGlobalExcepciones {
                 "Hay campos con datos inválidos", p.getRequestURI(), campos));
     }
 
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class})
     ResponseEntity<ErrorRespuesta> formato(Exception e, HttpServletRequest p) {
         return responder(HttpStatus.BAD_REQUEST, "FORMATO_INVALIDO",
                 "El cuerpo o los parámetros de la petición no tienen el formato esperado", p);

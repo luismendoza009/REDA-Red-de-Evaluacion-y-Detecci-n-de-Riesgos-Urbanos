@@ -44,7 +44,8 @@ export async function mostrar(contenedor) {
           <label>Categoría<select name="idCategoria" required><option value="">Elige…</option>
             ${categorias.map((c) => `<option value="${c.id}" title="${escapar(c.descripcion ?? "")}">${escapar(c.nombre)}</option>`).join("")}</select></label>
           <label>Barrio o zona<select name="idZona" required><option value="">Elige…</option>
-            ${zonas.map((z) => `<option value="${z.id}">${escapar(z.nombre)}</option>`).join("")}</select></label>
+            ${zonas.map((z) => `<option value="${z.id}">${escapar(z.nombre)}</option>`).join("")}</select>
+            <small id="zona-sugerencia" aria-live="polite">Se sugiere solo al marcar el punto en el mapa.</small></label>
         </div>
 
         <div class="campo">
@@ -112,7 +113,7 @@ export async function mostrar(contenedor) {
 
   const form = $("#f-reporte");
   const fotos = [];
-  const selector = crearSelector(form);
+  const selector = crearSelector(form, zonas);
   conectarTipo(form);
   conectarTestigos();
   conectarFotos(fotos);
@@ -134,16 +135,44 @@ export async function mostrar(contenedor) {
   });
 }
 
-function crearSelector(form) {
+function crearSelector(form, zonas) {
   const m = L.map("mapa-selector", { zoomControl: true, attributionControl: false }).setView(VALLEDUPAR, 13);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, className: "teselas-oscuras" }).addTo(m);
   let marcador = null;
+  // Si el ciudadano eligió el barrio a mano, la sugerencia ya no lo cambia (él conoce su barrio mejor que el mapa).
+  let barrioAMano = false;
+  let consulta = 0;
+  const pista = $("#zona-sugerencia");
+  form.idZona.addEventListener("change", (e) => {
+    if (!e.isTrusted) return;
+    barrioAMano = Boolean(form.idZona.value);
+    pista.textContent = barrioAMano ? "Elegido por ti." : "Se sugiere solo al marcar el punto en el mapa.";
+    // sin punto marcado todavía: acerca el mapa al barrio elegido para que sea fácil marcarlo
+    const z = zonas.find((x) => x.id === Number(form.idZona.value));
+    if (!marcador && z?.latitud != null) m.setView([z.latitud, z.longitud], 16);
+  });
+  const sugerirBarrio = async (lat, lon) => {
+    if (barrioAMano) return;
+    const mia = ++consulta; // si el ciudadano toca varias veces seguidas, solo vale la última respuesta
+    let sugerida = null;
+    try { sugerida = await api.zonaSugerida(lat, lon); } catch { return; }
+    if (mia !== consulta || barrioAMano) return;
+    if (sugerida) {
+      form.idZona.value = sugerida.id;
+      form.idZona.removeAttribute("aria-invalid");
+      pista.textContent = `Sugerido por el punto marcado (a ${sugerida.distanciaMetros} m). Cámbialo si no es tu barrio.`;
+    } else {
+      form.idZona.value = "";
+      pista.textContent = "No reconocemos el barrio de este punto: elígelo de la lista.";
+    }
+  };
   const marcar = (lat, lon) => {
     const ll = [Number(lat.toFixed(6)), Number(lon.toFixed(6))];
     if (marcador) marcador.setLatLng(ll); else marcador = L.circleMarker(ll, { radius: 9, color: "#f0efec", weight: 3, fillColor: "#d95926", fillOpacity: 1 }).addTo(m);
     form.latitud.value = ll[0];
     form.longitud.value = ll[1];
     $("#coordenadas").textContent = `Punto marcado: ${ll[0]}, ${ll[1]}`;
+    sugerirBarrio(ll[0], ll[1]);
   };
   m.on("click", (e) => marcar(e.latlng.lat, e.latlng.lng));
   $("#btn-gps").addEventListener("click", () => {

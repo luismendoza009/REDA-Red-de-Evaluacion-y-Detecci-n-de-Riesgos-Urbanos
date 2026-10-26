@@ -455,7 +455,7 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
 
 /* ---------------------------------------------------------------- formularios */
 .formulario { display: grid; gap: 14px; }
-.formulario label, .campo { display: grid; gap: 6px; font-size: 13.5px; color: var(--texto-2); }
+.formulario label, .campo { display: grid; gap: 6px; align-content: start; font-size: 13.5px; color: var(--texto-2); }
 .formulario legend, .etiqueta-campo { font-size: 13.5px; color: var(--texto-2); margin-bottom: 6px; padding: 0; }
 .formulario fieldset { border: 0; margin: 0; padding: 0; }
 .formulario input:not([type=checkbox]):not([type=radio]):not([type=file]), .formulario select, .formulario textarea, .modal textarea {

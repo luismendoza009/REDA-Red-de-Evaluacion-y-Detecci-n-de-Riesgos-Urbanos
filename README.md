@@ -79,8 +79,8 @@ psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 27 prueba
 psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificación cruzada del banco
 
 cd ..\programacion\backend
-mvn test                                  # 71 pruebas unitarias
-mvn verify -Pintegracion                  # + 14 de integración contra PostgreSQL (base recién creada)
+mvn test                                  # 77 pruebas unitarias
+mvn verify -Pintegracion                  # + 16 de integración contra PostgreSQL (base recién creada)
 ```
 
 ## Regenerar el diagrama
