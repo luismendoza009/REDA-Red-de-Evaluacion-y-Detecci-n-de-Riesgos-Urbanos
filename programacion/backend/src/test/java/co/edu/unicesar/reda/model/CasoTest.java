@@ -113,6 +113,7 @@ class CasoTest {
         assertEquals(Postulacion.Estado.ELEGIDA, c.getPostulaciones().get(1).getEstado());
         assertTrue(c.esAbogadoAsignado(abogadoB.getUsuario()));
         assertFalse(c.esAbogadoAsignado(abogadaA.getUsuario()));
+        assertEquals(TarifaRemision.CON_LESION, c.valorCobrado().orElseThrow(), "el valor cobrado sale de la remisión guardada");
     }
 
     @Test

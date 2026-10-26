@@ -99,7 +99,7 @@ public class AbogadoCasosService {
     private ExpedienteResponse expediente(Caso c) {
         Incidente i = c.getIncidente();
         Reporte r = i.getReporte();
-        BigDecimal valor = c.abogadoAsignado().isPresent() ? TarifaRemision.para(i.getTipoDano()) : null;
+        BigDecimal valor = c.valorCobrado().orElse(null);
         return new ExpedienteResponse(c.getId(), c.getEstado().getNombre(), c.getFechaCreacion(), c.getFechaCierre(),
                 c.getObservacion(), r.getAutor().getNombre(), r.getAutor().getCorreo(), ReporteMapper.detalle(r),
                 antecedentesDe(r, i).stream().map(ReporteMapper::antecedente).toList(),
