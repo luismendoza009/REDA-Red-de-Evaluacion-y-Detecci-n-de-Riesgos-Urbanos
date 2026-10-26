@@ -17,9 +17,18 @@
 | P13 | Pruebas de integración contra PostgreSQL real, con `@Transactional` para deshacer los cambios | El equipo no tiene Docker (Testcontainers); H2 no soporta las vistas ni el SQL de PostgreSQL | H2 en memoria |
 | P14 | El mapa público lee una **vista** de la base que ya oculta los datos personales | La privacidad no depende de que el código Java "se acuerde" de ocultar campos | Filtrar campos en Java |
 
+| P15 | Interfaz **web responsiva** (HTML + CSS + JavaScript con módulos, sin framework) servida por el mismo Spring Boot | Una sola URL y un solo comando para la demo; funciona en PC y celular; la API REST queda lista para una app móvil nativa después. Angular agregaría una cadena de compilación que hoy no aporta | Angular; app de escritorio (JavaFX) |
+| P16 | Mapa con **Leaflet 1.9.4** + **leaflet.heat 0.2.0** y teselas de **OpenStreetMap** oscurecidas con CSS | Gratis y sin clave. Los mapas base de CARTO empezaron a exigir API key (se vio la marca de agua al probar). La política de uso de OSM admite el tráfico de una demo; en producción se usa un servidor de teselas propio | CARTO, Mapbox, Google Maps (requieren clave/pago) |
+| P17 | Los reportes se **agrupan en el backend** (radio 80 m, `AgrupadorPuntos`) y no con un plugin del navegador | La agrupación es regla del negocio ("punto de alta frecuencia"): queda probada y es la misma para web y móvil | Leaflet.markercluster (agrupa por píxeles según el zoom, no por metros) |
+| P18 | Colores de situación: azul `#3987e5` (con abogado), naranja `#d95926` (abierto), verde agua `#199e70` (cerrado) | Paleta categórica validada con script para daltonismo sobre fondo oscuro (todas las parejas pasan); siempre con texto al lado | Morado/naranja/verde elegidos a ojo |
+| P19 | Fotos privadas: se piden con el token y se muestran como `blob:` locales; respuesta con `Cache-Control: no-store` | Un `<img src>` no puede enviar el token; `no-store` evita copias en cachés compartidas | URL firmada temporal (más compleja) |
+| P20 | El formato de la foto se valida por sus **bytes** y el permiso se revisa **antes** que el hash | Detectado al probar: revisar el hash primero le revelaba a un tercero que esa foto existía | Confiar en la extensión o el Content-Type |
+| P21 | Fotos de la semilla sin archivo → imagen SVG generada que dice "foto de ejemplo · datos simulados" | La demo no muestra imágenes rotas y nunca hace pasar una imagen por una foto real | Fotos de internet (derechos, engaño) |
+| P22 | Spring Security mantiene `X-Frame-Options: DENY` | Protege contra clickjacking; se notó al intentar incrustar la página en un iframe de prueba | Relajarlo para facilitar pruebas |
+
 ## Pendiente (siguientes iteraciones)
 
-- Carga de fotos (evidencias) con validación de tipo, tamaño y hash SHA-256.
-- Casos y remisiones a abogados; vista del abogado.
+- Formulario web para crear reportes (con GPS del celular) y vista "Mis reportes".
+- Casos y remisiones a abogados; vista del abogado (con acceso a las fotos de sus casos).
 - Cálculo de IRU e IVC (depende de las funciones PL/pgSQL de la Entrega 3 de BD).
-- Dashboard y frontend (tecnología por decidir; los temas del curso no incluyen frontend).
+- Dashboard para el administrador.
