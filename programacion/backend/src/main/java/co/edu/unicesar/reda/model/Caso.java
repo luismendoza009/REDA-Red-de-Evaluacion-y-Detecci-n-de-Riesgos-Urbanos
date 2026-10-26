@@ -57,6 +57,9 @@ public class Caso {
     @OneToMany(mappedBy = "caso", cascade = CascadeType.PERSIST)
     private List<Remision> remisiones = new ArrayList<>();
 
+    @OneToOne(mappedBy = "caso", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private Calificacion calificacion;
+
     protected Caso() {
     }
 
@@ -149,6 +152,36 @@ public class Caso {
         this.fechaCierre = OffsetDateTime.now();
         this.observacion = observacion.trim();
     }
+
+    /**
+     * El ciudadano califica al abogado que lo acompañó. Reglas: solo el dueño del caso, solo cuando el
+     * caso terminó (así la calificación refleja el servicio completo) y una sola vez por caso.
+     */
+    public Calificacion calificar(Usuario ciudadano, short puntaje, String comentario) {
+        if (!incidente.getReporte().esDe(ciudadano)) {
+            throw new ReglaNegocioException("NO_ES_AUTOR", "Solo el ciudadano dueño del caso puede calificar a su abogado");
+        }
+        if (estado.tipo() != EstadoCaso.Nombre.CERRADO) {
+            throw new ReglaNegocioException("CASO_NO_CERRADO", "Podrás calificar a tu abogado cuando el caso se cierre");
+        }
+        if (calificacion != null) {
+            throw new ReglaNegocioException("YA_CALIFICADO", "Ya calificaste a tu abogado en este caso");
+        }
+        if (puntaje < 1 || puntaje > 5) {
+            throw new ReglaNegocioException("PUNTAJE_INVALIDO", "La calificación va de 1 a 5 estrellas");
+        }
+        Abogado abogado = abogadoAsignado().orElseThrow(() ->
+                new ReglaNegocioException("SIN_ABOGADO", "Este caso no tuvo abogado asignado"));
+        this.calificacion = Calificacion.de(this, abogado, puntaje, comentario);
+        return calificacion;
+    }
+
+    public boolean puedeSerCalificadoPor(Usuario ciudadano) {
+        return incidente.getReporte().esDe(ciudadano) && estado.tipo() == EstadoCaso.Nombre.CERRADO
+                && calificacion == null && abogadoAsignado().isPresent();
+    }
+
+    public Calificacion getCalificacion() { return calificacion; }
 
     public Optional<Abogado> abogadoAsignado() {
         return remisiones.stream().filter(Remision::estaAceptada).map(Remision::getAbogado).findFirst();

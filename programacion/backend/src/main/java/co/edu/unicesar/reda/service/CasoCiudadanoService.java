@@ -67,4 +67,13 @@ public class CasoCiudadanoService {
         casos.flush();
         return mapper.paraCiudadano(caso);
     }
+
+    /** El ciudadano califica al abogado que llevó su caso (cuando el caso se cerró). */
+    @Transactional
+    public CasoCiudadanoResponse calificar(Integer idCaso, short puntaje, String comentario, Integer idCiudadano) {
+        Caso caso = Busqueda.porId(casos, idCaso, "Caso");
+        caso.calificar(Busqueda.porId(usuarios, idCiudadano, "Usuario"), puntaje, comentario);
+        casos.flush();
+        return mapper.paraCiudadano(caso);
+    }
 }

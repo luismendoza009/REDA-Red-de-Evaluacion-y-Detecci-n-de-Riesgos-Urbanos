@@ -58,6 +58,14 @@ public class CasoController {
         return ciudadano.elegir(id, datos.idPostulacion(), usuario.id());
     }
 
+    @PostMapping("/api/casos/{id}/calificacion")
+    @PreAuthorize("hasRole('CIUDADANO')")
+    @Operation(summary = "Calificar al abogado que llevó mi caso (1 a 5 estrellas, una vez, cuando el caso se cerró)")
+    public CasoCiudadanoResponse calificar(@PathVariable Integer id, @Valid @RequestBody CalificarRequest datos,
+                                           @AuthenticationPrincipal UsuarioAutenticado usuario) {
+        return ciudadano.calificar(id, datos.puntaje(), datos.comentario(), usuario.id());
+    }
+
     // ------------------------------------------------------------------ abogado
     @GetMapping("/api/abogado/casos-disponibles")
     @PreAuthorize("hasRole('ABOGADO')")

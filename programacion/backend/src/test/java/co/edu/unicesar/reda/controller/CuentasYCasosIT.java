@@ -204,6 +204,25 @@ class CuentasYCasosIT {
                 Integer.class, idCaso));
         assertEquals(0, new java.math.BigDecimal("200000.00").compareTo(jdbc.queryForObject(
                 "SELECT valor_cobrado FROM remisiones WHERE id_caso = ?", java.math.BigDecimal.class, idCaso)));
+
+        // 9. antes de cerrar no se puede calificar; el abogado cierra y el ciudadano lo califica UNA vez
+        Map<String, Object> calificacion = Map.of("puntaje", 5, "comentario", "Muy atento y claro con cada paso");
+        enviar(HttpMethod.POST, "/api/casos/" + idCaso + "/calificacion", calificacion, ciudadana)
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.codigo").value("CASO_NO_CERRADO"));
+        enviar(HttpMethod.POST, "/api/abogado/casos/" + idCaso + "/cierre",
+                Map.of("observacion", "Conciliación con la entidad responsable"), abogadoB).andExpect(status().isOk());
+        long antes = jdbc.queryForObject("SELECT count(*) FROM calificaciones WHERE id_abogado = (SELECT id_abogado FROM remisiones WHERE id_caso = ?)",
+                Long.class, idCaso);
+        enviar(HttpMethod.POST, "/api/casos/" + idCaso + "/calificacion", calificacion, ciudadana)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.miCalificacion").value(5))
+                .andExpect(jsonPath("$.puedeCalificar").value(false))
+                .andExpect(jsonPath("$.abogadoElegido.numCalificaciones").value(antes + 1))
+                .andExpect(jsonPath("$.abogadoElegido.comentarios[0].comentario").value("Muy atento y claro con cada paso"));
+        enviar(HttpMethod.POST, "/api/casos/" + idCaso + "/calificacion", Map.of("puntaje", 1), ciudadana)
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.codigo").value("YA_CALIFICADO"));
+        enviar(HttpMethod.POST, "/api/casos/" + idCaso + "/calificacion", Map.of("puntaje", 9), ciudadana)
+                .andExpect(status().isBadRequest());
     }
 
     // ------------------------------------------------------------------ utilidades
