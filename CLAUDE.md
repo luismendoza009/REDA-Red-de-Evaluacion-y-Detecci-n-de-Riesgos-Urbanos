@@ -57,7 +57,7 @@ El vínculo entre un incidente y sus antecedentes es la función estrella del si
 - Repo: https://github.com/luismendoza009/REDA-Red-de-Evaluacion-y-Detecci-n-de-Riesgos-Urbanos
 - Integrantes: Rafael Alfonso Rivera Restrepo, Ivan Andres Rodriguez Rodriguez, Luis Eliecer Mendoza Perpiñán.
 - **Entrega 1 (diseño):** documento Word/PDF hecho (`documentacion/Entrega1_REDA.docx` y `.pdf`). Esquema de 10 tablas: `roles, usuarios, categorias, zonas, estados, reportes, evidencias, evaluaciones, historial_estados, reportes_relacionados`.
-- **PENDIENTE de Entrega 1:** la carpeta `diagramas/` está VACÍA. Los archivos `reda_eer.drawio` y `reda_eer.png` deben copiarse ahí. Después: commit, push, y mover el tag `entrega-1` al commit final (`git tag -d entrega-1; git push origin :refs/tags/entrega-1; git tag -a entrega-1 -m "..."; git push origin entrega-1`).
+- **Estado (2026-10-25):** Entrega 1 cerrada en local (diagrama .drawio + .png en `base-de-datos/diagramas/`). Entrega 2 completa en la rama `feature/entrega-2-migraciones` (sin push). Backend en `feature/backend-base`. PENDIENTE con autorización del usuario: push (bloqueado por credencial 403), mover tag `entrega-1`, crear tag `entrega-2`.
 - Si los archivos del diagrama no existen en el equipo, regenera el diagrama (ver sección 5) como `.drawio` y también como imagen `.png`.
 - Problema de autenticación Git que ocurrió: el equipo estuvo autenticado con otra cuenta de GitHub (`leliecermendoza`) y dio error 403 contra la cuenta dueña (`luismendoza009`). Si vuelve a pasar, guía al usuario a limpiar la credencial en el Administrador de credenciales de Windows.
 
@@ -74,7 +74,7 @@ PROGRAMACIÓN 3         → aplicación Java (backend) + interfaz (frontend),
                           arquitectura por capas, buenas prácticas
 ```
 
-**Programación 3 NO tiene guía escrita** (confirmado por Luis). Temas vistos en clase, que el código debe evidenciar y la documentación debe señalar: Oh My Posh (terminal), POO, arquitectura en capas, integración, validaciones y excepciones, código limpio v2, patrones GRASP, auditoría y corrección GRASP, auditoría y corrección SOLID. Por eso: `documentacion/programacion3/` debe tener un mapa "tema → dónde está en el código" y las auditorías GRASP y SOLID con formato hallazgo → corrección. Usa el stack de la sección 8.
+**Programación 3 NO tiene guía escrita** (confirmado por Luis). Temas vistos en clase, que el código debe evidenciar y la documentación debe señalar: Oh My Posh (terminal), POO, arquitectura en capas, integración, validaciones y excepciones, código limpio v2, patrones GRASP, auditoría y corrección GRASP, auditoría y corrección SOLID. Por eso: `programacion/documentacion/` debe tener un mapa "tema → dónde está en el código" y las auditorías GRASP y SOLID con formato hallazgo → corrección. Usa el stack de la sección 8.
 
 ---
 
@@ -277,28 +277,29 @@ Frontend (SPA)  ──HTTP/JSON──▶  API REST (Spring Boot, Java 17+)  ─�
 
 ## 12. ESTRUCTURA DEL REPOSITORIO
 
+**Decisión del usuario (2026-10-25): el repo se separa por asignatura.** En la raíz solo van README.md, CLAUDE.md y .gitignore.
+
 ```
 /
-├─ README.md                      (identificación, integrantes, cómo ejecutar)
-├─ CLAUDE.md                      (este archivo)
-├─ documentacion/
-│   ├─ Entrega1_REDA.docx / .pdf
-│   ├─ entrega2/  (PDF + notas de correcciones + auditoría de normalización + banco de consultas + evidencia de índices)
-│   ├─ entrega3/  (documento integrador + declaración de IA + plan de respaldos + evidencia de restauración)
-│   ├─ programacion3/  (guía de la materia y documentos de esa entrega)
-│   ├─ diccionario_datos.md
-│   └─ decisiones.md  (decisiones técnicas y compromisos, con su porqué)
-├─ diagramas/                     (reda_eer.drawio + reda_eer.png, arquitectura)
-├─ migraciones/                   (001_...sql, 002_...sql ...)
-├─ sql/
-│   ├─ semilla/        (datos semilla)
-│   ├─ consultas/      (banco de consultas comentadas)
-│   ├─ funciones/ y triggers/
-│   └─ seguridad/      (roles, grants, vistas)
-├─ scripts/            (migrar.ps1, respaldo.ps1, restaurar.ps1)
-├─ backend/            (Spring Boot, Maven)
-└─ frontend/           (Angular u otra tecnología acordada)
+├─ README.md, CLAUDE.md, .gitignore
+├─ base-de-datos/                 ← TODO lo de Base de Datos I
+│   ├─ migraciones/               (001_...sql, 002_...sql ...)
+│   ├─ sql/
+│   │   ├─ semilla/  consultas/  indices/  pruebas/  herramientas/
+│   │   ├─ funciones/ y triggers/   (Entrega 3)
+│   │   └─ seguridad/               (roles, grants, vistas — Entrega 3)
+│   ├─ scripts/                   (migrar.ps1, generadores, respaldo.ps1, restaurar.ps1)
+│   ├─ diagramas/                 (reda_eer.drawio + .png + especificaciones JSON)
+│   └─ documentacion/
+│       ├─ Entrega1_REDA.docx / .pdf
+│       ├─ entrega2/  entrega3/
+│       ├─ diccionario_datos.md, decisiones.md, datos_simulados.md, declaracion_uso_ia.md
+└─ programacion/                  ← TODO lo de Programación 3
+    ├─ backend/                   (Spring Boot, Maven)
+    ├─ frontend/                  (cuando se haga)
+    └─ documentacion/             (decisiones de diseño, auditorías GRASP/SOLID, mapa de temas)
 ```
+Los scripts de `base-de-datos/scripts/` calculan su raíz como la carpeta padre (`base-de-datos/`); las rutas en los documentos de BD son relativas a `base-de-datos/`.
 
 ---
 

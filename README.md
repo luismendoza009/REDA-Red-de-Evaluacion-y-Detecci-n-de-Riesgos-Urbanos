@@ -12,23 +12,39 @@ esas condiciones). El sistema vincula cada incidente con los reportes previos de
 - Ivan Andres Rodriguez Rodriguez
 - Luis Eliecer Mendoza Perpiñan
 
-## Estado del proyecto
-| Entrega | Contenido | Tag |
+## Organización del repositorio
+
+El repositorio está separado por asignatura:
+
+```
+base-de-datos/            BASE DE DATOS I
+├─ migraciones/           DDL numerado (001_..., 002_...) ejecutable en orden sobre base vacía
+├─ sql/
+│   ├─ semilla/           datos simulados de Valledupar
+│   ├─ consultas/         banco de consultas + verificación cruzada
+│   ├─ indices/           evidencia EXPLAIN ANALYZE antes/después
+│   ├─ pruebas/           coherencia de la semilla y pruebas negativas de restricciones
+│   └─ herramientas/      generador del diccionario
+├─ scripts/               migrar.ps1, generadores (semilla, diccionario, diagrama, documento)
+├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
+└─ documentacion/         entregas (Entrega1, entrega2/), diccionario, decisiones, datos simulados, uso de IA
+
+programacion/             PROGRAMACIÓN 3
+├─ backend/               API REST en Java 17 + Spring Boot (arquitectura en capas)
+└─ documentacion/         decisiones de diseño, auditorías GRASP y SOLID
+```
+
+## Estado
+| Entrega (BD) | Contenido | Tag |
 |---|---|---|
-| 1 — Planteamiento y diseño | `documentacion/Entrega1_REDA.pdf`, `diagramas/reda_eer.drawio` y `.png` | `entrega-1` |
-| 2 — Implementación | migraciones, semilla, consultas, índices (en curso) | `entrega-2` |
+| 1 — Planteamiento y diseño | `base-de-datos/documentacion/Entrega1_REDA.pdf`, diagrama EER | `entrega-1` |
+| 2 — Implementación | migraciones, semilla, consultas, índices, normalización | `entrega-2` (pendiente) |
 | 3 — Producto final | funciones, triggers, seguridad, respaldos | `entrega-final` |
 
-## Estructura
-```
-documentacion/   documentos de cada entrega, diccionario de datos, decisiones
-diagramas/       diagrama EER (.drawio editable + .png) y su especificación JSON
-migraciones/     DDL numerado (001_..., 002_...) ejecutable en orden sobre base vacía
-scripts/         utilidades (generar_diagrama.py, migrar.ps1, respaldos)
-```
-
-## Construir la base de datos (PostgreSQL 16+)
+## Base de datos (PostgreSQL 16+)
+Desde la carpeta `base-de-datos`:
 ```powershell
+cd base-de-datos
 $env:PGPASSWORD = "<tu clave de postgres>"     # no se guarda en ningún archivo
 .\scripts\migrar.ps1 -Recrear -ConSemilla       # base vacía -> migraciones -> datos semilla
 psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql            # coherencia de datos
@@ -41,10 +57,20 @@ psql -U postgres -d reda -f sql\indices\evidencia_indices.sql            # EXPLA
 Usuarios de prueba: cualquiera de `sql/semilla/02_usuarios.sql`, contraseña `Reda2026*`.
 Para generar de nuevo los datos semilla: `python scripts\generar_semilla.py`.
 
-## Regenerar el diagrama
-El `.drawio` y el `.png` se generan desde una sola especificación para que no se desincronicen:
+Diagrama (el `.drawio` y el `.png` salen de una sola especificación para que no se desincronicen):
 ```powershell
-python scripts\generar_diagrama.py diagramas\especificacion_eer_v2.json diagramas\reda_eer   # Entrega 2 (actual)
+python scripts\generar_diagrama.py diagramas\especificacion_eer_v2.json diagramas\reda_eer
 ```
 `especificacion_eer_v1.json` conserva el diagrama de la Entrega 1. Requiere Python 3 con `matplotlib`.
-El `.drawio` resultante se puede seguir editando en app.diagrams.net.
+
+## Backend (Java 17 + Maven)
+Requiere la base creada con los pasos anteriores. Desde `programacion/backend`:
+```powershell
+cd programacion\backend
+$env:REDA_DB_CLAVE    = "<tu clave de postgres>"
+$env:REDA_JWT_SECRETO = "<texto aleatorio de 32+ caracteres>"
+mvn spring-boot:run
+```
+Documentación interactiva de la API: http://localhost:8080/swagger-ui.html
+Alternativa a las variables de entorno: copiar `application-example.properties` como
+`application-local.properties` (está en `.gitignore`).

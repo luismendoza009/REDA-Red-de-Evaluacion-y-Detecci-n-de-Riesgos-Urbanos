@@ -129,11 +129,11 @@ parrafo("Esta entrega implementa en PostgreSQL 18 el diseño de la Entrega 1, am
         "El ciudadano reporta condiciones (antecedentes) e incidentes (daños sufridos); el sistema vincula cada "
         "incidente con los reportes previos del mismo punto (\"la entidad ya sabía\") y, si el caso es viable, lo "
         "remite a un abogado. El esquema pasa de 10 a 20 tablas, y se conservan las 10 originales con sus políticas de borrado.")
-parrafo("Todo lo entregado está en el repositorio, en la etiqueta **entrega-2**:")
+parrafo("Todo lo entregado está en el repositorio, en la etiqueta **entrega-2**, dentro de la carpeta **base-de-datos/** (las rutas de este documento son relativas a ella):")
 parrafo(REPO, alinear=False)
 
 titulo("2. Dónde encontrar cada requisito")
-tabla(["Requisito de la guía", "Ubicación en el repositorio", "Resumen"], [
+tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resumen"], [
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
     ("2. DDL como migraciones numeradas", "migraciones/001_ … 008_*.sql", "8 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
