@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.

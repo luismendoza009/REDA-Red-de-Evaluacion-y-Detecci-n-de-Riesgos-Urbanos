@@ -4,6 +4,9 @@
 application-local.properties
 **/src/main/resources/application-local.*
 
+# Fotos subidas por los usuarios (evidencia privada): nunca al repositorio
+almacenamiento/
+
 # Respaldos de la base (pueden contener datos personales)
 respaldos/
 *.backup

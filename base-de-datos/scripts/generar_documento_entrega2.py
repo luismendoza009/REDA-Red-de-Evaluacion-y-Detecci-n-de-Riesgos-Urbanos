@@ -135,9 +135,9 @@ parrafo(REPO, alinear=False)
 titulo("2. Dónde encontrar cada requisito")
 tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resumen"], [
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
-    ("2. DDL como migraciones numeradas", "migraciones/001_ … 008_*.sql", "8 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
+    ("2. DDL como migraciones numeradas", "migraciones/001_ … 009_*.sql", "9 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
-    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 9 casos; simulados y coherentes"),
+    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 8 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
     ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 20 tablas, con 4 excepciones justificadas"),
     ("5. Banco de consultas", "sql/consultas/banco_consultas.sql", "10 consultas comentadas con la pregunta de negocio"),
@@ -160,7 +160,7 @@ tabla(["Exigencia de la guía", "Consultas"], [
 ], [7, 9])
 
 titulo("4. Cómo se verificó")
-vineta("**Migraciones sobre base vacía:** scripts/migrar.ps1 -Recrear crea la base desde cero y aplica las 8 "
+vineta("**Migraciones sobre base vacía:** scripts/migrar.ps1 -Recrear crea la base desde cero y aplica las 9 "
        "migraciones sin errores; una segunda ejecución no reaplica ninguna.")
 vineta("**Integridad declarativa:** las 19 pruebas negativas de sql/pruebas/probar_restricciones.sql son rechazadas, cada una "
        "por la restricción exacta que se esperaba (la prueba compara el nombre de la restricción).")
@@ -173,8 +173,8 @@ vineta("**Totales no inflados:** las vistas y consultas que combinan varias rela
 
 titulo("5. Índices: resultados")
 tabla(["Experimento", "Antes", "Después", "Mejora"], [
-    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,33 ms · 3 476 páginas", "0,58 ms · 574 páginas", "14× más rápido"),
-    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "39,71 ms · Seq Scan de ≈ 400 000 filas", "0,064 ms · 8 páginas", "≈ 600× más rápido"),
+    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,29 ms · 3 476 páginas", "0,53 ms · 574 páginas", "15× más rápido"),
+    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "36,42 ms · Seq Scan de ≈ 400 000 filas", "0,055 ms · 8 páginas", "≈ 650× más rápido"),
 ], [6.4, 3.6, 3.6, 2.4])
 parrafo("Las mediciones se hicieron con 200 000 reportes y 400 000 evidencias sintéticos cargados dentro de una "
         "transacción que termina en ROLLBACK, para que el volumen no contamine la base de la demo.")
