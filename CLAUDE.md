@@ -74,7 +74,7 @@ PROGRAMACIÓN 3         → aplicación Java (backend) + interfaz (frontend),
                           arquitectura por capas, buenas prácticas
 ```
 
-**IMPORTANTE:** No conozco el enunciado exacto de Programación 3 (fechas, tecnologías obligatorias, rúbrica). Si el usuario tiene el PDF/guía, pídele que lo ponga en `documentacion/programacion3/` y léelo antes de decidir tecnologías. Hasta entonces, usa el stack de la sección 8.
+**Programación 3 NO tiene guía escrita** (confirmado por Luis). Temas vistos en clase, que el código debe evidenciar y la documentación debe señalar: Oh My Posh (terminal), POO, arquitectura en capas, integración, validaciones y excepciones, código limpio v2, patrones GRASP, auditoría y corrección GRASP, auditoría y corrección SOLID. Por eso: `documentacion/programacion3/` debe tener un mapa "tema → dónde está en el código" y las auditorías GRASP y SOLID con formato hallazgo → corrección. Usa el stack de la sección 8.
 
 ---
 
