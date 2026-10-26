@@ -125,6 +125,8 @@ Página con formulario en una tarjeta:
 1. Dos tarjetas grandes para elegir: **"Una falla"** (nadie salió herido) o **"Un incidente"** (me causó un daño).
 2. Categoría y barrio (dos listas desplegables).
 3. **Mini-mapa** (300 px de alto) para tocar el punto exacto + botón "📍 Usar mi ubicación" (GPS) y el texto con las coordenadas.
+   Al marcarlo, la lista de barrio (que está **arriba** del mapa) se llena sola: "Sugerido por el punto marcado (a 49 m).
+   Cámbialo si no es tu barrio." Si eligió el barrio antes, el mapa se acerca a ese barrio.
 4. Descripción con contador de caracteres. Gravedad percibida opcional: cinco botones 1–5.
 5. Si es incidente, aparece un bloque con borde naranja "Lo que te pasó" (aviso de que es privado): fecha y hora del hecho,
    entidad que cree responsable (o "No sé"), tipo de daño (Lesión / Daño material / Ambos), casilla de atención médica
@@ -184,7 +186,7 @@ Navegador (HTML + CSS + JavaScript con módulos, sin framework; Leaflet 1.9.4 + 
         │  HTTP/JSON, token JWT en la cabecera
 API REST: Java 17 + Spring Boot 3.5 (Spring Web, Data JPA, Security, Validation, springdoc/Swagger)
         │  JPA para el CRUD + SQL explícito (JdbcTemplate) para mapa y búsqueda de antecedentes
-PostgreSQL 18 (migraciones SQL numeradas 001–011, sin Flyway)
+PostgreSQL 18 (migraciones SQL numeradas 001–012, sin Flyway)
 ```
 - La interfaz la sirve el mismo Spring Boot (`src/main/resources/static`): una URL, un comando. SPA con rutas `#/`,
   un módulo JS por vista, el menú cambia según el rol (el backend vuelve a verificar cada permiso).
@@ -193,7 +195,7 @@ PostgreSQL 18 (migraciones SQL numeradas 001–011, sin Flyway)
   `security` (JWT, BCrypt, límite de intentos), `config`.
 - Patrones documentados con auditoría "hallazgo → corrección": Experto, Creador, Controlador, Alta cohesión, Bajo acoplamiento,
   Fabricación pura, Indirección, Variaciones protegidas; SRP, OCP, LSP, ISP, DIP.
-- Pruebas: 71 unitarias (dominio sin base de datos, servicios con Mockito) y 14 de integración (HTTP → JPA → PostgreSQL real).
+- Pruebas: 77 unitarias (dominio sin base de datos, servicios con Mockito) y 16 de integración (HTTP → JPA → PostgreSQL real).
 
 ---
 
@@ -229,9 +231,10 @@ PostgreSQL 18 (migraciones SQL numeradas 001–011, sin Flyway)
 
 Todos los datos de la demo son **simulados** (137 reportes, 18 incidentes, 9 casos, 55 usuarios ficticios con correos
 `.test`). Los nombres de barrios y entidades son de Valledupar.
-**Problema conocido en corrección:** las coordenadas de los barrios eran aproximaciones inventadas; un usuario notó un
-punto dentro de la Universidad Popular del Cesar marcado como "La Nevada". Se está reemplazando por ubicaciones reales de
-OpenStreetMap y se agregará la **detección automática del barrio** a partir del punto marcado.
+**Ubicaciones:** cada uno de los 30 barrios tiene un punto de referencia **real** tomado de OpenStreetMap y comprobado
+contra el límite de su comuna; los reportes simulados caen a menos de 170 m de ese punto. Al marcar el punto en el
+formulario, la app **sugiere el barrio** (si alguno queda a 600 m o menos) y el ciudadano puede cambiarlo. Límite: solo 30
+de los ~175 barrios están ubicados (OSM casi no tiene barrios de Valledupar dibujados y la Alcaldía no publica polígonos).
 
 ---
 
