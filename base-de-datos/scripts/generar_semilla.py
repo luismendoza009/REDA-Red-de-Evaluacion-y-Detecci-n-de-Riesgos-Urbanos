@@ -7,8 +7,9 @@ Genera los datos semilla SIMULADOS de REDA (sql/semilla/*.sql).
   ANTECEDENTE se calculan con la misma regla que la consulta de negocio y la API (misma categoría,
   reporte de CONDICION no rechazado, distancia Haversine <= 100 m, fecha anterior al hecho).
 - Sin datos reales de personas: nombres combinados al azar, correos en el dominio
-  reservado .test, teléfonos ficticios. Los nombres de barrios y entidades sí son de
-  Valledupar, pero las coordenadas, atributos de zona y atribuciones son SIMULADOS
+  reservado .test, teléfonos ficticios. Los nombres de barrios y entidades son de Valledupar
+  y el punto de referencia de cada barrio es real (OpenStreetMap); los reportes se reparten
+  alrededor de ese punto. Los atributos de zona y las atribuciones son SIMULADOS
   (ver documentacion/datos_simulados.md).
 
 Uso:  python scripts/generar_semilla.py
@@ -144,39 +145,79 @@ CATEGORIAS = [
     ]),
 ]
 
-# (barrio, tipo, latitud, longitud, tráfico, colegios, centros de salud) — coordenadas APROXIMADAS SIMULADAS
+# (barrio, tipo, latitud, longitud, tráfico, colegios, centros de salud, fuente de la ubicación)
+# Coordenadas REALES: punto de referencia dentro del barrio tomado de OpenStreetMap (consulta del 2026-10-26),
+# comprobado contra el polígono de su comuna en OSM.
+# Tráfico, colegios y centros de salud siguen siendo SIMULADOS.
 ZONAS = [
-    ("Centro", "COMERCIAL", 10.4770, -73.2445, 5, 4, 3),
-    ("Loperena", "MIXTA", 10.4745, -73.2480, 4, 2, 1),
-    ("Cañaguate", "RESIDENCIAL", 10.4805, -73.2420, 3, 1, 0),
-    ("San Joaquín", "RESIDENCIAL", 10.4710, -73.2405, 3, 2, 1),
-    ("Altagracia", "RESIDENCIAL", 10.4795, -73.2475, 3, 1, 0),
-    ("Gaitán", "RESIDENCIAL", 10.4690, -73.2470, 3, 2, 0),
-    ("Novalito", "MIXTA", 10.4850, -73.2500, 4, 2, 1),
-    ("Los Fundadores", "RESIDENCIAL", 10.4900, -73.2560, 2, 1, 0),
-    ("Pontevedra", "RESIDENCIAL", 10.4930, -73.2470, 2, 1, 1),
-    ("Rosario Norte", "RESIDENCIAL", 10.4965, -73.2540, 2, 1, 0),
-    ("Los Mayales", "RESIDENCIAL", 10.4985, -73.2640, 3, 2, 1),
-    ("Novalito Norte", "RESIDENCIAL", 10.4890, -73.2470, 2, 1, 0),
-    ("Villa Castro", "RESIDENCIAL", 10.4600, -73.2560, 3, 2, 1),
-    ("Primero de Mayo", "RESIDENCIAL", 10.4580, -73.2440, 4, 3, 1),
-    ("La Nevada", "RESIDENCIAL", 10.4520, -73.2600, 3, 2, 0),
-    ("Mareigua", "RESIDENCIAL", 10.4540, -73.2490, 3, 2, 1),
-    ("Garupal", "RESIDENCIAL", 10.4470, -73.2560, 3, 3, 1),
-    ("Villa Miriam", "RESIDENCIAL", 10.4640, -73.2330, 3, 1, 0),
-    ("Sicarare", "MIXTA", 10.4660, -73.2620, 4, 2, 1),
-    ("Panamá", "RESIDENCIAL", 10.4635, -73.2490, 3, 2, 0),
-    ("El Prado", "RESIDENCIAL", 10.4870, -73.2600, 2, 1, 1),
-    ("Villa Clara", "RESIDENCIAL", 10.4560, -73.2370, 2, 1, 0),
-    ("Doce de Octubre", "RESIDENCIAL", 10.4605, -73.2400, 3, 2, 1),
-    ("Las Delicias", "RESIDENCIAL", 10.4500, -73.2420, 3, 1, 0),
-    ("Dangond", "RESIDENCIAL", 10.4680, -73.2530, 3, 1, 0),
-    ("San Fernando", "RESIDENCIAL", 10.4430, -73.2490, 2, 2, 0),
-    ("Valle Meza", "RESIDENCIAL", 10.4720, -73.2310, 2, 1, 0),
-    ("Los Músicos", "RESIDENCIAL", 10.4820, -73.2370, 2, 1, 0),
-    ("Simón Bolívar", "RESIDENCIAL", 10.4560, -73.2530, 3, 2, 1),
-    ("Hospital Rosario Pumarejo", "INSTITUCIONAL", 10.4755, -73.2520, 5, 0, 2),
+    ("Centro", "COMERCIAL", 10.47765, -73.24455, 5, 4, 3,
+     "Plaza Alfonso López (OSM)"),
+    ("Loperena", "MIXTA", 10.47351, -73.24883, 4, 2, 1,
+     "Colegio Nacional Loperena (OSM)"),
+    ("Cañaguate", "RESIDENCIAL", 10.47990, -73.24930, 3, 1, 0,
+     "Manzanas Cañahuates (OSM, landuse=residential)"),
+    ("Santa Rosa", "RESIDENCIAL", 10.46030, -73.23930, 3, 2, 1,
+     "Parque Santa Rosa (OSM)"),
+    ("Santo Domingo", "RESIDENCIAL", 10.46959, -73.23802, 3, 1, 0,
+     "Colegio Santo Domingo (OSM)"),
+    ("Doce de Octubre", "RESIDENCIAL", 10.45710, -73.24501, 3, 2, 0,
+     "Plaza 12 de Octubre (OSM)"),
+    ("Novalito", "MIXTA", 10.48650, -73.25370, 4, 2, 1,
+     "Manzanas Novalito (OSM, landuse=residential)"),
+    ("Villa Clara", "RESIDENCIAL", 10.46262, -73.23689, 2, 1, 0,
+     "Barrio Villa Clara (OSM, place=neighbourhood)"),
+    ("Candelaria Sur", "RESIDENCIAL", 10.46193, -73.23228, 2, 1, 1,
+     "Candelaria Sur y Villa del Rosario (OSM, place=city_block)"),
+    ("Los Corales", "RESIDENCIAL", 10.48995, -73.27040, 2, 1, 0,
+     "Conjunto Los Corales (OSM, landuse=residential)"),
+    ("Los Mayales", "RESIDENCIAL", 10.45880, -73.23053, 3, 2, 1,
+     "Parque Los Mayales (OSM)"),
+    ("Rosario Real", "RESIDENCIAL", 10.49537, -73.27702, 2, 1, 0,
+     "Urbanización Rosario Real (OSM, landuse=residential)"),
+    ("Villa Bolivariana", "RESIDENCIAL", 10.45133, -73.23832, 3, 2, 1,
+     "Unidad Villa Bolivariana (OSM, landuse=residential)"),
+    ("Primero de Mayo", "RESIDENCIAL", 10.45397, -73.25294, 4, 3, 1,
+     "Casa de Justicia Primero de Mayo (OSM)"),
+    ("La Nevada", "RESIDENCIAL", 10.47657, -73.28280, 3, 2, 1,
+     "Escuela Mixta y Parque La Nevada (OSM)"),
+    ("San Martín", "RESIDENCIAL", 10.45059, -73.24872, 3, 2, 1,
+     "Parque San Martín (OSM)"),
+    ("Garupal", "RESIDENCIAL", 10.47048, -73.26375, 3, 3, 1,
+     "Barrio Garupal (OSM, landuse=residential)"),
+    ("Doña Clara", "RESIDENCIAL", 10.45456, -73.22862, 3, 1, 0,
+     "Urbanización Doña Clara (OSM, landuse=residential)"),
+    ("Universidad Popular del Cesar", "ESCOLAR", 10.44950, -73.26240, 4, 1, 0,
+     "UPC sede Sabanas (OSM, amenity=university)"),
+    ("Iracal", "RESIDENCIAL", 10.47438, -73.26801, 3, 2, 0,
+     "Parque Iracal (OSM)"),
+    ("Los Cortijos", "RESIDENCIAL", 10.47632, -73.26188, 2, 1, 1,
+     "Parque Los Cortijos (OSM)"),
+    ("Don Carmelo", "RESIDENCIAL", 10.44097, -73.26020, 2, 1, 0,
+     "Barrio Don Carmelo (OSM, place=neighbourhood)"),
+    ("Nuevo Milenio", "RESIDENCIAL", 10.44221, -73.25171, 3, 2, 1,
+     "Barrio Milenio (OSM, place=neighbourhood)"),
+    ("Verona", "RESIDENCIAL", 10.44528, -73.26427, 2, 1, 0,
+     "Urbanización Verona (OSM, landuse=residential)"),
+    ("Terminal de Transportes", "INSTITUCIONAL", 10.44436, -73.24302, 5, 0, 0,
+     "Terminal de Transporte de Valledupar (OSM, amenity=bus_station)"),
+    ("Leandro Díaz", "RESIDENCIAL", 10.43640, -73.26400, 2, 2, 0,
+     "Urbanización Leandro Díaz (OSM, landuse=residential)"),
+    ("Vive Alto", "RESIDENCIAL", 10.44038, -73.23392, 2, 1, 0,
+     "Conjunto Vive Alto (OSM, landuse=residential)"),
+    ("Don Alberto", "RESIDENCIAL", 10.46630, -73.28850, 2, 1, 0,
+     "Urbanización Norte y Altos de Don Alberto (OSM)"),
+    ("Las Trinitarias", "RESIDENCIAL", 10.49801, -73.27514, 3, 2, 1,
+     "Las Trinitarias (OSM, landuse=residential)"),
+    ("Hospital Rosario Pumarejo", "INSTITUCIONAL", 10.46933, -73.25452, 5, 0, 2,
+     "Hospital Rosario Pumarejo de López (OSM, amenity=hospital)"),
 ]
+
+FECHA_CONSULTA_OSM = "2026-10-26"
+
+# Dispersión alrededor del punto de referencia: corta para que el reporte quede dentro de su barrio
+# (el barrio más cercano a otro está a unos 360 m).
+RADIO_PUNTO_CRITICO = 80
+RADIO_DISPERSO = 170
 
 NOMBRES = ["María", "José", "Ana", "Luis", "Carmen", "Carlos", "Rosa", "Jorge", "Diana", "Andrés",
            "Paola", "Jesús", "Yuliana", "Miguel", "Sandra", "Fabián", "Lorena", "Camilo", "Daniela",
@@ -325,7 +366,7 @@ def main():
     puntos_incidente = []  # (zona, cat, lat, lon, fecha_hecho, es_demo)
     for zona, cat, n, primero, hecho in PUNTOS:
         z = ZONAS[zona - 1]
-        clat, clon = desplazar(z[2], z[3], 250)
+        clat, clon = desplazar(z[2], z[3], RADIO_PUNTO_CRITICO)
         es_demo = hecho is None
         if es_demo:
             hecho = datetime(2026, 10, 21, 19, 20, tzinfo=TZ)
@@ -342,7 +383,7 @@ def main():
         cat = random.choices(range(1, 9), weights=pesos_cat)[0]
         zona = random.randint(1, len(ZONAS))
         z = ZONAS[zona - 1]
-        lat, lon = desplazar(z[2], z[3], 450)
+        lat, lon = desplazar(z[2], z[3], RADIO_DISPERSO)
         f = hora_diurna(fecha_aleatoria(INICIO, FIN))
         nuevo_reporte(cat, zona, "CONDICION", lat, lon, f, ciclo_condicion(f))
 
@@ -351,7 +392,7 @@ def main():
         cat = random.choices(range(1, 9), weights=pesos_cat)[0]
         zona = random.randint(1, len(ZONAS))
         z = ZONAS[zona - 1]
-        lat, lon = desplazar(z[2], z[3], 450)
+        lat, lon = desplazar(z[2], z[3], RADIO_DISPERSO)
         puntos_incidente.append((zona, cat, lat, lon, fecha_aleatoria(datetime(2026, 4, 1, tzinfo=TZ), FIN - timedelta(days=3)), False))
 
     # Los incidentes se insertan al final, en orden cronológico del hecho.
@@ -437,6 +478,8 @@ def main():
             continue
         validacion = [h for h in historial if h[1] == rid and h[3] == VAL][-1]
         creacion = validacion[5] + timedelta(hours=random.randint(2, 48))
+        if creacion > FIN:
+            continue
         cid = len(casos) + 1
         estado = CICLO_ESTADOS_CASO[len(casos) % len(CICLO_ESTADOS_CASO)]
         cierre = None
@@ -449,20 +492,28 @@ def main():
             for k, a in enumerate(interesados):
                 momento = momento + timedelta(hours=random.randint(3, 30))
                 filas.append([None, cid, a[0], MENSAJES[k % len(MENSAJES)], "PENDIENTE", momento, None])
+            # un caso reciente no alcanza a avanzar: solo ocurre lo que cabe antes del fin de la simulación
+            filas = [fl for fl in filas if fl[5] <= FIN]
             if estado in (C_ACEP, C_CERR):
-                eleccion = filas[-1][5] + timedelta(hours=random.randint(2, 48))
+                eleccion = filas[-1][5] + timedelta(hours=random.randint(2, 48)) if filas else FIN + timedelta(days=1)
+                if eleccion > FIN:
+                    estado = C_REM if filas else C_EVAL
+            if estado in (C_ACEP, C_CERR):
                 elegida = random.randrange(len(filas))
                 for k, fila in enumerate(filas):
                     fila[4] = "ELEGIDA" if k == elegida else "NO_ELEGIDA"
                     fila[6] = eleccion
                 remisiones.append([None, cid, filas[elegida][2], eleccion, "ACEPTADA", eleccion, None, tarifa[inc[5]]])
                 if estado == C_CERR:
-                    cierre = min(eleccion + timedelta(days=random.randint(15, 40)), FIN)
+                    cierre = eleccion + timedelta(days=random.randint(15, 40))
+                    if cierre > FIN:
+                        estado, cierre = C_ACEP, None
+                if estado == C_CERR:
                     # el ciudadano califica al abogado unos días después del cierre
                     puntaje = random.choice([5, 5, 4, 4, 3])
                     calificaciones.append([None, cid, filas[elegida][2], puntaje,
                                            random.choice(COMENTARIOS[puntaje]) if random.random() < 2 else None,  # siempre con comentario (el sorteo se conserva solo para que la semilla siga siendo la misma que la versión verificada)
-                                           cierre + timedelta(days=random.randint(1, 4))])
+                                           min(cierre + timedelta(days=random.randint(1, 4)), FIN)])
             postulaciones.extend(filas)
         elif estado == C_RECH:
             # ningún abogado se interesó en el plazo: el caso se cierra sin abogado
@@ -491,8 +542,10 @@ def main():
         f.write(inserts("estados_caso", ["id_estado_caso", "nombre"], [(i, n) for i, n in enumerate(ESTADOS_CASO, 1)]))
         f.write(inserts("categorias", ["id_categoria", "nombre", "descripcion"],
                         [(i, c[0], c[1]) for i, c in enumerate(CATEGORIAS, 1)]))
-        f.write(inserts("zonas", ["id_zona", "nombre", "tipo", "ciudad", "nivel_trafico", "centros_educativos", "centros_salud"],
-                        [(i, z[0], z[1], "Valledupar", z[4], z[5], z[6]) for i, z in enumerate(ZONAS, 1)]))
+        f.write(inserts("zonas", ["id_zona", "nombre", "tipo", "ciudad", "nivel_trafico", "centros_educativos", "centros_salud",
+                                  "latitud_referencia", "longitud_referencia", "fuente_ubicacion"],
+                        [(i, z[0], z[1], "Valledupar", z[4], z[5], z[6], z[2], z[3], f"{z[7]}, consultado el {FECHA_CONSULTA_OSM}")
+                         for i, z in enumerate(ZONAS, 1)]))
         f.write(inserts("entidades_publicas", ["id_entidad", "nombre", "tipo", "ciudad"],
                         [(i, e[0], e[1], "Valledupar") for i, e in enumerate(ENTIDADES, 1)]))
         v = datetime(2026, 2, 1, 8, 0, tzinfo=TZ)
