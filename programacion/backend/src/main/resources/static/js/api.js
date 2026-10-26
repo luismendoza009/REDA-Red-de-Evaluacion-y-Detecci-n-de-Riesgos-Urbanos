@@ -83,6 +83,7 @@ export const api = {
   // catálogos y mapa
   categorias: () => pedir("/api/catalogos/categorias"),
   zonas: () => pedir("/api/catalogos/zonas"),
+  zonaSugerida: (lat, lon) => pedir(`/api/catalogos/zonas/sugerida?latitud=${lat}&longitud=${lon}`),
   entidades: () => pedir("/api/catalogos/entidades"),
   puntos: () => pedir("/api/mapa/puntos"),
   detallePublico: (id) => pedir(`/api/mapa/reportes/${id}`),

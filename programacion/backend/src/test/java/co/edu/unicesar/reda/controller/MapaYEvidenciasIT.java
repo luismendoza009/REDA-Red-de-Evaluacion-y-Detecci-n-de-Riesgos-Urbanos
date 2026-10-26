@@ -64,7 +64,32 @@ class MapaYEvidenciasIT {
     }
 
     @Test
-    void elPuntoDelCentroAgrupaLosCincoReportesDeLaAlcantarilla() throws Exception {
+    void cadaReporteDeLaSemillaQuedaEnElBarrioQueSeLeSugeriria() throws Exception {
+        // el barrio de cada reporte es el de punto de referencia más cercano (coordenadas reales de OSM)
+        var reportes = jdbc.queryForList("SELECT id_zona, latitud, longitud FROM reportes ORDER BY id_reporte");
+        for (var r : reportes) {
+            JsonNode sugerida = json.readTree(mvc.perform(conSesion("/api/catalogos/zonas/sugerida")
+                            .param("latitud", r.get("latitud").toString()).param("longitud", r.get("longitud").toString()))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+            assertEquals(((Number) r.get("id_zona")).intValue(), sugerida.path("id").asInt());
+        }
+    }
+
+    @Test
+    void unPuntoEnLaUpcSugiereLaUpcYUnoLejanoNoSugiereNada() throws Exception {
+        mvc.perform(conSesion("/api/catalogos/zonas/sugerida").param("latitud", "10.4497").param("longitud", "-73.2620"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Universidad Popular del Cesar"));
+        mvc.perform(conSesion("/api/catalogos/zonas/sugerida").param("latitud", "10.5200").param("longitud", "-73.2000"))
+                .andExpect(status().isNoContent());
+        mvc.perform(conSesion("/api/catalogos/zonas/sugerida").param("latitud", "10.45"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(conSesion("/api/catalogos/zonas/sugerida").param("latitud", "95").param("longitud", "-73.2"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void elPuntoDelCentroAgrupaLaAlcantarillaYLoQueHayAlLado() throws Exception {
         JsonNode puntos = json.readTree(mvc.perform(conSesion("/api/mapa/puntos")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString());
         JsonNode centro = null;
@@ -74,7 +99,14 @@ class MapaYEvidenciasIT {
             }
         }
         assertNotNull(centro, "el incidente demo debe estar en algún punto");
-        assertEquals(5, centro.path("totalReportes").asInt());
+        assertEquals("Centro", centro.path("zona").asText());
+        // 4 antecedentes + el incidente (alcantarilla) y, a menos de 80 m, una luminaria y un hueco de otra categoría
+        assertEquals(7, centro.path("totalReportes").asInt());
+        long alcantarilla = 0;
+        for (JsonNode r : centro.path("reportes")) {
+            if (r.path("categoria").asText().startsWith("Alcantarilla")) alcantarilla++;
+        }
+        assertEquals(5, alcantarilla);
         assertEquals("CRITICA", centro.path("frecuencia").asText());
         assertEquals(1, centro.path("incidentes").asInt());
         // lista ordenada del más reciente al más antiguo
