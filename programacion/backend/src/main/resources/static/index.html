@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0d">
+  <meta name="description" content="Mapa de fallas en la infraestructura pública de Valledupar: puntos de alta frecuencia, casos y su situación.">
+  <title>REDA · Mapa de fallas de Valledupar</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/css/reda.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa de reportes de Valledupar"></div>
+
+  <!-- Barra superior: marca, cifras y sesión -->
+  <header class="barra">
+    <div class="marca">
+      <svg class="marca-logo" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--con-abogado)" stroke-width="5" stroke-dasharray="22 69.1" transform="rotate(-90 16 16)"/>
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--abierto)" stroke-width="5" stroke-dasharray="22 69.1" stroke-dashoffset="-23" transform="rotate(-90 16 16)"/>
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--cerrado)" stroke-width="5" stroke-dasharray="21 69.1" stroke-dashoffset="-46" transform="rotate(-90 16 16)"/>
+      </svg>
+      <div>
+        <h1>REDA</h1>
+        <p>Fallas en la infraestructura pública · Valledupar</p>
+      </div>
+    </div>
+
+    <section class="cifras" aria-label="Resumen">
+      <div class="cifra"><span class="cifra-valor" id="k-reportes">–</span><span class="cifra-nombre">Reportes</span></div>
+      <div class="cifra"><span class="cifra-valor" id="k-puntos">–</span><span class="cifra-nombre">Puntos de alta frecuencia</span></div>
+      <div class="cifra"><span class="cifra-valor" id="k-incidentes">–</span><span class="cifra-nombre">Incidentes con daño</span></div>
+    </section>
+
+    <div class="sesion" id="sesion">
+      <button class="boton boton-claro" id="btn-entrar" type="button">Iniciar sesión</button>
+    </div>
+  </header>
+
+  <!-- Filtros, en una sola fila -->
+  <nav class="filtros" aria-label="Filtros">
+    <div class="chips" id="chips-situacion" role="group" aria-label="Situación del caso"></div>
+    <label class="selector">
+      <span class="visualmente-oculto">Categoría</span>
+      <select id="filtro-categoria"><option value="">Todas las categorías</option></select>
+    </label>
+    <label class="interruptor"><input type="checkbox" id="filtro-alta"><span>Solo alta frecuencia</span></label>
+    <label class="interruptor"><input type="checkbox" id="filtro-calor" checked><span>Mapa de calor</span></label>
+  </nav>
+
+  <!-- Leyenda -->
+  <aside class="leyenda" aria-label="Leyenda">
+    <h2>Cómo leer el mapa</h2>
+    <ul>
+      <li><span class="ley-tamano"><i></i><i></i><i></i></span>Tamaño y número: reportes en el punto</li>
+      <li><span class="ley-anillo"></span>Anillo: situación de los casos</li>
+      <li><span class="ley-pulso"></span>Pulso: hubo un incidente con daño</li>
+      <li><span class="ley-calor"></span>Calor: concentración de reportes</li>
+    </ul>
+  </aside>
+
+  <!-- Panel lateral (en celular, hoja inferior) -->
+  <aside class="panel" id="panel" aria-hidden="true" aria-labelledby="panel-titulo" role="dialog">
+    <button class="panel-cerrar" id="panel-cerrar" type="button" aria-label="Cerrar panel">✕</button>
+    <div class="panel-contenido" id="panel-contenido"></div>
+  </aside>
+
+  <!-- Inicio de sesión -->
+  <dialog class="modal" id="modal-sesion" aria-labelledby="modal-titulo">
+    <form method="dialog" id="form-sesion" class="modal-cuerpo">
+      <h2 id="modal-titulo">Iniciar sesión</h2>
+      <p class="texto-2">Las fotos son evidencia privada: solo las ven el autor del reporte y el personal de revisión.</p>
+      <label>Correo<input type="email" name="correo" autocomplete="username" required></label>
+      <label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <p class="error" id="error-sesion" role="alert"></p>
+      <div class="modal-acciones">
+        <button class="boton" type="button" id="btn-cancelar">Cancelar</button>
+        <button class="boton boton-claro" type="submit">Entrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Visor de fotos -->
+  <dialog class="visor" id="visor" aria-label="Foto de evidencia">
+    <button class="panel-cerrar" type="button" id="visor-cerrar" aria-label="Cerrar foto">✕</button>
+    <img id="visor-img" alt="">
+    <p id="visor-pie"></p>
+  </dialog>
+
+  <p class="aviso">REDA documenta fallas en la infraestructura pública. No presta asesoría jurídica ni garantiza el resultado de un caso. Datos de demostración simulados.</p>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
