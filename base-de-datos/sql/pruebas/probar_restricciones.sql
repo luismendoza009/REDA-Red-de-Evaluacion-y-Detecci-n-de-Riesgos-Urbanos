@@ -127,4 +127,12 @@ SELECT pg_temp.debe_fallar('zona con latitud pero sin longitud', 'ck_zonas_ubica
 SELECT pg_temp.debe_fallar('zona con una latitud imposible', 'ck_zonas_latitud',
   $q$UPDATE zonas SET latitud_referencia = 104.47 WHERE id_zona = 1$q$);
 
+-- Migración 013: foto de perfil
+SELECT pg_temp.debe_fallar('foto de perfil sin formato ni fecha', 'ck_usuarios_foto_completa',
+  $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/x.jpg' WHERE id_usuario = 1$q$);
+SELECT pg_temp.debe_fallar('foto de perfil en un formato no permitido', 'ck_usuarios_foto_mime',
+  $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/x.gif', foto_perfil_mime = 'image/gif', fecha_foto_perfil = now() WHERE id_usuario = 1$q$);
+SELECT pg_temp.debe_fallar('dos usuarios con el mismo archivo de foto', 'uq_usuarios_foto',
+  $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/igual.jpg', foto_perfil_mime = 'image/jpeg', fecha_foto_perfil = now() WHERE id_usuario IN (1, 2)$q$);
+
 ROLLBACK;

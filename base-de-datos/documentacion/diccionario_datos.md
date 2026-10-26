@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -122,13 +122,19 @@ Personas registradas en la plataforma (ciudadanos, operadores, abogados, adminis
 | fecha_registro | TIMESTAMPTZ | No |  | now() | Momento de creación de la cuenta. |
 | activo | BOOLEAN | No |  | true | false = cuenta desactivada (no se borra: sus reportes son evidencia histórica). |
 | fecha_consentimiento | TIMESTAMPTZ | No |  | now() | Momento en que el usuario aceptó la política de tratamiento de datos (Ley 1581 de 2012). |
+| foto_perfil | VARCHAR(255) | Sí | UQ |  | [PERSONAL] Ruta relativa (nombre generado) de la foto de perfil. Solo la ven el propio usuario y el personal; la de un abogado verificado, cualquier usuario con sesión. |
+| foto_perfil_mime | VARCHAR(20) | Sí |  |  | Formato real de la foto de perfil (detectado por sus bytes): image/jpeg, image/png o image/webp. |
+| fecha_foto_perfil | TIMESTAMPTZ | Sí |  |  | Cuándo se cargó la foto de perfil actual. |
 
 **Restricciones:**
 
 - `ck_usuarios_correo`: `CHECK ((((correo)::text = lower((correo)::text)) AND ((correo)::text ~~ '%_@_%._%'::text)))`
+- `ck_usuarios_foto_completa`: `CHECK ((((foto_perfil IS NULL) AND (foto_perfil_mime IS NULL) AND (fecha_foto_perfil IS NULL)) OR ((foto_perfil IS NOT NULL) AND (foto_perfil_mime IS NOT NULL) AND (fecha_foto_perfil IS NOT NULL))))`
+- `ck_usuarios_foto_mime`: `CHECK (((foto_perfil_mime)::text = ANY ((ARRAY['image/jpeg'::character varying, 'image/png'::character varying, 'image/webp'::character varying])::text[])))`
 - `ck_usuarios_hash`: `CHECK ((((password_hash)::text ~~ '$2_$%'::text) AND (length((password_hash)::text) = 60)))`
 - `fk_usuarios_rol`: `FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE RESTRICT`
 - `uq_usuarios_correo`: `UNIQUE (correo)`
+- `uq_usuarios_foto`: `UNIQUE (foto_perfil)`
 
 **Índices adicionales:**
 
