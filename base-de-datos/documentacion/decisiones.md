@@ -25,6 +25,9 @@ confirmación del grupo y pueden revisarse.
 | D16 | El dato de las coordenadas en `v_mapa_publico` se redondea a 4 decimales (~11 m) | Privacidad: un incidente puede ocurrir frente a la casa del afectado | Coordenadas exactas |
 | D18 | Un reporte **Rechazado** no cuenta como antecedente | Un reporte rechazado es duplicado, falso o no es infraestructura pública: no prueba que la entidad "ya sabía". La misma regla se aplica en la semilla, en la consulta C05, en sus verificaciones y en la API (detectado al probar el backend) | Contar todos los reportes previos |
 | D19 | El repositorio se separa en `base-de-datos/` y `programacion/` (decisión del grupo) | Cada asignatura tiene su carpeta; las rutas de los documentos de BD son relativas a `base-de-datos/`. La guía pide "migraciones/001_xxx.sql": la carpeta conserva ese nombre, solo cambia de lugar | Todo en la raíz |
+| D20 | Migración 009: `v_mapa_publico` agrega la **situación pública** del caso (ABIERTO, CON_ABOGADO, CERRADO) y la descripción de la falla | La regla de clasificación vive en la base, igual para todos los clientes (web, móvil). No se editó la 008: `CREATE OR REPLACE VIEW` solo agrega columnas al final | Calcularla en el frontend |
+| D21 | Las **fotos de evidencia son privadas** (decisión del grupo): la vista pública solo expone cuántas hay | Pueden mostrar personas lesionadas y son prueba de un caso legal | Fotos públicas para condiciones |
+| D22 | En la semilla, los estados de los casos se reparten en un ciclo fijo, no al azar | Garantiza que la demo siempre muestre casos con abogado, abiertos y cerrados | Sorteo (dejaba 0 cerrados) |
 | D17 | La tabla `auditoria` se crea en la Entrega 3 | Va junto con los triggers que la alimentan (requisito de esa entrega) | Crearla vacía ahora |
 
 ## Migraciones y herramientas

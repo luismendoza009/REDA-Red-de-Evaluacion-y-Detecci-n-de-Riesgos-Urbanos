@@ -397,6 +397,7 @@ def main():
         if r[2] == "ANTECEDENTE":
             ante_por_reporte[r[0]] = ante_por_reporte.get(r[0], 0) + 1
     casos, remisiones = [], []
+    CICLO_ESTADOS_CASO = [C_CERR, C_ACEP, C_RECH, C_ACEP, C_REM, C_CERR, C_ACEP, C_EVAL, C_ACEP]
     tarifa = {"LESION": 200000, "AMBOS": 200000, "DANO_MATERIAL": 120000}
     for inc in incidentes:
         iid, rid = inc[0], inc[1]
@@ -409,7 +410,9 @@ def main():
         val = max(h[5] for h in historial if h[1] == rid and h[3] == VAL)
         creacion = val + timedelta(hours=random.randint(2, 48))
         cid = len(casos) + 1
-        estado = random.choices([C_EVAL, C_REM, C_ACEP, C_RECH, C_CERR], weights=[1, 2, 4, 1, 1])[0]
+        # Reparto fijo (no al azar) para que la demo siempre muestre las tres situaciones públicas:
+        # con abogado (Aceptado), abiertos (Evaluado, Remitido) y cerrados (Cerrado, Rechazado).
+        estado = CICLO_ESTADOS_CASO[len(casos) % len(CICLO_ESTADOS_CASO)]
         cierre = None
         activos = [a for a in abogados if a[5]]
         random.shuffle(activos)
@@ -425,9 +428,8 @@ def main():
             resp = envio + timedelta(hours=random.randint(4, 96))
             remisiones.append([None, cid, activos[0][0], envio, "ACEPTADA", resp, None, valor])
             if estado == C_CERR:
-                cierre = resp + timedelta(days=random.randint(15, 40))
-                if cierre > FIN:
-                    cierre, estado = None, C_ACEP
+                # se cierra entre 15 y 40 días después de aceptado, sin pasar de la fecha de corte
+                cierre = min(resp + timedelta(days=random.randint(15, 40)), FIN)
         elif estado == C_RECH:
             for k in range(2):
                 resp = envio + timedelta(hours=random.randint(4, 72))
