@@ -22,4 +22,5 @@ BEGIN
   PERFORM setval(pg_get_serial_sequence('calculos_indice', 'id_calculo'), coalesce((SELECT max(id_calculo) FROM calculos_indice), 0) + 1, false);
   PERFORM setval(pg_get_serial_sequence('postulaciones', 'id_postulacion'), coalesce((SELECT max(id_postulacion) FROM postulaciones), 0) + 1, false);
   PERFORM setval(pg_get_serial_sequence('tokens_recuperacion', 'id_token'), coalesce((SELECT max(id_token) FROM tokens_recuperacion), 0) + 1, false);
+  PERFORM setval(pg_get_serial_sequence('calificaciones', 'id_calificacion'), coalesce((SELECT max(id_calificacion) FROM calificaciones), 0) + 1, false);
 END $$;

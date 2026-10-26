@@ -27,8 +27,8 @@ alrededor del incidente demo y anteriores a la fecha del hecho. Es el filtro pre
 | Plan sobre reportes | Index Scan con `ix_reportes_categoria` (solo categoría) | Index Scan con `ix_reportes_antecedentes` |
 | Condición resuelta por el índice | `id_categoria` | `id_categoria`, `tipo_reporte`, rango de `latitud` |
 | Filas descartadas por filtro | 25 052 | 539 |
-| Páginas leídas (buffers) | 3 476 | 574 |
-| Tiempo de ejecución | 8,29 ms | 0,53 ms |
+| Páginas leídas (buffers) | 3 477 | 574 |
+| Tiempo de ejecución | 8,39 ms | 0,54 ms |
 
 **Conclusión:** la comparación es honesta: el "antes" ya tenía el índice simple de la FK `id_categoria`,
 y aun así tenía que leer y descartar todos los reportes de la categoría (unos 25 000). El índice compuesto
@@ -49,11 +49,11 @@ Este es el índice que usará la función PL/pgSQL de búsqueda de antecedentes 
 | Plan sobre evidencias | Parallel Seq Scan (2 workers) + Hash Join | Index Scan + Nested Loop |
 | Filas leídas de evidencias | ≈ 400 214 (133 405 por proceso × 3) | 1 |
 | Páginas leídas | 7 688 | 8 |
-| Tiempo de ejecución | 36,42 ms | 0,055 ms |
+| Tiempo de ejecución | 39,44 ms | 0,069 ms |
 
 **Conclusión:** PostgreSQL **no crea índices para las claves foráneas** (solo para PK y UNIQUE). Sin el
 índice, ver la foto de un caso obliga a recorrer las 400 000 evidencias; con el índice, el plan cambia
-de Hash Join a Nested Loop y lee 8 páginas: unas **650 veces más rápido**. El mismo índice acelera el
+de Hash Join a Nested Loop y lee 8 páginas: unas **570 veces más rápido**. El mismo índice acelera el
 `ON DELETE CASCADE` desde reportes (borrar un reporte no recorre toda la tabla de evidencias). Por eso la
 migración 007 indexa todas las FK de joins frecuentes que no estaban cubiertas por una PK o UNIQUE.
 
