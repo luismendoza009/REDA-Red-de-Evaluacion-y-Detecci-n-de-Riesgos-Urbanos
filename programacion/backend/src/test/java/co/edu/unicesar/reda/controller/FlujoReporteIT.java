@@ -131,7 +131,7 @@ class FlujoReporteIT {
 
     @Test
     void elMapaPublicoNoExponeDatosPersonales() throws Exception {
-        String cuerpo = enviar(HttpMethod.GET, "/api/publico/mapa", null, null)
+        String cuerpo = enviar(HttpMethod.GET, "/api/mapa/mapa", null, tokenCiudadano)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertFalse(cuerpo.contains("@correo.test") || cuerpo.contains("descripcionDano"),

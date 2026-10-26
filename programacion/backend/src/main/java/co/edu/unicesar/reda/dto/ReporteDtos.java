@@ -38,7 +38,13 @@ public final class ReporteDtos {
             @NotBlank @Size(min = 10, max = 2000) String descripcionDano,
             @NotNull @PastOrPresent OffsetDateTime fechaHoraHecho,
             boolean huboAtencionMedica,
-            Integer idEntidad) {
+            Integer idEntidad,
+            @Size(max = 5, message = "máximo 5 testigos") List<@Valid TestigoRequest> testigos) {
+    }
+
+    public record TestigoRequest(
+            @NotBlank @Size(max = 120) String nombre,
+            @NotBlank @Size(max = 150) String contacto) {
     }
 
     public record CambioEstadoRequest(
@@ -71,6 +77,18 @@ public final class ReporteDtos {
     /** Respuesta al crear un incidente: incluye los antecedentes que el sistema encontró y vinculó. */
     public record IncidenteCreadoResponse(ReporteDetalleResponse reporte, List<AntecedenteResponse> antecedentes,
                                           Long diasConocimientoPrevio) {
+    }
+
+    /** Un reporte en la bandeja del operador, con los estados a los que puede pasar. */
+    public record ReporteEnRevision(Integer id, String tipo, String categoria, String zona, String estado,
+                                    OffsetDateTime fechaReporte, String descripcion, Short nivelGravedad, int numFotos,
+                                    List<String> siguientesEstados) {
+    }
+
+    /** Un reporte en "Mis reportes", con la situación de su caso si lo tiene. */
+    public record MiReporteResponse(Integer id, String tipo, String categoria, String zona, String estado,
+                                    OffsetDateTime fechaReporte, String descripcion, int numFotos,
+                                    boolean puedeBuscarAbogado, Integer idCaso, String estadoCaso) {
     }
 
     /** Punto del mapa público: sin autor ni datos del daño. */

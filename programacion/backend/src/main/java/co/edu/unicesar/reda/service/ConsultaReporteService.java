@@ -1,8 +1,10 @@
 package co.edu.unicesar.reda.service;
 
 import co.edu.unicesar.reda.dto.ReporteDtos.AntecedenteResponse;
+import co.edu.unicesar.reda.dto.ReporteDtos.MiReporteResponse;
 import co.edu.unicesar.reda.dto.ReporteDtos.ReporteDetalleResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.ReporteResumenResponse;
+import co.edu.unicesar.reda.model.Caso;
+import co.edu.unicesar.reda.model.NombreEstado;
 import co.edu.unicesar.reda.exception.AccesoDenegadoException;
 import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
@@ -30,8 +32,17 @@ public class ConsultaReporteService {
         this.buscadorAntecedentes = buscadorAntecedentes;
     }
 
-    public List<ReporteResumenResponse> misReportes(Integer idAutor) {
-        return reportes.findByAutorIdOrderByFechaReporteDesc(idAutor).stream().map(ReporteMapper::resumen).toList();
+    public List<MiReporteResponse> misReportes(Integer idAutor) {
+        return reportes.findByAutorIdOrderByFechaReporteDesc(idAutor).stream().map(r -> {
+            Caso caso = r.getIncidente() == null ? null : r.getIncidente().getCaso();
+            NombreEstado estado = r.getEstado().tipo();
+            boolean puedeBuscarAbogado = r.getIncidente() != null && caso == null
+                    && (estado == NombreEstado.VALIDADO || estado == NombreEstado.EN_PROCESO);
+            return new MiReporteResponse(r.getId(), r.getTipo().name(), r.getCategoria().getNombre(),
+                    r.getZona().getNombre(), r.getEstado().getNombre(), r.getFechaReporte(), r.getDescripcion(),
+                    r.getEvidencias().size(), puedeBuscarAbogado, caso == null ? null : caso.getId(),
+                    caso == null ? null : caso.getEstado().getNombre());
+        }).toList();
     }
 
     public ReporteDetalleResponse detalle(Integer idReporte, Integer idSolicitante) {

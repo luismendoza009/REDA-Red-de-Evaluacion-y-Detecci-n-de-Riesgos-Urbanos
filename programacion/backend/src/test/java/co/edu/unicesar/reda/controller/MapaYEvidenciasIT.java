@@ -51,9 +51,21 @@ class MapaYEvidenciasIT {
     @Autowired ObjectMapper json;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
+    private String sesion;
+
+    @org.junit.jupiter.api.BeforeEach
+    void iniciarSesion() throws Exception {
+        sesion = token(AUTOR_DEMO);
+    }
+
+    /** El mapa exige sesión: toda consulta lleva el token. */
+    private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder conSesion(String ruta) {
+        return get(ruta).header("Authorization", "Bearer " + sesion);
+    }
+
     @Test
     void elPuntoDelCentroAgrupaLosCincoReportesDeLaAlcantarilla() throws Exception {
-        JsonNode puntos = json.readTree(mvc.perform(get("/api/publico/puntos")).andExpect(status().isOk())
+        JsonNode puntos = json.readTree(mvc.perform(conSesion("/api/mapa/puntos")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString());
         JsonNode centro = null;
         for (JsonNode p : puntos) {
@@ -71,8 +83,8 @@ class MapaYEvidenciasIT {
 
     @Test
     void elMapaPublicoNoExponeDatosPrivados() throws Exception {
-        String puntos = mvc.perform(get("/api/publico/puntos")).andReturn().getResponse().getContentAsString();
-        String detalle = mvc.perform(get("/api/publico/reportes/" + REPORTE_DEMO)).andExpect(status().isOk())
+        String puntos = mvc.perform(conSesion("/api/mapa/puntos")).andReturn().getResponse().getContentAsString();
+        String detalle = mvc.perform(conSesion("/api/mapa/reportes/" + REPORTE_DEMO)).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         // comparación exacta contra los datos sensibles reales (buscar palabras sueltas daba falsos
         // positivos: "pavimento fracturado" no es un dato de salud)
@@ -94,8 +106,8 @@ class MapaYEvidenciasIT {
                 SELECT min(r.id_reporte) FROM reportes r JOIN estados e USING (id_estado) WHERE e.nombre = 'Rechazado'
                 """, Integer.class);
         assertNotNull(rechazado, "la semilla debe tener al menos un reporte rechazado");
-        mvc.perform(get("/api/publico/reportes/" + rechazado)).andExpect(status().isNotFound());
-        mvc.perform(get("/api/publico/reportes/999999")).andExpect(status().isNotFound());
+        mvc.perform(conSesion("/api/mapa/reportes/" + rechazado)).andExpect(status().isNotFound());
+        mvc.perform(conSesion("/api/mapa/reportes/999999")).andExpect(status().isNotFound());
     }
 
     @Test

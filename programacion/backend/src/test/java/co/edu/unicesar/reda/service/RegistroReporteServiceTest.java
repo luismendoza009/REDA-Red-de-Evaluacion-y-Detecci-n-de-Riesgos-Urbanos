@@ -69,7 +69,7 @@ class RegistroReporteServiceTest {
         var falla = new FallaRequest(2, 1, "Peatón cayó en la alcantarilla", new BigDecimal("10.477100"),
                 new BigDecimal("-73.244800"), (short) 5);
         var respuesta = servicio.crearIncidente(
-                new CrearIncidenteRequest(falla, TipoDano.LESION, "Fractura de tibia", hecho, true, null), 7);
+                new CrearIncidenteRequest(falla, TipoDano.LESION, "Fractura de tibia", hecho, true, null, null), 7);
 
         assertEquals(2, respuesta.antecedentes().size());
         assertEquals(150L, respuesta.diasConocimientoPrevio(), "los días se cuentan desde el PRIMER antecedente");
@@ -92,7 +92,7 @@ class RegistroReporteServiceTest {
         var falla = new FallaRequest(2, 1, "Peatón cayó en la alcantarilla", BigDecimal.ONE, BigDecimal.ONE, null);
 
         var respuesta = servicio.crearIncidente(new CrearIncidenteRequest(falla, TipoDano.LESION, "Fractura de tibia",
-                OffsetDateTime.now().minusHours(1), false, null), 7);
+                OffsetDateTime.now().minusHours(1), false, null, null), 7);
 
         assertTrue(respuesta.antecedentes().isEmpty());
         assertNull(respuesta.diasConocimientoPrevio());

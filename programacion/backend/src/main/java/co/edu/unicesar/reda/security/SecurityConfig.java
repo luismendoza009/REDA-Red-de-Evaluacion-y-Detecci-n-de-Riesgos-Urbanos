@@ -23,7 +23,8 @@ import java.util.List;
 
 /**
  * Reglas de acceso:
- *  - Públicos: registro, login, mapa público, catálogos (GET) y la documentación Swagger.
+ *  - Sin sesión: registro, login, recuperación de contraseña, la documentación Swagger y los archivos
+ *    de la interfaz web (que sin token solo muestra la pantalla de entrada).
  *  - Todo lo demás exige token. El permiso por rol se declara en cada endpoint con @PreAuthorize,
  *    junto al código que protege (así no queda una lista central que se desactualiza).
  * Sin sesión en el servidor (STATELESS) y sin CSRF: la API no usa cookies, usa el token en la cabecera.
@@ -40,8 +41,9 @@ public class SecurityConfig {
                 .cors(c -> {})
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers("/api/auth/**", "/api/publico/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/catalogos/**").permitAll()
+                        // sin sesión SOLO: crear cuenta, entrar y recuperar la contraseña (decisión del grupo:
+                        // el mapa y todos los datos exigen iniciar sesión)
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // la interfaz web (archivos estáticos); los datos que pide pasan por las reglas de arriba
                         .requestMatchers(HttpMethod.GET, "/", "/index.html", "/css/**", "/js/**", "/img/**",

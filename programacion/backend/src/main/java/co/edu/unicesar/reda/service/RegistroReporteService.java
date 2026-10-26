@@ -63,6 +63,9 @@ public class RegistroReporteService {
                 : Busqueda.porId(entidades, datos.idEntidad(), "Entidad");
         Incidente incidente = reporte.registrarIncidente(datos.tipoDano(), datos.descripcionDano(),
                 datos.fechaHoraHecho(), datos.huboAtencionMedica(), entidad);
+        if (datos.testigos() != null) {
+            datos.testigos().forEach(t -> incidente.agregarTestigo(t.nombre(), t.contacto()));
+        }
         reportes.save(reporte);
 
         List<BuscadorAntecedentes.Antecedente> antecedentes = buscadorAntecedentes.buscar(

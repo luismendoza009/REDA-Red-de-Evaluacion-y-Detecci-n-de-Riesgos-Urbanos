@@ -162,12 +162,17 @@ public class Reporte {
     }
 
     /**
-     * El detalle incluye datos sensibles (salud): solo lo ven su autor y el personal de revisión.
-     * Experto en información: el reporte conoce a su autor, así que él decide (antes de la auditoría
-     * GRASP esta regla estaba en el servicio).
+     * El detalle y las fotos son privados (datos de salud, evidencia legal): los ven su autor, el
+     * personal de revisión y el abogado que el ciudadano ELIGIÓ para el caso (al elegirlo, lo autorizó).
+     * Experto en información: el reporte conoce a su autor y a su incidente, así que él decide (antes de
+     * la auditoría GRASP esta regla estaba en el servicio).
      */
     public boolean puedeSerVistoPor(Usuario usuario) {
-        return esDe(usuario) || usuario.esPersonalDeRevision();
+        return esDe(usuario) || usuario.esPersonalDeRevision() || esAbogadoDelCaso(usuario);
+    }
+
+    private boolean esAbogadoDelCaso(Usuario usuario) {
+        return incidente != null && incidente.getCaso() != null && incidente.getCaso().esAbogadoAsignado(usuario);
     }
 
     public Integer getId() { return id; }

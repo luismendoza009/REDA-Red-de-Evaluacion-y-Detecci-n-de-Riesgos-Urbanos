@@ -4,6 +4,9 @@ import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Daño sufrido a causa de una falla (especialización 1:1 de un Reporte de tipo INCIDENTE).
@@ -43,7 +46,29 @@ public class Incidente {
     @Column(name = "hubo_atencion_medica", nullable = false)
     private boolean huboAtencionMedica;
 
+    @OneToOne(mappedBy = "incidente", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private Caso caso;
+
+    @OneToMany(mappedBy = "incidente", cascade = CascadeType.PERSIST)
+    private List<Testigo> testigos = new ArrayList<>();
+
     protected Incidente() {
+    }
+
+    /** Creador (GRASP): el incidente agrega su caso, así que él lo crea. Un incidente, un caso. */
+    public Caso solicitarAbogado(Usuario solicitante, Usuario operadorQueValido, EstadoCaso remitido,
+                                 boolean autorizaCompartir) {
+        if (caso != null) {
+            throw new ReglaNegocioException("CASO_EXISTENTE", "Este incidente ya tiene un caso abierto");
+        }
+        this.caso = Caso.abrir(this, solicitante, operadorQueValido, remitido, autorizaCompartir);
+        return caso;
+    }
+
+    public Testigo agregarTestigo(String nombre, String contacto) {
+        Testigo t = Testigo.de(this, nombre, contacto);
+        testigos.add(t);
+        return t;
     }
 
     static Incidente de(Reporte reporte, TipoDano tipoDano, String descripcionDano, OffsetDateTime fechaHoraHecho,
@@ -72,4 +97,6 @@ public class Incidente {
     public TipoDano getTipoDano() { return tipoDano; }
     public String getDescripcionDano() { return descripcionDano; }
     public boolean isHuboAtencionMedica() { return huboAtencionMedica; }
+    public Caso getCaso() { return caso; }
+    public List<Testigo> getTestigos() { return Collections.unmodifiableList(testigos); }
 }
