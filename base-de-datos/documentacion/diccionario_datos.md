@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -50,13 +50,20 @@ Barrios o zonas de la ciudad; permiten agregar reportes y aportan variables de c
 | nivel_trafico | SMALLINT | No |  | 3 | [SIMULADO] Nivel de tráfico vehicular/peatonal de 1 (bajo) a 5 (muy alto). |
 | centros_educativos | SMALLINT | No |  | 0 | [SIMULADO] Número de colegios o centros educativos en la zona. |
 | centros_salud | SMALLINT | No |  | 0 | [SIMULADO] Número de hospitales, clínicas o centros de salud en la zona. |
+| latitud_referencia | NUMERIC(9,6) | Sí |  |  | Latitud de un punto de referencia dentro del barrio (OpenStreetMap). No es el centroide exacto. |
+| longitud_referencia | NUMERIC(9,6) | Sí |  |  | Longitud del punto de referencia del barrio (OpenStreetMap). |
+| fuente_ubicacion | VARCHAR(200) | Sí |  |  | De dónde sale el punto de referencia (lugar de OpenStreetMap y fecha de consulta). |
 
 **Restricciones:**
 
 - `ck_zonas_educativos`: `CHECK ((centros_educativos >= 0))`
+- `ck_zonas_fuente`: `CHECK (((fuente_ubicacion IS NULL) OR (latitud_referencia IS NOT NULL)))`
+- `ck_zonas_latitud`: `CHECK (((latitud_referencia >= ('-90'::integer)::numeric) AND (latitud_referencia <= (90)::numeric)))`
+- `ck_zonas_longitud`: `CHECK (((longitud_referencia >= ('-180'::integer)::numeric) AND (longitud_referencia <= (180)::numeric)))`
 - `ck_zonas_salud`: `CHECK ((centros_salud >= 0))`
 - `ck_zonas_tipo`: `CHECK (((tipo)::text = ANY ((ARRAY['RESIDENCIAL'::character varying, 'COMERCIAL'::character varying, 'ESCOLAR'::character varying, 'MIXTA'::character varying, 'INSTITUCIONAL'::character varying])::text[])))`
 - `ck_zonas_trafico`: `CHECK (((nivel_trafico >= 1) AND (nivel_trafico <= 5)))`
+- `ck_zonas_ubicacion_completa`: `CHECK (((latitud_referencia IS NULL) = (longitud_referencia IS NULL)))`
 - `uq_zonas_nombre_ciudad`: `UNIQUE (nombre, ciudad)`
 
 ## estados

@@ -121,4 +121,10 @@ UNION ALL
 SELECT pg_temp.debe_fallar('evaluación con todos los puntajes vacíos', 'ck_evaluaciones_alguna',
   $q$INSERT INTO evaluaciones (id_reporte, id_usuario) VALUES (1, 2)$q$);
 
+-- Migración 012: ubicación de referencia de las zonas
+SELECT pg_temp.debe_fallar('zona con latitud pero sin longitud', 'ck_zonas_ubicacion_completa',
+  $q$UPDATE zonas SET longitud_referencia = NULL WHERE id_zona = 1$q$);
+SELECT pg_temp.debe_fallar('zona con una latitud imposible', 'ck_zonas_latitud',
+  $q$UPDATE zonas SET latitud_referencia = 104.47 WHERE id_zona = 1$q$);
+
 ROLLBACK;
