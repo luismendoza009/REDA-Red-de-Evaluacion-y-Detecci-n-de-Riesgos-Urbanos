@@ -86,6 +86,6 @@ export function mostrar(contenedor, [pagina]) {
   contenedor.innerHTML = `
     <div class="${conSesion ? "contenido contenido-estrecho" : ""} vista texto-largo">
       ${PAGINAS[pagina]()}
-      <p class="enlaces"><a href="${conSesion ? "#/mapa" : "#/entrar"}">← Volver</a></p>
+      <p class="enlaces"><a href="${conSesion ? "#/inicio" : "#/entrar"}">← Volver</a></p>
     </div>`;
 }

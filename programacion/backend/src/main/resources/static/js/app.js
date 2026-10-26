@@ -6,7 +6,8 @@
 // la que protege los datos, solo evita mostrar opciones que no corresponden).
 // =============================================================================
 import { api, sesion } from "./api.js";
-import { ponerFoto } from "./avatares.js";
+import { ponerFotoUsuario } from "./avatares.js";
+import { icono } from "./iconos.js";
 import { $, $$, escapar, avisar } from "./ui.js";
 import * as acceso from "./vistas/acceso.js";
 import * as mapa from "./vistas/mapa.js";
@@ -17,6 +18,7 @@ import * as abogado from "./vistas/abogado.js";
 import * as gestion from "./vistas/gestion.js";
 import * as cuenta from "./vistas/cuenta.js";
 import * as info from "./vistas/info.js";
+import * as inicio from "./vistas/inicio.js";
 
 const ROLES = { CIUDADANO: "Ciudadano", OPERADOR: "Operador", ABOGADO: "Abogado", ADMINISTRADOR: "Administrador", ANALISTA: "Analista" };
 
@@ -28,6 +30,7 @@ const RUTAS = [
   { patron: /^\/recuperar$/, acceso: true, vista: acceso.recuperar },
   { patron: /^\/restablecer\/([A-Za-z0-9_-]+)$/, acceso: true, vista: acceso.restablecer },
   { patron: /^\/(terminos|privacidad|ayuda)$/, libre: true, vista: info.mostrar },
+  { patron: /^\/inicio$/, vista: inicio.mostrar },
   { patron: /^\/mapa(?:\/(punto|reporte)\/(\d+))?$/, vista: mapa.mostrar, esMapa: true },
   { patron: /^\/reportar$/, roles: ["CIUDADANO"], vista: reportar.mostrar },
   { patron: /^\/mis-reportes$/, roles: ["CIUDADANO"], vista: misReportes.mostrar },
@@ -39,12 +42,36 @@ const RUTAS = [
   { patron: /^\/cuenta$/, vista: cuenta.mostrar },
 ];
 
+/**
+ * Menú lateral por rol: grupos de opciones [ruta, texto, icono]. Una ruta que empieza por "/" (no "#/")
+ * se abre en otra pestaña (la documentación Swagger de la API).
+ */
+const INICIO = ["#/inicio", "Inicio", "inicio"];
+const MAPA = ["#/mapa", "Mapa de reportes", "mapa"];
 const MENU = {
-  CIUDADANO: [["#/mapa", "Mapa"], ["#/reportar", "Reportar"], ["#/mis-reportes", "Mis reportes"], ["#/mis-casos", "Mis casos"]],
-  ABOGADO: [["#/mapa", "Mapa"], ["#/abogado/disponibles", "Casos disponibles"], ["#/abogado/mis-casos", "Mis casos"]],
-  OPERADOR: [["#/mapa", "Mapa"], ["#/revision", "Revisión"]],
-  ADMINISTRADOR: [["#/mapa", "Mapa"], ["#/revision", "Revisión"], ["#/admin/abogados", "Abogados"]],
-  ANALISTA: [["#/mapa", "Mapa"]],
+  CIUDADANO: [
+    ["", [INICIO]],
+    ["Mis reportes", [["#/reportar", "Nuevo reporte", "reportar"], ["#/mis-reportes", "Mis reportes", "reportes"]]],
+    ["Asesoría legal", [["#/mis-casos", "Mis casos y abogados", "casos"]]],
+    ["Ciudad", [MAPA]],
+  ],
+  ABOGADO: [
+    ["", [INICIO]],
+    ["Casos", [["#/abogado/disponibles", "Casos disponibles", "buscar"], ["#/abogado/mis-casos", "Mis casos", "casos"]]],
+    ["Ciudad", [MAPA]],
+  ],
+  OPERADOR: [
+    ["", [INICIO]],
+    ["Revisión", [["#/revision", "Bandeja de revisión", "revision"]]],
+    ["Ciudad", [MAPA]],
+  ],
+  ADMINISTRADOR: [
+    ["", [INICIO]],
+    ["Gestión", [["#/revision", "Bandeja de revisión", "revision"], ["#/admin/abogados", "Verificar abogados", "verificar"]]],
+    ["Ciudad", [MAPA]],
+    ["Técnico", [["/swagger-ui.html", "Documentación de la API", "api"]]],
+  ],
+  ANALISTA: [["", [INICIO]], ["Ciudad", [MAPA]]],
 };
 
 let mensajeSalida = null;
@@ -59,15 +86,15 @@ async function enrutar() {
   const coincidencia = RUTAS.map((r) => ({ r, m: ruta.match(r.patron) })).find((x) => x.m);
 
   if (!coincidencia) {
-    location.replace(s ? "#/mapa" : "#/entrar");
+    location.replace(s ? "#/inicio" : "#/entrar");
     return;
   }
   const { r, m } = coincidencia;
-  if (r.acceso && s) { location.replace("#/mapa"); return; }
+  if (r.acceso && s) { location.replace("#/inicio"); return; }
   if (!r.acceso && !r.libre && !s) { location.replace("#/entrar"); return; }
   if (r.roles && !r.roles.includes(s.rol)) {
     avisar("Esa sección no está disponible para tu rol.", "error");
-    location.replace("#/mapa");
+    location.replace("#/inicio");
     return;
   }
 
@@ -80,9 +107,10 @@ async function enrutar() {
   }
 
   mostrarPantalla("app");
-  armarBarra(s);
+  armarMenu(s);
+  cerrarMenuMovil();
   document.body.classList.toggle("en-mapa", !!r.esMapa);
-  $$("#menu a").forEach((a) => a.classList.toggle("activo", ruta.startsWith(a.getAttribute("href").slice(1))));
+  marcarActivo(ruta);
   const pagina = $("#pagina");
   pagina.hidden = !!r.esMapa;
   if (r.esMapa) {
@@ -101,49 +129,56 @@ function mostrarPantalla(cual) {
   document.body.classList.toggle("modo-acceso", cual === "acceso");
 }
 
-let barraDe = null;
-function armarBarra(s) {
+let menuDe = null;
+function armarMenu(s) {
   document.body.dataset.rol = s.rol;
-  if (barraDe === s.token) return;
-  barraDe = s.token;
-  $("#menu").innerHTML = (MENU[s.rol] ?? MENU.ANALISTA).map(([href, texto]) => `<a href="${href}">${escapar(texto)}</a>`).join("");
-  $("#usuario-nombre").textContent = s.nombre.split(" ")[0];
-  $("#usuario-rol").innerHTML = `${escapar(s.nombre)}<small>${ROLES[s.rol] ?? s.rol}</small>`;
-  ponerFoto($("#avatar"), s.nombre, null);
+  if (menuDe === s.token) return;
+  menuDe = s.token;
+  $("#menu").innerHTML = (MENU[s.rol] ?? MENU.ANALISTA).map(([grupo, opciones]) => `
+    <div class="menu-grupo">
+      ${grupo ? `<p class="menu-titulo">${escapar(grupo)}</p>` : ""}
+      ${opciones.map(([href, texto, ic]) => href.startsWith("#")
+        ? `<a href="${href}">${icono(ic)}<span>${escapar(texto)}</span></a>`
+        : `<a href="${href}" target="_blank" rel="noopener">${icono(ic)}<span>${escapar(texto)}</span><small>↗</small></a>`).join("")}
+    </div>`).join("");
+  $$(".lateral-pie [data-icono]").forEach((el) => {
+    if (!el.querySelector("svg")) el.insertAdjacentHTML("afterbegin", icono(el.dataset.icono));
+  });
+  $("#usuario-nombre").textContent = s.nombre;
+  $("#usuario-rol").textContent = ROLES[s.rol] ?? s.rol;
+  ponerFotoUsuario(s.nombre, null);
   // la foto no viene en el token: se pide el perfil una vez por sesión
   api.perfil().then((p) => {
-    if (barraDe !== s.token) return;
-    ponerFoto($("#avatar"), p.nombre, p.foto);
-    if (p.abogado?.verificado) $("#usuario-rol small").textContent = "Abogado · ✓ verificado";
+    if (menuDe !== s.token) return;
+    ponerFotoUsuario(p.nombre, p.foto);
+    if (p.abogado?.verificado) $("#usuario-rol").textContent = "Abogado · ✓ verificado";
   }).catch(() => { /* sin perfil: se quedan las iniciales */ });
 }
 
-// menús desplegables (usuario y, en celular, secciones)
-function alternar(boton, panel) {
-  const abrir = boton.getAttribute("aria-expanded") !== "true";
-  boton.setAttribute("aria-expanded", abrir);
-  panel.hidden = !abrir;
-  panel.classList.toggle("abierto", abrir);
+/** Resalta la opción del menú de la sección actual y la usa como título en el celular. */
+function marcarActivo(ruta) {
+  let activo = null;
+  $$("#menu a, .lateral-pie a").forEach((a) => {
+    const href = a.getAttribute("href");
+    const es = href.startsWith("#") && ruta.startsWith(href.slice(1));
+    a.classList.toggle("activo", es);
+    if (es) { a.setAttribute("aria-current", "page"); activo ??= a; } else a.removeAttribute("aria-current");
+  });
+  $("#titulo-movil").textContent = activo?.textContent.trim() || "REDA";
 }
-$("#btn-usuario").addEventListener("click", () => alternar($("#btn-usuario"), $("#usuario-opciones")));
-$("#btn-menu").addEventListener("click", () => {
-  const abrir = $("#btn-menu").getAttribute("aria-expanded") !== "true";
+
+// menú lateral en el celular: se abre como cajón con un velo detrás
+function abrirMenuMovil(abrir) {
   $("#btn-menu").setAttribute("aria-expanded", abrir);
-  $("#menu").classList.toggle("abierto", abrir);
-});
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".usuario-menu")) {
-    $("#btn-usuario").setAttribute("aria-expanded", "false");
-    $("#usuario-opciones").hidden = true;
-  }
-  if (e.target.closest("#menu a")) {
-    $("#btn-menu").setAttribute("aria-expanded", "false");
-    $("#menu").classList.remove("abierto");
-  }
-});
-$("#usuario-opciones").addEventListener("click", (e) => { if (e.target.closest("a")) $("#usuario-opciones").hidden = true; });
+  $("#lateral").classList.toggle("abierto", abrir);
+  $("#velo").hidden = !abrir;
+}
+const cerrarMenuMovil = () => abrirMenuMovil(false);
+$("#btn-menu").addEventListener("click", () => abrirMenuMovil(!$("#lateral").classList.contains("abierto")));
+$("#velo").addEventListener("click", cerrarMenuMovil);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#lateral").classList.contains("abierto")) cerrarMenuMovil(); });
 $("#btn-salir").addEventListener("click", () => {
-  barraDe = null;
+  menuDe = null;
   mapa.reiniciar();
   sesion.cerrar("Cerraste sesión.");
 });
