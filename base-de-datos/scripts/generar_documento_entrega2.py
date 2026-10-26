@@ -137,7 +137,7 @@ tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resume
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
     ("2. DDL como migraciones numeradas", "migraciones/001_ … 008_*.sql", "8 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
-    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 10 casos; simulados y coherentes"),
+    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 9 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
     ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 20 tablas, con 4 excepciones justificadas"),
     ("5. Banco de consultas", "sql/consultas/banco_consultas.sql", "10 consultas comentadas con la pregunta de negocio"),
@@ -173,8 +173,8 @@ vineta("**Totales no inflados:** las vistas y consultas que combinan varias rela
 
 titulo("5. Índices: resultados")
 tabla(["Experimento", "Antes", "Después", "Mejora"], [
-    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,88 ms · 3 475 páginas", "0,65 ms · 576 páginas", "13,7× más rápido"),
-    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "40,35 ms · Seq Scan de 400 206 filas", "0,074 ms · 8 páginas", "≈ 500× más rápido"),
+    ("Búsqueda de antecedentes (índice compuesto categoría, tipo, latitud)", "8,33 ms · 3 476 páginas", "0,58 ms · 574 páginas", "14× más rápido"),
+    ("Fotos del expediente (índice de la FK evidencias.id_reporte)", "39,71 ms · Seq Scan de ≈ 400 000 filas", "0,064 ms · 8 páginas", "≈ 600× más rápido"),
 ], [6.4, 3.6, 3.6, 2.4])
 parrafo("Las mediciones se hicieron con 200 000 reportes y 400 000 evidencias sintéticos cargados dentro de una "
         "transacción que termina en ROLLBACK, para que el volumen no contamine la base de la demo.")

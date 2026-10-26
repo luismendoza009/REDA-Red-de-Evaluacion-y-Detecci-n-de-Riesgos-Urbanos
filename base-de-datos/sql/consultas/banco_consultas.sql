@@ -88,7 +88,7 @@ ORDER BY r.fecha_reporte;
 
 -- -----------------------------------------------------------------------------
 -- C05. "La entidad ya sabía": para cada incidente, ¿cuántos reportes de condición
---      de la misma categoría hubo a menos de 100 m ANTES del hecho, y desde hace
+--      (no rechazados) de la misma categoría hubo a menos de 100 m ANTES del hecho, y desde hace
 --      cuántos días se conocía la falla?
 --      Se calcula con la fórmula de Haversine (distancia sobre la esfera terrestre,
 --      radio 6 371 km), sin PostGIS. No usa la tabla reportes_relacionados: la
@@ -111,6 +111,8 @@ cercanos AS (
     JOIN reportes rc ON rc.id_categoria  = inc.id_categoria
                     AND rc.tipo_reporte  = 'CONDICION'
                     AND rc.fecha_reporte < inc.fecha_hora_hecho
+    -- un reporte rechazado (duplicado, foto falsa...) no prueba que la entidad supiera
+    JOIN estados ec  ON ec.id_estado = rc.id_estado AND ec.nombre <> 'Rechazado'
 )
 SELECT inc.id_incidente,
        c.nombre                                            AS categoria,

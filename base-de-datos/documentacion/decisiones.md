@@ -23,6 +23,8 @@ confirmación del grupo y pueden revisarse.
 | D14 | Correo guardado en minúsculas (CHECK) | Evita cuentas duplicadas que difieren solo en mayúsculas. El backend normalizará el correo antes de guardar | Índice único sobre `lower(correo)` |
 | D15 | CHECK de formato BCrypt en `password_hash` | Defensa en profundidad: la base rechaza una contraseña en texto plano aunque el backend falle | Confiar solo en el backend |
 | D16 | El dato de las coordenadas en `v_mapa_publico` se redondea a 4 decimales (~11 m) | Privacidad: un incidente puede ocurrir frente a la casa del afectado | Coordenadas exactas |
+| D18 | Un reporte **Rechazado** no cuenta como antecedente | Un reporte rechazado es duplicado, falso o no es infraestructura pública: no prueba que la entidad "ya sabía". La misma regla se aplica en la semilla, en la consulta C05, en sus verificaciones y en la API (detectado al probar el backend) | Contar todos los reportes previos |
+| D19 | El repositorio se separa en `base-de-datos/` y `programacion/` (decisión del grupo) | Cada asignatura tiene su carpeta; las rutas de los documentos de BD son relativas a `base-de-datos/`. La guía pide "migraciones/001_xxx.sql": la carpeta conserva ese nombre, solo cambia de lugar | Todo en la raíz |
 | D17 | La tabla `auditoria` se crea en la Entrega 3 | Va junto con los triggers que la alimentan (requisito de esa entrega) | Crearla vacía ahora |
 
 ## Migraciones y herramientas

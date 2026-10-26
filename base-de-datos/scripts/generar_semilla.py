@@ -4,8 +4,8 @@ Genera los datos semilla SIMULADOS de REDA (sql/semilla/*.sql).
 - Determinista: random.seed fija -> siempre produce los mismos archivos.
 - Coherente: los estados actuales coinciden con el último cambio del historial, las fechas
   avanzan en orden (hecho <= reporte <= revisión <= validación...), los vínculos de
-  ANTECEDENTE se calculan con la misma regla que la consulta de negocio (misma categoría,
-  reporte de CONDICION, distancia Haversine <= 100 m, fecha anterior al hecho).
+  ANTECEDENTE se calculan con la misma regla que la consulta de negocio y la API (misma categoría,
+  reporte de CONDICION no rechazado, distancia Haversine <= 100 m, fecha anterior al hecho).
 - Sin datos reales de personas: nombres combinados al azar, correos en el dominio
   reservado .test, teléfonos ficticios. Los nombres de barrios y entidades sí son de
   Valledupar, pero las coordenadas, atributos de zona y atribuciones son SIMULADOS
@@ -293,10 +293,11 @@ def main():
         edad = (FIN - fecha).days
         if edad < 7:
             return random.choice([[], [REV]])
-        if random.random() < 0.08:
-            return [REV, RECH]
-        if not atendible:  # el punto crítico: la entidad no lo arregla
+        rechazado = random.random() < 0.08
+        if not atendible:  # el punto crítico: la entidad no lo arregla y el reporte es legítimo
             return random.choice([[REV], [REV, VAL], [REV, VAL]])
+        if rechazado:
+            return [REV, RECH]
         return random.choice([[REV], [REV, VAL], [REV, VAL, PROC], [REV, VAL, PROC, SOL], [REV, VAL, PROC, SOL]])
 
     # 1) Puntos críticos: varias condiciones previas en el mismo punto y luego un incidente.
@@ -376,8 +377,8 @@ def main():
     for inc in incidentes:
         ri = por_id[inc[1]]
         for rc in reportes:
-            if rc[5] != "CONDICION" or rc[2] != ri[2]:
-                continue
+            if rc[5] != "CONDICION" or rc[2] != ri[2] or rc[4] == RECH:
+                continue  # solo condiciones de la misma categoría y NO rechazadas
             if rc[9] >= inc[4]:
                 continue
             if haversine_m(float(ri[7]), float(ri[8]), float(rc[7]), float(rc[8])) <= RADIO_ANTECEDENTE_M:

@@ -33,7 +33,7 @@ WHERE r.tipo_reporte = 'INCIDENTE' AND NOT EXISTS (SELECT 1 FROM incidentes i WH
 \echo '5. El hecho ocurre antes de reportarlo. Esperado: 0'
 SELECT count(*) FROM incidentes i JOIN reportes r USING (id_reporte) WHERE i.fecha_hora_hecho > r.fecha_reporte;
 
-\echo '6. Los ANTECEDENTE son condiciones de la misma categoría, a <= 100 m y anteriores al hecho. Esperado: 0'
+\echo '6. Los ANTECEDENTE son condiciones NO rechazadas de la misma categoría, a <= 100 m y anteriores al hecho. Esperado: 0'
 SELECT count(*)
 FROM reportes_relacionados rr
 JOIN reportes ri   ON ri.id_reporte = rr.id_reporte
@@ -41,6 +41,7 @@ JOIN incidentes i  ON i.id_reporte  = ri.id_reporte
 JOIN reportes rc   ON rc.id_reporte = rr.id_reporte_relacionado
 WHERE rr.tipo_relacion = 'ANTECEDENTE'
   AND NOT (rc.tipo_reporte = 'CONDICION'
+           AND rc.id_estado <> (SELECT id_estado FROM estados WHERE nombre = 'Rechazado')
            AND rc.id_categoria = ri.id_categoria
            AND rc.fecha_reporte < i.fecha_hora_hecho
            AND 2 * 6371000 * asin(sqrt(
