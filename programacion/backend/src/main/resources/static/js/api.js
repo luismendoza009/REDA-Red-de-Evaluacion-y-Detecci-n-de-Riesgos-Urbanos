@@ -4,6 +4,7 @@
 // =============================================================================
 
 const CLAVE_SESION = "reda.sesion";
+const oyentesSalida = [];
 
 export const sesion = {
   actual() {
@@ -14,19 +15,29 @@ export const sesion = {
     }
   },
   guardar(datos) {
-    try { sessionStorage.setItem(CLAVE_SESION, JSON.stringify(datos)); } catch { /* modo privado: la sesión vive solo en memoria */ }
+    try { sessionStorage.setItem(CLAVE_SESION, JSON.stringify(datos)); } catch { /* modo privado */ }
   },
-  cerrar() {
+  cerrar(motivo) {
     try { sessionStorage.removeItem(CLAVE_SESION); } catch { /* nada que borrar */ }
+    oyentesSalida.forEach((f) => f(motivo));
+  },
+  /** Se llama cuando la sesión termina (cerrar sesión o token vencido). */
+  alSalir(funcion) {
+    oyentesSalida.push(funcion);
+  },
+  tieneRol(...roles) {
+    const s = this.actual();
+    return !!s && roles.includes(s.rol);
   },
 };
 
-/** Error de la API con el formato único del backend (codigo + mensaje). */
+/** Error de la API con el formato único del backend (codigo + mensaje + campos). */
 export class ErrorApi extends Error {
   constructor(estado, cuerpo) {
-    super(cuerpo?.mensaje ?? `Error ${estado}`);
+    super(cuerpo?.mensaje ?? (estado === 0 ? "No hay conexión con el servidor" : `Error ${estado}`));
     this.estado = estado;
     this.codigo = cuerpo?.codigo ?? "DESCONOCIDO";
+    this.campos = cuerpo?.campos ?? {};
   }
 }
 
@@ -41,23 +52,48 @@ async function pedir(ruta, { metodo = "GET", json, formulario, binario = false }
   } else if (formulario) {
     cuerpo = formulario; // el navegador pone el Content-Type multipart con su "boundary"
   }
-  const r = await fetch(ruta, { method: metodo, headers: cabeceras, body: cuerpo });
+  let r;
+  try {
+    r = await fetch(ruta, { method: metodo, headers: cabeceras, body: cuerpo });
+  } catch {
+    throw new ErrorApi(0, null);
+  }
   if (!r.ok) {
     let detalle = null;
     try { detalle = await r.json(); } catch { /* respuesta sin cuerpo */ }
-    if (r.status === 401 && s?.token) sesion.cerrar(); // token vencido
+    if (r.status === 401 && s?.token) sesion.cerrar("Tu sesión venció. Vuelve a iniciar sesión.");
     throw new ErrorApi(r.status, detalle);
   }
   if (binario) return r.blob();
   return r.status === 204 ? null : r.json();
 }
 
+const post = (ruta, json) => pedir(ruta, { metodo: "POST", json });
+
 export const api = {
-  puntos: () => pedir("/api/publico/puntos"),
-  detallePublico: (id) => pedir(`/api/publico/reportes/${id}`),
+  // cuentas
+  iniciarSesion: (correo, password) => post("/api/auth/login", { correo, password }),
+  registrar: (datos) => post("/api/auth/registro", datos),
+  registrarAbogado: (datos) => post("/api/auth/registro-abogado", datos),
+  recuperar: (correo) => post("/api/auth/recuperar", { correo }),
+  restablecer: (token, nuevaPassword) => post("/api/auth/restablecer", { token, nuevaPassword }),
+  perfil: () => pedir("/api/cuenta"),
+  actualizarPerfil: (nombre) => pedir("/api/cuenta", { metodo: "PATCH", json: { nombre } }),
+  cambiarPassword: (actual, nueva) => post("/api/cuenta/password", { actual, nueva }),
+  // catálogos y mapa
   categorias: () => pedir("/api/catalogos/categorias"),
-  iniciarSesion: (correo, password) => pedir("/api/auth/login", { metodo: "POST", json: { correo, password } }),
+  zonas: () => pedir("/api/catalogos/zonas"),
+  entidades: () => pedir("/api/catalogos/entidades"),
+  puntos: () => pedir("/api/mapa/puntos"),
+  detallePublico: (id) => pedir(`/api/mapa/reportes/${id}`),
+  // reportes
+  crearCondicion: (falla) => post("/api/reportes/condiciones", falla),
+  crearIncidente: (datos) => post("/api/reportes/incidentes", datos),
   misReportes: () => pedir("/api/reportes/mios"),
+  cambiarEstado: (id, nuevoEstado, observacion) =>
+    pedir(`/api/reportes/${id}/estado`, { metodo: "PATCH", json: { nuevoEstado, observacion } }),
+  bandejaRevision: () => pedir("/api/revision/bandeja"),
+  // fotos (privadas)
   evidencias: (idReporte) => pedir(`/api/reportes/${idReporte}/evidencias`),
   archivo: (url) => pedir(url, { binario: true }),
   subirFoto(idReporte, archivo) {
@@ -65,4 +101,17 @@ export const api = {
     datos.append("archivo", archivo);
     return pedir(`/api/reportes/${idReporte}/evidencias`, { metodo: "POST", formulario: datos });
   },
+  // casos
+  solicitarAbogado: (idReporte) => post("/api/casos", { idReporte, autorizaCompartirResumen: true }),
+  misCasos: () => pedir("/api/casos/mios"),
+  elegirAbogado: (idCaso, idPostulacion) => post(`/api/casos/${idCaso}/eleccion`, { idPostulacion }),
+  calificarAbogado: (idCaso, puntaje, comentario) => post(`/api/casos/${idCaso}/calificacion`, { puntaje, comentario }),
+  casosDisponibles: () => pedir("/api/abogado/casos-disponibles"),
+  postular: (idCaso, mensaje) => post(`/api/abogado/casos/${idCaso}/postulacion`, { mensaje }),
+  retirarPostulacion: (idCaso) => pedir(`/api/abogado/casos/${idCaso}/postulacion`, { metodo: "DELETE" }),
+  misCasosAbogado: () => pedir("/api/abogado/mis-casos"),
+  cerrarCaso: (idCaso, observacion) => post(`/api/abogado/casos/${idCaso}/cierre`, { observacion }),
+  // administración
+  abogadosAdmin: () => pedir("/api/admin/abogados"),
+  verificarAbogado: (id) => post(`/api/admin/abogados/${id}/verificacion`),
 };
