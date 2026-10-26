@@ -105,7 +105,7 @@ export async function mostrar(contenedor) {
 
         <p class="error" role="alert"></p>
         <div class="fila-acciones">
-          <a class="boton" href="#/mapa">Cancelar</a>
+          <a class="boton" href="#/inicio">Cancelar</a>
           <button class="boton boton-claro" type="submit">Enviar reporte</button>
         </div>
       </form>

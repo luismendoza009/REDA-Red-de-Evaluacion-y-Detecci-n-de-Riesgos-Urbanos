@@ -28,7 +28,7 @@ function enviarCon(form, accion) {
 /** Al entrar o registrarse se guarda la sesión y el enrutador lleva al mapa. */
 function entrarCon(respuesta) {
   sesion.guardar(respuesta);
-  location.hash = "#/mapa";
+  location.hash = "#/inicio";
 }
 
 export function entrar(contenedor, _params, { mensaje } = {}) {

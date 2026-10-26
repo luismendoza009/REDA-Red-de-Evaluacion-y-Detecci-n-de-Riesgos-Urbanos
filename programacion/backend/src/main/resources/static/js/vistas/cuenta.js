@@ -5,7 +5,7 @@
 // =============================================================================
 import { api, sesion } from "../api.js";
 import { $, escapar, fecha, plural, avisar, mostrarErrores, conBotonOcupado, cargando } from "../ui.js";
-import { avatar, insigniaVerificado, cargarAvatares, ponerFoto } from "../avatares.js";
+import { avatar, insigniaVerificado, cargarAvatares, ponerFotoUsuario } from "../avatares.js";
 
 const ROLES = { CIUDADANO: "Ciudadano", OPERADOR: "Operador", ABOGADO: "Abogado", ADMINISTRADOR: "Administrador", ANALISTA: "Analista" };
 const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
@@ -122,14 +122,14 @@ function conectarFoto(contenedor, p) {
       await api.cambiarFoto(archivo);
       avisar("Foto actualizada.", "exito");
       mostrar(contenedor);
-      ponerFoto($("#avatar"), p.nombre, (await api.perfil()).foto);
+      ponerFotoUsuario(p.nombre, (await api.perfil()).foto);
     } catch (err) { avisar(err.message, "error"); }
   });
   $("#quitar-foto")?.addEventListener("click", async () => {
     try {
       await api.quitarFoto();
       avisar("Foto quitada.");
-      ponerFoto($("#avatar"), p.nombre, null);
+      ponerFotoUsuario(p.nombre, null);
       mostrar(contenedor);
     } catch (err) { avisar(err.message, "error"); }
   });
@@ -143,7 +143,7 @@ function conectarDatos() {
       try {
         const nuevo = await api.actualizarPerfil(fPerfil.nombre.value);
         sesion.guardar({ ...sesion.actual(), nombre: nuevo.nombre });
-        $("#usuario-nombre").textContent = nuevo.nombre.split(" ")[0];
+        $("#usuario-nombre").textContent = nuevo.nombre;
         avisar("Datos guardados.", "exito");
       } catch (err) { mostrarErrores(fPerfil, err); }
     });

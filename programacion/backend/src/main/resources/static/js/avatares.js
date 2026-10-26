@@ -36,7 +36,15 @@ export async function cargarAvatares(raiz = document) {
   }));
 }
 
-/** Cambia el avatar de un elemento ya pintado (p. ej. la barra superior tras subir una foto nueva). */
+/** Actualiza la foto del usuario en el menú lateral y en la cabecera del celular. */
+export function ponerFotoUsuario(nombre, foto) {
+  ["#avatar", "#avatar-movil"].forEach((sel) => {
+    const el = document.querySelector(sel);
+    if (el) ponerFoto(el, nombre, foto);
+  });
+}
+
+/** Cambia el avatar de un elemento ya pintado (p. ej. el menú lateral tras subir una foto nueva). */
 export function ponerFoto(el, nombre, foto) {
   el.classList.remove("con-foto");
   el.textContent = iniciales(nombre);
