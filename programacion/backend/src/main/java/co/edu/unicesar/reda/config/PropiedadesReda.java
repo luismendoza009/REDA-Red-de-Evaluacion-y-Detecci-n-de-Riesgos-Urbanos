@@ -17,7 +17,16 @@ import java.util.List;
  */
 @Validated
 @ConfigurationProperties(prefix = "reda")
-public record PropiedadesReda(@Valid Jwt jwt, @Valid Antecedentes antecedentes, @Valid Cors cors) {
+public record PropiedadesReda(@Valid Jwt jwt, @Valid Antecedentes antecedentes, @Valid Cors cors,
+                              @Valid Almacenamiento almacenamiento, @Valid Mapa mapa) {
+
+    /** Carpeta donde se guardan las fotos subidas (en producción iría a almacenamiento de objetos). */
+    public record Almacenamiento(@NotBlank String directorio) {
+    }
+
+    /** Radio para agrupar reportes cercanos en un mismo "punto" del mapa. */
+    public record Mapa(@Min(1) int radioAgrupacionMetros) {
+    }
 
     public record Jwt(
             @NotBlank(message = "defina la variable de entorno REDA_JWT_SECRETO")

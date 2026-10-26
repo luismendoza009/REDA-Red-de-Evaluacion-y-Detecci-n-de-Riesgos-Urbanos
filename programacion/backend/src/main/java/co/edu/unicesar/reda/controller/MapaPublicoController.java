@@ -1,15 +1,19 @@
 package co.edu.unicesar.reda.controller;
 
+import co.edu.unicesar.reda.dto.MapaDtos.DetallePublicoResponse;
+import co.edu.unicesar.reda.dto.MapaDtos.PuntoResponse;
 import co.edu.unicesar.reda.dto.ReporteDtos.PuntoMapaResponse;
 import co.edu.unicesar.reda.service.MapaPublicoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/** Endpoints sin sesión. Nada de lo que devuelven contiene datos personales, del daño ni fotos. */
 @RestController
 @RequestMapping("/api/publico")
 @Tag(name = "Público")
@@ -22,8 +26,20 @@ public class MapaPublicoController {
     }
 
     @GetMapping("/mapa")
-    @Operation(summary = "Puntos del mapa público (sin datos personales)")
+    @Operation(summary = "Reportes sueltos del mapa público")
     public List<PuntoMapaResponse> mapa() {
-        return mapa.puntos();
+        return mapa.puntosSueltos();
+    }
+
+    @GetMapping("/puntos")
+    @Operation(summary = "Puntos del mapa: reportes agrupados por cercanía, con su frecuencia y situación")
+    public List<PuntoResponse> puntos() {
+        return mapa.puntosAgrupados();
+    }
+
+    @GetMapping("/reportes/{id}")
+    @Operation(summary = "Detalle público de un reporte: línea de tiempo y número de fotos (privadas)")
+    public DetallePublicoResponse detalle(@PathVariable Integer id) {
+        return mapa.detalle(id);
     }
 }

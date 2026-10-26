@@ -70,6 +70,10 @@ public class Reporte {
     @OneToOne(mappedBy = "reporte", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Incidente incidente;
 
+    @OneToMany(mappedBy = "reporte", cascade = CascadeType.PERSIST)
+    @OrderBy("fechaCarga ASC")
+    private List<Evidencia> evidencias = new ArrayList<>();
+
     protected Reporte() {
     }
 
@@ -131,6 +135,28 @@ public class Reporte {
         return cambio;
     }
 
+    /**
+     * Agrega una foto. Creador (GRASP): el reporte agrega sus evidencias, así que él las crea.
+     * Solo el autor puede subir fotos a su propio reporte.
+     */
+    public Evidencia agregarEvidencia(Usuario quienSube, String rutaImagen, FormatoImagen formato, int tamanoBytes,
+                                      String hashSha256) {
+        verificarPuedeRecibirEvidencia(quienSube, tamanoBytes);
+        Evidencia evidencia = Evidencia.de(this, rutaImagen, formato, tamanoBytes, hashSha256);
+        evidencias.add(evidencia);
+        return evidencia;
+    }
+
+    /** Se expone aparte para validar ANTES de escribir el archivo en disco (no dejar archivos huérfanos). */
+    public void verificarPuedeRecibirEvidencia(Usuario quienSube, int tamanoBytes) {
+        if (!esDe(quienSube)) {
+            throw new ReglaNegocioException("NO_ES_AUTOR", "Solo el autor del reporte puede agregarle fotos");
+        }
+        if (tamanoBytes <= 0 || tamanoBytes > Evidencia.TAMANO_MAXIMO_BYTES) {
+            throw new ReglaNegocioException("TAMANO_NO_PERMITIDO", "La foto debe pesar entre 1 byte y 10 MB");
+        }
+    }
+
     public boolean esDe(Usuario usuario) {
         return autor.getId().equals(usuario.getId());
     }
@@ -157,4 +183,5 @@ public class Reporte {
     public Short getNivelGravedad() { return nivelGravedad; }
     public List<HistorialEstado> getHistorial() { return Collections.unmodifiableList(historial); }
     public Incidente getIncidente() { return incidente; }
+    public List<Evidencia> getEvidencias() { return Collections.unmodifiableList(evidencias); }
 }
