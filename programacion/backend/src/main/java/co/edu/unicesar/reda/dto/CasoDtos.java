@@ -29,9 +29,23 @@ public final class CasoDtos {
     public record CerrarRequest(@NotBlank @Size(min = 10, max = 1000) String observacion) {
     }
 
-    /** Lo que el ciudadano ve de un abogado para poder compararlo. */
+    /**
+     * Lo que el ciudadano ve de un abogado para poder compararlo. El correo de contacto solo viene
+     * del abogado que el ciudadano eligió (de los demás postulados no se expone).
+     */
     public record PerfilPublicoAbogado(Integer id, String nombre, String especialidad, String ciudad,
-                                       short aniosExperiencia, String presentacion, long casosTomadosEnReda) {
+                                       short aniosExperiencia, String presentacion, long casosTomadosEnReda,
+                                       String correoContacto, Double calificacionPromedio, long numCalificaciones,
+                                       List<ComentarioPublico> comentarios) {
+    }
+
+    /** Comentario de un cliente, sin su nombre: solo el barrio y el mes del caso como contexto. */
+    public record ComentarioPublico(short puntaje, String comentario, String contexto, OffsetDateTime fecha) {
+    }
+
+    public record CalificarRequest(
+            @NotNull @jakarta.validation.constraints.Min(1) @jakarta.validation.constraints.Max(5) Short puntaje,
+            @Size(min = 3, max = 1000) String comentario) {
     }
 
     public record PostulacionResponse(Integer id, PerfilPublicoAbogado abogado, String mensaje, String estado,
@@ -41,7 +55,8 @@ public final class CasoDtos {
     /** Vista del ciudadano: su caso y quiénes se postularon. */
     public record CasoCiudadanoResponse(Integer id, Integer idReporte, String categoria, String zona, String tipoDano,
                                         String estado, OffsetDateTime fechaCreacion, PerfilPublicoAbogado abogadoElegido,
-                                        List<PostulacionResponse> postulaciones) {
+                                        List<PostulacionResponse> postulaciones, boolean puedeCalificar,
+                                        Short miCalificacion, String miComentario) {
     }
 
     /**

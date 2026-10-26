@@ -4,6 +4,7 @@ import co.edu.unicesar.reda.dto.AuthDtos.*;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import co.edu.unicesar.reda.model.Usuario;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
+import co.edu.unicesar.reda.repository.CalificacionRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
 import co.edu.unicesar.reda.security.LimitadorIntentos;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +19,15 @@ public class PerfilService {
     private final AbogadoRepository abogados;
     private final PasswordEncoder codificador;
     private final LimitadorIntentos limitador;
+    private final CalificacionRepository calificaciones;
 
     public PerfilService(UsuarioRepository usuarios, AbogadoRepository abogados, PasswordEncoder codificador,
-                         LimitadorIntentos limitador) {
+                         LimitadorIntentos limitador, CalificacionRepository calificaciones) {
         this.usuarios = usuarios;
         this.abogados = abogados;
         this.codificador = codificador;
         this.limitador = limitador;
+        this.calificaciones = calificaciones;
     }
 
     @Transactional(readOnly = true)
@@ -56,8 +59,12 @@ public class PerfilService {
 
     private PerfilResponse perfil(Usuario u) {
         PerfilAbogado abogado = abogados.findByUsuarioId(u.getId())
-                .map(a -> new PerfilAbogado(a.getTarjetaProfesional(), a.getEspecialidad(), a.getCiudad(),
-                        a.getAniosExperiencia(), a.getPresentacion(), a.isActivo()))
+                .map(a -> {
+                    CalificacionRepository.Reputacion rep = calificaciones.reputacionDe(a.getId());
+                    return new PerfilAbogado(a.getTarjetaProfesional(), a.getEspecialidad(), a.getCiudad(),
+                            a.getAniosExperiencia(), a.getPresentacion(), a.isActivo(),
+                            rep.getPromedio() == null ? null : Math.round(rep.getPromedio() * 10) / 10.0, rep.getTotal());
+                })
                 .orElse(null);
         return new PerfilResponse(u.getId(), u.getNombre(), u.getCorreo(), u.getRol().getNombre().name(),
                 u.getFechaRegistro(), abogado);

@@ -58,7 +58,7 @@ public final class AuthDtos {
     }
 
     public record PerfilAbogado(String tarjetaProfesional, String especialidad, String ciudad, short aniosExperiencia,
-                                String presentacion, boolean verificado) {
+                                String presentacion, boolean verificado, Double calificacionPromedio, long numCalificaciones) {
     }
 
     public record ActualizarPerfilRequest(@NotBlank @Size(max = 120) String nombre) {

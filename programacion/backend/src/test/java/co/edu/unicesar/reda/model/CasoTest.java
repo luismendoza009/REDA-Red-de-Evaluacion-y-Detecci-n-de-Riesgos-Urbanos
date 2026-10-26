@@ -152,6 +152,36 @@ class CasoTest {
     }
 
     @Test
+    void soloSeCalificaUnCasoCerradoPorSuDuenoYUnaVez() {
+        Caso c = casoConDosPostulaciones();
+        c.elegir(100, ciudadana, aceptado);
+        assertEquals("CASO_NO_CERRADO", assertThrows(ReglaNegocioException.class,
+                () -> c.calificar(ciudadana, (short) 5, "Excelente")).getCodigo(), "no se califica un caso en curso");
+
+        c.cerrar(abogadaA.getUsuario(), cerrado, "Conciliación con la entidad");
+        assertEquals("NO_ES_AUTOR", assertThrows(ReglaNegocioException.class,
+                () -> c.calificar(vecino, (short) 1, "No me gustó")).getCodigo());
+        assertEquals("PUNTAJE_INVALIDO", assertThrows(ReglaNegocioException.class,
+                () -> c.calificar(ciudadana, (short) 6, "Seis estrellas")).getCodigo());
+        assertTrue(c.puedeSerCalificadoPor(ciudadana));
+
+        Calificacion cal = c.calificar(ciudadana, (short) 5, "  Muy claro y atento  ");
+        assertSame(abogadaA, cal.getAbogado(), "se califica al abogado que el ciudadano eligió");
+        assertEquals("Muy claro y atento", cal.getComentario());
+        assertFalse(c.puedeSerCalificadoPor(ciudadana));
+        assertEquals("YA_CALIFICADO", assertThrows(ReglaNegocioException.class,
+                () -> c.calificar(ciudadana, (short) 4, "Cambio de opinión")).getCodigo());
+    }
+
+    @Test
+    void elComentarioEsOpcional() {
+        Caso c = casoConDosPostulaciones();
+        c.elegir(200, ciudadana, aceptado);
+        c.cerrar(abogadoB.getUsuario(), cerrado, "Fallo favorable en primera instancia");
+        assertNull(c.calificar(ciudadana, (short) 4, "   ").getComentario());
+    }
+
+    @Test
     void elTokenDeRecuperacionSirveUnaSolaVezYVence() {
         Usuario u = usuario(30, NombreRol.CIUDADANO);
         TokenRecuperacion t = TokenRecuperacion.para(u, "a".repeat(64));
