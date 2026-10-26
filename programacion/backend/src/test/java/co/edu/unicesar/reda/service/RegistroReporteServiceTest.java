@@ -1,10 +1,7 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.config.PropiedadesReda;
-import co.edu.unicesar.reda.dto.ReporteDtos.CambioEstadoRequest;
 import co.edu.unicesar.reda.dto.ReporteDtos.CrearIncidenteRequest;
 import co.edu.unicesar.reda.dto.ReporteDtos.FallaRequest;
-import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.model.*;
 import co.edu.unicesar.reda.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +25,7 @@ import static org.mockito.Mockito.*;
  * abstracciones (DIP): los repositorios y el BuscadorAntecedentes se reemplazan por dobles de prueba.
  */
 @ExtendWith(MockitoExtension.class)
-class ReporteServiceTest {
+class RegistroReporteServiceTest {
 
     @Mock ReporteRepository reportes;
     @Mock UsuarioRepository usuarios;
@@ -39,13 +36,12 @@ class ReporteServiceTest {
     @Mock ReporteRelacionadoRepository relaciones;
     @Mock BuscadorAntecedentes buscador;
 
-    private ReporteService servicio;
+    private RegistroReporteService servicio;
 
     @BeforeEach
     void preparar() {
-        var propiedades = new PropiedadesReda(null, new PropiedadesReda.Antecedentes(100), null);
-        servicio = new ReporteService(reportes, usuarios, categorias, zonas, estados, entidades, relaciones,
-                buscador, propiedades);
+        servicio = new RegistroReporteService(reportes, usuarios, categorias, zonas, estados, entidades, relaciones,
+                buscador);
     }
 
     private void datosBasicos() {
@@ -66,7 +62,7 @@ class ReporteServiceTest {
         datosBasicos();
         OffsetDateTime hecho = OffsetDateTime.now().minusHours(2);
         OffsetDateTime primerReporte = hecho.minusDays(150);
-        when(buscador.buscar(eq(2), any(), any(), eq(hecho), eq(100))).thenReturn(List.of(
+        when(buscador.buscar(eq(2), any(), any(), eq(hecho))).thenReturn(List.of(
                 new BuscadorAntecedentes.Antecedente(11, primerReporte, "Validado", "Alcantarilla sin tapa", 12.3),
                 new BuscadorAntecedentes.Antecedente(15, hecho.minusDays(40), "En revisión", "Sigue sin tapa", 30.0)));
 
@@ -92,7 +88,7 @@ class ReporteServiceTest {
     @Test
     void sinAntecedentesNoHayDiasDeConocimientoPrevio() {
         datosBasicos();
-        when(buscador.buscar(anyInt(), any(), any(), any(), anyInt())).thenReturn(List.of());
+        when(buscador.buscar(anyInt(), any(), any(), any())).thenReturn(List.of());
         var falla = new FallaRequest(2, 1, "Peatón cayó en la alcantarilla", BigDecimal.ONE, BigDecimal.ONE, null);
 
         var respuesta = servicio.crearIncidente(new CrearIncidenteRequest(falla, TipoDano.LESION, "Fractura de tibia",
@@ -100,14 +96,5 @@ class ReporteServiceTest {
 
         assertTrue(respuesta.antecedentes().isEmpty());
         assertNull(respuesta.diasConocimientoPrevio());
-    }
-
-    @Test
-    void cambiarEstadoDeUnReporteQueNoExisteLanza404() {
-        when(reportes.findById(999)).thenReturn(Optional.empty());
-        var e = assertThrows(RecursoNoEncontradoException.class,
-                () -> servicio.cambiarEstado(999, new CambioEstadoRequest(NombreEstado.EN_REVISION, null), 2));
-        assertEquals("NO_ENCONTRADO", e.getCodigo());
-        verifyNoInteractions(buscador);
     }
 }

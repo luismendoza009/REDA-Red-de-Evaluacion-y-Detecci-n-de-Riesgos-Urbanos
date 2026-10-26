@@ -135,6 +135,15 @@ public class Reporte {
         return autor.getId().equals(usuario.getId());
     }
 
+    /**
+     * El detalle incluye datos sensibles (salud): solo lo ven su autor y el personal de revisión.
+     * Experto en información: el reporte conoce a su autor, así que él decide (antes de la auditoría
+     * GRASP esta regla estaba en el servicio).
+     */
+    public boolean puedeSerVistoPor(Usuario usuario) {
+        return esDe(usuario) || usuario.esPersonalDeRevision();
+    }
+
     public Integer getId() { return id; }
     public Usuario getAutor() { return autor; }
     public Categoria getCategoria() { return categoria; }

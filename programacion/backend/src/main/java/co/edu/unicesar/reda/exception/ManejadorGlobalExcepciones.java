@@ -30,29 +30,24 @@ public class ManejadorGlobalExcepciones {
 
     private static final Logger log = LoggerFactory.getLogger(ManejadorGlobalExcepciones.class);
 
-    @ExceptionHandler(RecursoNoEncontradoException.class)
-    ResponseEntity<ErrorRespuesta> noEncontrado(RedaException e, HttpServletRequest p) {
-        return responder(HttpStatus.NOT_FOUND, e.getCodigo(), e.getMessage(), p);
+    /**
+     * TODAS las excepciones propias de REDA pasan por aquí. Cada una trae su categoría, así que
+     * crear una excepción nueva no obliga a modificar esta clase (abierta a extensión, cerrada a
+     * modificación). Antes de la auditoría SOLID había un método casi idéntico por excepción.
+     */
+    @ExceptionHandler(RedaException.class)
+    ResponseEntity<ErrorRespuesta> propia(RedaException e, HttpServletRequest p) {
+        return responder(estadoHttp(e.getCategoria()), e.getCodigo(), e.getMessage(), p);
     }
 
-    @ExceptionHandler(ReglaNegocioException.class)
-    ResponseEntity<ErrorRespuesta> reglaNegocio(RedaException e, HttpServletRequest p) {
-        return responder(HttpStatus.UNPROCESSABLE_ENTITY, e.getCodigo(), e.getMessage(), p);
-    }
-
-    @ExceptionHandler(ConflictoException.class)
-    ResponseEntity<ErrorRespuesta> conflicto(RedaException e, HttpServletRequest p) {
-        return responder(HttpStatus.CONFLICT, e.getCodigo(), e.getMessage(), p);
-    }
-
-    @ExceptionHandler(CredencialesInvalidasException.class)
-    ResponseEntity<ErrorRespuesta> credenciales(RedaException e, HttpServletRequest p) {
-        return responder(HttpStatus.UNAUTHORIZED, e.getCodigo(), e.getMessage(), p);
-    }
-
-    @ExceptionHandler(AccesoDenegadoException.class)
-    ResponseEntity<ErrorRespuesta> accesoDenegado(RedaException e, HttpServletRequest p) {
-        return responder(HttpStatus.FORBIDDEN, e.getCodigo(), e.getMessage(), p);
+    static HttpStatus estadoHttp(CategoriaError categoria) {
+        return switch (categoria) {
+            case NO_ENCONTRADO -> HttpStatus.NOT_FOUND;
+            case REGLA_NEGOCIO -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case CONFLICTO -> HttpStatus.CONFLICT;
+            case NO_AUTENTICADO -> HttpStatus.UNAUTHORIZED;
+            case ACCESO_DENEGADO -> HttpStatus.FORBIDDEN;
+        };
     }
 
     /** @PreAuthorize rechazó la petición: el rol no tiene permiso. */
