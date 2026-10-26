@@ -225,6 +225,50 @@ class CuentasYCasosIT {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void fotoDePerfilYPerfilDelAbogadoSoloSiEstaVerificado() throws Exception {
+        byte[] png = {(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 13, 'I', 'H', 'D', 'R'};
+        String ciudadana = registrar("it-" + UUID.randomUUID() + "@correo.test", "Original2026");
+        String vecino = registrar("it-" + UUID.randomUUID() + "@correo.test", "Original2026");
+
+        // un ciudadano sube su foto: él la ve, otro ciudadano no
+        String ruta = json.readTree(cuerpo(subirFoto(png, ciudadana).andExpect(status().isOk()))).path("foto").asText();
+        assertTrue(ruta.matches("/api/usuarios/\\d+/foto\\?v=\\d+"), ruta);
+        enviar(HttpMethod.GET, ruta, null, ciudadana).andExpect(status().isOk());
+        enviar(HttpMethod.GET, ruta, null, vecino).andExpect(status().isForbidden());
+        assertEquals(ruta, json.readTree(cuerpo(enviar(HttpMethod.GET, "/api/cuenta", null, ciudadana))).path("foto").asText());
+        // el formato se reconoce por los bytes, no por el nombre del archivo
+        subirFoto("no soy una foto".getBytes(), ciudadana).andExpect(status().isUnprocessableEntity());
+
+        // un abogado SIN verificar no arma su perfil público
+        String pendiente = login("jesus.zuleta10@correo.test", "Reda2026*");
+        subirFoto(png, pendiente).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.codigo").value("ABOGADO_NO_VERIFICADO"));
+        Map<String, Object> perfil = Map.of("especialidad", "Responsabilidad del Estado", "ciudad", "Valledupar",
+                "aniosExperiencia", 9, "presentacion", "Llevo casos de reparación directa.");
+        enviar(HttpMethod.PATCH, "/api/cuenta/abogado", perfil, pendiente).andExpect(status().isUnprocessableEntity());
+
+        // un abogado verificado sí: su foto la ve cualquier usuario con sesión
+        String verificado = login("luis.onate7@correo.test", "Reda2026*");
+        String rutaAbogado = json.readTree(cuerpo(subirFoto(png, verificado).andExpect(status().isOk()))).path("foto").asText();
+        enviar(HttpMethod.GET, rutaAbogado, null, vecino).andExpect(status().isOk());
+        enviar(HttpMethod.PATCH, "/api/cuenta/abogado", perfil, verificado).andExpect(status().isOk())
+                .andExpect(jsonPath("$.abogado.especialidad").value("Responsabilidad del Estado"))
+                .andExpect(jsonPath("$.abogado.verificado").value(true));
+        // un ciudadano no edita un perfil de abogado
+        enviar(HttpMethod.PATCH, "/api/cuenta/abogado", perfil, ciudadana).andExpect(status().isForbidden());
+
+        // quitar la foto
+        enviar(HttpMethod.DELETE, "/api/cuenta/foto", null, ciudadana).andExpect(status().isNoContent());
+        enviar(HttpMethod.GET, ruta, null, ciudadana).andExpect(status().isNotFound());
+    }
+
+    private ResultActions subirFoto(byte[] contenido, String token) throws Exception {
+        return mvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/cuenta/foto")
+                .file(new org.springframework.mock.web.MockMultipartFile("archivo", "foto.png", "image/png", contenido))
+                .header("Authorization", "Bearer " + token));
+    }
+
     // ------------------------------------------------------------------ utilidades
     private String registrar(String correo, String password) throws Exception {
         return json.readTree(cuerpo(enviar(HttpMethod.POST, "/api/auth/registro", Map.of("nombre", "Ciudadana de Prueba",

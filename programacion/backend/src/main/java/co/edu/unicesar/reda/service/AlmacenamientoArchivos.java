@@ -9,8 +9,16 @@ import java.util.Optional;
  */
 public interface AlmacenamientoArchivos {
 
-    /** Guarda el archivo con un nombre generado y devuelve su ruta relativa (la que se guarda en la base). */
-    String guardar(byte[] contenido, String extension);
+    /** Guarda una foto de evidencia con un nombre generado y devuelve su ruta relativa (la que va en la base). */
+    default String guardar(byte[] contenido, String extension) {
+        return guardar("evidencias", contenido, extension);
+    }
+
+    /** Guarda el archivo dentro de {@code carpeta} (evidencias, perfiles...) con un nombre generado. */
+    String guardar(String carpeta, byte[] contenido, String extension);
+
+    /** Borra un archivo que ya no se usa (p. ej. la foto de perfil anterior). No falla si no existe. */
+    void borrar(String rutaRelativa);
 
     /** Lee el archivo; vacío si no existe (p. ej. las fotos de la semilla simulada). */
     Optional<byte[]> leer(String rutaRelativa);

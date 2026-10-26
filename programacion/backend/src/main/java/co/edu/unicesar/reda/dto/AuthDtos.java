@@ -53,8 +53,9 @@ public final class AuthDtos {
     public record MensajeResponse(String mensaje) {
     }
 
+    /** {@code foto}: ruta para descargar la foto de perfil (con sesión), o null si no tiene. */
     public record PerfilResponse(Integer id, String nombre, String correo, String rol, java.time.OffsetDateTime fechaRegistro,
-                                 PerfilAbogado abogado) {
+                                 String foto, PerfilAbogado abogado) {
     }
 
     public record PerfilAbogado(String tarjetaProfesional, String especialidad, String ciudad, short aniosExperiencia,
@@ -62,6 +63,14 @@ public final class AuthDtos {
     }
 
     public record ActualizarPerfilRequest(@NotBlank @Size(max = 120) String nombre) {
+    }
+
+    /** Perfil profesional del abogado: mismas reglas que en el registro. Solo si está verificado. */
+    public record ActualizarPerfilAbogadoRequest(
+            @NotBlank @Size(max = 80) String especialidad,
+            @NotBlank @Size(max = 80) String ciudad,
+            @NotNull @Min(0) @Max(70) Short aniosExperiencia,
+            @Size(max = 600) String presentacion) {
     }
 
     public record CambioPasswordRequest(

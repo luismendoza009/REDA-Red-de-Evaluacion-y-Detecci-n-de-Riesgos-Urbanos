@@ -26,9 +26,12 @@ public class AlmacenamientoDisco implements AlmacenamientoArchivos {
     }
 
     @Override
-    public String guardar(byte[] contenido, String extension) {
+    public String guardar(String carpeta, byte[] contenido, String extension) {
+        if (!carpeta.matches("[a-z]+")) {
+            throw new IllegalArgumentException("Carpeta no válida: " + carpeta);
+        }
         LocalDate hoy = LocalDate.now();
-        String relativa = String.format("evidencias/%d/%02d/%s.%s", hoy.getYear(), hoy.getMonthValue(),
+        String relativa = String.format("%s/%d/%02d/%s.%s", carpeta, hoy.getYear(), hoy.getMonthValue(),
                 UUID.randomUUID().toString().replace("-", ""), extension);
         Path destino = resolver(relativa);
         try {
@@ -47,6 +50,15 @@ public class AlmacenamientoDisco implements AlmacenamientoArchivos {
             return Files.isRegularFile(archivo) ? Optional.of(Files.readAllBytes(archivo)) : Optional.empty();
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo leer la foto", e);
+        }
+    }
+
+    @Override
+    public void borrar(String rutaRelativa) {
+        try {
+            Files.deleteIfExists(resolver(rutaRelativa));
+        } catch (IOException e) {
+            throw new UncheckedIOException("No se pudo borrar el archivo", e);
         }
     }
 
