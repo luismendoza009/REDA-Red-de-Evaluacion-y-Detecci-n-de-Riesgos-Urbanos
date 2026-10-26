@@ -26,9 +26,16 @@
 | P21 | Fotos de la semilla sin archivo → imagen SVG generada que dice "foto de ejemplo · datos simulados" | La demo no muestra imágenes rotas y nunca hace pasar una imagen por una foto real | Fotos de internet (derechos, engaño) |
 | P22 | Spring Security mantiene `X-Frame-Options: DENY` | Protege contra clickjacking; se notó al intentar incrustar la página en un iframe de prueba | Relajarlo para facilitar pruebas |
 
-## Pendiente (siguientes iteraciones)
+| P23 | **Todo exige sesión** salvo crear cuenta, entrar, recuperar contraseña y las páginas legales (decisión del grupo) | Los datos del mapa son de la comunidad registrada; la página de acceso explica el proyecto | Mapa público |
+| P24 | Interfaz como **SPA con rutas `#/`** y un módulo por vista (`js/vistas/*.js`); el menú cambia según el rol | Sin configurar el servidor; cada vista es un archivo pequeño con una responsabilidad. El backend vuelve a verificar cada permiso: la interfaz no protege datos, solo oculta opciones | Un solo archivo JS |
+| P25 | Registro de abogados **pendiente de verificación**; un administrador activa la cuenta | Evita que cualquiera se haga pasar por abogado y vea casos | Activación automática |
+| P26 | Límite de **8 intentos cada 15 min** por correo (inicio de sesión, recuperación, cambio de contraseña) con respuesta 429 | Frena fuerza bruta. En memoria; con varios servidores iría a Redis | Sin límite |
+| P27 | El correo de recuperación se escribe en la consola (`CorreoConsola`) detrás de la interfaz `EnvioCorreo` | No hay servidor de correo en el entorno; en producción se agrega una implementación SMTP sin tocar los servicios (DIP) | Integrar un proveedor ya |
+| P28 | La respuesta de "recuperar contraseña" es **igual exista o no el correo** | No revela quién tiene cuenta (enumeración de usuarios) | Decir "ese correo no existe" |
+| P29 | Calificaciones: el comentario se muestra **sin el nombre** del cliente ("Cliente en Centro · mayo de 2026") | Da contexto sin exponer a la persona | Mostrar el nombre |
+| P30 | Estrellas: se dibujan redondeando hacia abajo en el medio punto (4,5 → 4 estrellas) y siempre con el número al lado | No exagerar la reputación; la cifra no depende solo del dibujo (accesibilidad) | Redondeo normal |
+| P31 | Pruebas de interfaz con Edge controlado por CDP (`--remote-debugging-port`), emulando celular de 390 px | Edge sin ventana impone un ancho mínimo que impedía probar el celular; con CDP se emula el dispositivo y se inicia sesión de cada rol | Revisar a mano |
 
-- Formulario web para crear reportes (con GPS del celular) y vista "Mis reportes".
-- Casos y remisiones a abogados; vista del abogado (con acceso a las fotos de sus casos).
+## Pendiente (siguientes iteraciones)
 - Cálculo de IRU e IVC (depende de las funciones PL/pgSQL de la Entrega 3 de BD).
 - Dashboard para el administrador.
