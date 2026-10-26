@@ -20,4 +20,6 @@ BEGIN
   PERFORM setval(pg_get_serial_sequence('remisiones', 'id_remision'), coalesce((SELECT max(id_remision) FROM remisiones), 0) + 1, false);
   PERFORM setval(pg_get_serial_sequence('versiones_indice', 'id_version'), coalesce((SELECT max(id_version) FROM versiones_indice), 0) + 1, false);
   PERFORM setval(pg_get_serial_sequence('calculos_indice', 'id_calculo'), coalesce((SELECT max(id_calculo) FROM calculos_indice), 0) + 1, false);
+  PERFORM setval(pg_get_serial_sequence('postulaciones', 'id_postulacion'), coalesce((SELECT max(id_postulacion) FROM postulaciones), 0) + 1, false);
+  PERFORM setval(pg_get_serial_sequence('tokens_recuperacion', 'id_token'), coalesce((SELECT max(id_token) FROM tokens_recuperacion), 0) + 1, false);
 END $$;

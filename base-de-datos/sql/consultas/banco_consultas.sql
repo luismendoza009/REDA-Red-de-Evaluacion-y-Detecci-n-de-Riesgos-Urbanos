@@ -2,10 +2,10 @@
 -- banco_consultas.sql — Banco de consultas de negocio de REDA (Entrega 2)
 --
 -- Cobertura de la rúbrica:
---   JOIN de 3+ tablas ............ C01, C02, C05, C08
+--   JOIN de 3+ tablas ............ C01, C02, C05, C07, C08
 --   Reunión externa "no tienen" .. C03, C04
 --   GROUP BY + HAVING ............ C06, C10
---   Subconsulta / CTE ............ C05 (CTE), C07 (subconsulta), C08 (CTE)
+--   Subconsulta / CTE ............ C02 (CTE), C05 (CTE), C07 (subconsulta), C08 (CTE)
 --   Vista creada y consultada .... C09 (v_resumen_casos), C10 usa v_mapa_publico
 --                                  (las vistas se crean en migraciones/008_vistas.sql)
 -- Verificación a mano de cada resultado: sql/consultas/verificacion_consultas.sql
@@ -35,23 +35,37 @@ LEFT JOIN entidades_publicas ep ON ep.id_entidad = i.id_entidad
 ORDER BY i.fecha_hora_hecho;
 
 -- -----------------------------------------------------------------------------
--- C02. ¿Cuánto se le ha facturado a cada abogado, cuántos casos recibió y cuántos
---      aceptó? (ingresos del negocio; JOIN de 3 tablas + agregación)
---      Nota: se agrupa directamente sobre remisiones, la única tabla con montos;
---      unir antes con otras tablas 1:N (testigos, antecedentes) inflaría la suma.
+-- C02. ¿A cuántos casos se postuló cada abogado, en cuántos lo eligió el ciudadano y
+--      cuánto se le ha facturado? (ingresos del negocio; JOIN de 4 fuentes + CTE)
+--      Postulaciones y remisiones son dos relaciones 1:N del abogado: si se unieran ANTES de
+--      agregar, cada remisión se repetiría por cada postulación y la suma saldría inflada.
+--      Por eso cada una se agrega por separado (CTE) y después se unen.
 -- -----------------------------------------------------------------------------
-\echo 'C02. Facturación por abogado'
+\echo 'C02. Postulaciones, elecciones y facturación por abogado'
+WITH post AS (
+    SELECT id_abogado,
+           count(*)                                    AS postulaciones,
+           count(*) FILTER (WHERE estado = 'ELEGIDA')  AS elegido
+    FROM postulaciones
+    GROUP BY id_abogado
+),
+fact AS (
+    SELECT id_abogado, sum(valor_cobrado) AS total_facturado_cop
+    FROM remisiones
+    WHERE estado_remision = 'ACEPTADA'
+    GROUP BY id_abogado
+)
 SELECT a.id_abogado,
-       u.nombre                                              AS abogado,
-       count(*)                                              AS remisiones_recibidas,
-       count(*) FILTER (WHERE rm.estado_remision = 'ACEPTADA')  AS aceptadas,
-       count(*) FILTER (WHERE rm.estado_remision = 'RECHAZADA') AS rechazadas,
-       sum(rm.valor_cobrado)                                 AS total_facturado_cop
-FROM remisiones rm
-JOIN abogados a ON a.id_abogado = rm.id_abogado
+       u.nombre                               AS abogado,
+       a.activo,
+       coalesce(p.postulaciones, 0)           AS postulaciones,
+       coalesce(p.elegido, 0)                 AS veces_elegido,
+       coalesce(f.total_facturado_cop, 0)     AS total_facturado_cop
+FROM abogados a
 JOIN usuarios u ON u.id_usuario = a.id_usuario
-GROUP BY a.id_abogado, u.nombre
-ORDER BY total_facturado_cop DESC;
+LEFT JOIN post p ON p.id_abogado = a.id_abogado
+LEFT JOIN fact f ON f.id_abogado = a.id_abogado
+ORDER BY total_facturado_cop DESC, postulaciones DESC;
 
 -- -----------------------------------------------------------------------------
 -- C03. ¿Qué incidentes ya validados por un operador todavía NO tienen caso abierto?
@@ -146,24 +160,24 @@ HAVING count(*) >= 3
 ORDER BY fallas_abiertas DESC, falla_abierta_mas_antigua;
 
 -- -----------------------------------------------------------------------------
--- C07. ¿Qué abogados aceptan una proporción de casos mayor que el promedio de la
---      red? (para priorizarlos en nuevas remisiones; subconsulta en el HAVING)
---      Solo cuenta remisiones respondidas (ACEPTADA o RECHAZADA).
+-- C07. ¿Qué abogados son elegidos por los ciudadanos con más frecuencia que el promedio de
+--      la red? (qué perfiles prefieren los ciudadanos; subconsulta en el HAVING)
+--      Solo cuentan las postulaciones ya resueltas (ELEGIDA o NO_ELEGIDA).
 -- -----------------------------------------------------------------------------
-\echo 'C07. Abogados con tasa de aceptación sobre el promedio'
-SELECT a.id_abogado, u.nombre AS abogado,
-       count(*)                                                        AS respondidas,
-       round(avg((rm.estado_remision = 'ACEPTADA')::int) * 100, 1)     AS tasa_aceptacion_pct
-FROM remisiones rm
-JOIN abogados a ON a.id_abogado = rm.id_abogado
+\echo 'C07. Abogados con tasa de elección sobre el promedio'
+SELECT a.id_abogado, u.nombre AS abogado, a.anios_experiencia,
+       count(*)                                              AS postulaciones_resueltas,
+       round(avg((po.estado = 'ELEGIDA')::int) * 100, 1)     AS tasa_eleccion_pct
+FROM postulaciones po
+JOIN abogados a ON a.id_abogado = po.id_abogado
 JOIN usuarios u ON u.id_usuario = a.id_usuario
-WHERE rm.estado_remision IN ('ACEPTADA', 'RECHAZADA')
-GROUP BY a.id_abogado, u.nombre
-HAVING avg((rm.estado_remision = 'ACEPTADA')::int) >
-       (SELECT avg((estado_remision = 'ACEPTADA')::int)
-        FROM remisiones
-        WHERE estado_remision IN ('ACEPTADA', 'RECHAZADA'))
-ORDER BY tasa_aceptacion_pct DESC;
+WHERE po.estado IN ('ELEGIDA', 'NO_ELEGIDA')
+GROUP BY a.id_abogado, u.nombre, a.anios_experiencia
+HAVING avg((po.estado = 'ELEGIDA')::int) >
+       (SELECT avg((estado = 'ELEGIDA')::int)
+        FROM postulaciones
+        WHERE estado IN ('ELEGIDA', 'NO_ELEGIDA'))
+ORDER BY tasa_eleccion_pct DESC;
 
 -- -----------------------------------------------------------------------------
 -- C08. ¿Cuánto tarda, en promedio, una falla en solucionarse según su categoría?

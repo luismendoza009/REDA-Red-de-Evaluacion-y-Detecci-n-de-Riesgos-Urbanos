@@ -44,8 +44,8 @@ SELECT pg_temp.debe_fallar('dos remisiones ACEPTADAS para el mismo caso (índice
        AND a.id_abogado NOT IN (SELECT id_abogado FROM remisiones x WHERE x.id_caso = rm.id_caso)
      LIMIT 1$q$)
 UNION ALL
-SELECT pg_temp.debe_fallar('remisión RECHAZADA sin fecha de respuesta', 'ck_remisiones_respuesta',
-  $q$UPDATE remisiones SET fecha_respuesta = NULL, motivo_rechazo = NULL WHERE id_remision = (SELECT min(id_remision) FROM remisiones WHERE estado_remision = 'RECHAZADA')$q$)
+SELECT pg_temp.debe_fallar('remisión ACEPTADA sin fecha de respuesta', 'ck_remisiones_respuesta',
+  $q$UPDATE remisiones SET fecha_respuesta = NULL WHERE id_remision = (SELECT min(id_remision) FROM remisiones WHERE estado_remision = 'ACEPTADA')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('atención médica en un daño solo material', 'ck_incidentes_atencion',
   $q$UPDATE incidentes SET hubo_atencion_medica = true WHERE tipo_dano = 'DANO_MATERIAL'$q$)
@@ -91,6 +91,26 @@ SELECT pg_temp.debe_fallar('umbrales de nivel desordenados', 'ck_versiones_umbra
 UNION ALL
 SELECT pg_temp.debe_fallar('segundo caso para el mismo incidente', 'uq_casos_incidente',
   $q$INSERT INTO casos (id_incidente, id_estado_caso, id_operador) SELECT id_incidente, 1, id_operador FROM casos LIMIT 1$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('dos postulaciones ELEGIDAS en el mismo caso', 'uq_postulaciones_una_elegida',
+  $q$UPDATE postulaciones SET estado = 'ELEGIDA', fecha_resolucion = now()
+     WHERE id_caso = (SELECT id_caso FROM postulaciones WHERE estado = 'ELEGIDA' LIMIT 1)$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('el mismo abogado se postula dos veces al mismo caso', 'uq_postulaciones_caso_abogado',
+  $q$INSERT INTO postulaciones (id_caso, id_abogado, mensaje)
+     SELECT id_caso, id_abogado, mensaje FROM postulaciones LIMIT 1$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('postulación con un mensaje sin contenido', 'ck_postulaciones_mensaje',
+  $q$INSERT INTO postulaciones (id_caso, id_abogado, mensaje) VALUES (1, 4, 'Me interesa')$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('postulación resuelta sin fecha de resolución', 'ck_postulaciones_resolucion',
+  $q$UPDATE postulaciones SET estado = 'RETIRADA' WHERE estado = 'PENDIENTE'$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('token de recuperación guardado en claro (no es un hash)', 'ck_tokens_hash',
+  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, 'MiTokenSecreto', now() + interval '30 minutes')$q$)
+UNION ALL
+SELECT pg_temp.debe_fallar('token que vence antes de crearse', 'ck_tokens_vigencia',
+  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), now() - interval '1 minute')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('evaluación con todos los puntajes vacíos', 'ck_evaluaciones_alguna',
   $q$INSERT INTO evaluaciones (id_reporte, id_usuario) VALUES (1, 2)$q$);

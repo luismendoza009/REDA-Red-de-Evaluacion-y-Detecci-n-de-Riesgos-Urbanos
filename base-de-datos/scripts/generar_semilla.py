@@ -204,6 +204,13 @@ DANOS = {
     ],
 }
 ESPECIALIDADES = ["Responsabilidad del Estado", "Derecho administrativo", "Responsabilidad civil y del Estado"]
+PRESENTACIONES = [
+    "Litigante en reparación directa contra entidades públicas del Cesar. Atiendo en el centro de Valledupar.",
+    "Abogada administrativista. Acompaño a víctimas de fallas en servicios públicos desde la primera consulta.",
+    "Más de quince años en responsabilidad del Estado; casos de vías, alcantarillado y alumbrado público.",
+    "Abogado joven, cercano y con disponibilidad inmediata para revisar su caso.",
+    "Recién vinculado a la red; en verificación de tarjeta profesional.",
+]
 
 
 def direccion():
@@ -234,7 +241,9 @@ def main():
     analista = nuevo_usuario(5, base + timedelta(days=5))
     for i in range(5):
         uid = nuevo_usuario(3, base + timedelta(days=10 + i))
-        abogados.append((i + 1, uid, str(random.randint(100000, 399999)), ESPECIALIDADES[i % 3], "Valledupar", i != 4))
+        # el quinto abogado queda pendiente de verificación (activo = false) para la demo del administrador
+        abogados.append((i + 1, uid, str(random.randint(100000, 399999)), ESPECIALIDADES[i % 3], "Valledupar", i != 4,
+                         [12, 7, 15, 4, 2][i], PRESENTACIONES[i]))
     ciudadanos = [nuevo_usuario(1, fecha_aleatoria(base, INICIO + timedelta(days=60))) for _ in range(45)]
     registro_de = {u[0]: u[5] for u in usuarios}
 
@@ -396,9 +405,21 @@ def main():
     for r in relacionados:
         if r[2] == "ANTECEDENTE":
             ante_por_reporte[r[0]] = ante_por_reporte.get(r[0], 0) + 1
-    casos, remisiones = [], []
-    CICLO_ESTADOS_CASO = [C_CERR, C_ACEP, C_RECH, C_ACEP, C_REM, C_CERR, C_ACEP, C_EVAL, C_ACEP]
+    casos, remisiones, postulaciones = [], [], []
+    # Flujo (migración 010): el ciudadano pide abogado -> el caso queda "Remitido" (publicado a los
+    # abogados) -> varios se postulan -> el ciudadano ELIGE uno -> "Aceptado por abogado" y se crea la
+    # remisión ACEPTADA, que es lo que se le cobra al abogado. Reparto fijo de estados (no al azar)
+    # para que la demo siempre muestre casos buscando abogado, con abogado y cerrados.
+    CICLO_ESTADOS_CASO = [C_CERR, C_ACEP, C_RECH, C_REM, C_ACEP, C_CERR, C_REM, C_EVAL, C_ACEP]
     tarifa = {"LESION": 200000, "AMBOS": 200000, "DANO_MATERIAL": 120000}
+    MENSAJES = [
+        "Tengo experiencia en demandas de reparación directa contra el municipio por vías en mal estado. "
+        "Con los antecedentes del punto el caso es sólido; puedo revisarlo esta misma semana.",
+        "He llevado varios casos de falla en el servicio por alcantarillado y alumbrado. Le explico el proceso "
+        "sin costo inicial y reviso con usted la evidencia y los plazos.",
+        "Trabajo responsabilidad del Estado hace años. Los reportes previos en el mismo sitio ayudan mucho "
+        "a demostrar que la entidad conocía la falla. Me interesa acompañarlo.",
+    ]
     for inc in incidentes:
         iid, rid = inc[0], inc[1]
         rep = por_id[rid]
@@ -407,40 +428,40 @@ def main():
         fuerte = ante_por_reporte.get(rid, 0) >= 2 or inc[5] != "DANO_MATERIAL"
         if not fuerte and random.random() < 0.6:
             continue
-        val = max(h[5] for h in historial if h[1] == rid and h[3] == VAL)
-        creacion = val + timedelta(hours=random.randint(2, 48))
+        validacion = [h for h in historial if h[1] == rid and h[3] == VAL][-1]
+        creacion = validacion[5] + timedelta(hours=random.randint(2, 48))
         cid = len(casos) + 1
-        # Reparto fijo (no al azar) para que la demo siempre muestre las tres situaciones públicas:
-        # con abogado (Aceptado), abiertos (Evaluado, Remitido) y cerrados (Cerrado, Rechazado).
         estado = CICLO_ESTADOS_CASO[len(casos) % len(CICLO_ESTADOS_CASO)]
         cierre = None
         activos = [a for a in abogados if a[5]]
         random.shuffle(activos)
-        envio = creacion + timedelta(hours=random.randint(1, 24))
-        valor = tarifa[inc[5]]
-        if estado == C_REM:
-            remisiones.append([None, cid, activos[0][0], envio, "ENVIADA", None, None, valor])
-        elif estado in (C_ACEP, C_CERR):
-            if random.random() < 0.35:  # un primer abogado rechazó y se reenvió
-                resp = envio + timedelta(hours=random.randint(4, 72))
-                remisiones.append([None, cid, activos[1][0], envio, "RECHAZADA", resp, "Sin disponibilidad para nuevos casos.", valor])
-                envio = resp + timedelta(hours=random.randint(1, 12))
-            resp = envio + timedelta(hours=random.randint(4, 96))
-            remisiones.append([None, cid, activos[0][0], envio, "ACEPTADA", resp, None, valor])
-            if estado == C_CERR:
-                # se cierra entre 15 y 40 días después de aceptado, sin pasar de la fecha de corte
-                cierre = min(resp + timedelta(days=random.randint(15, 40)), FIN)
+        if estado in (C_REM, C_ACEP, C_CERR):
+            interesados = activos[:random.choice([2, 3, 3])]
+            momento = creacion
+            filas = []
+            for k, a in enumerate(interesados):
+                momento = momento + timedelta(hours=random.randint(3, 30))
+                filas.append([None, cid, a[0], MENSAJES[k % len(MENSAJES)], "PENDIENTE", momento, None])
+            if estado in (C_ACEP, C_CERR):
+                eleccion = filas[-1][5] + timedelta(hours=random.randint(2, 48))
+                elegida = random.randrange(len(filas))
+                for k, fila in enumerate(filas):
+                    fila[4] = "ELEGIDA" if k == elegida else "NO_ELEGIDA"
+                    fila[6] = eleccion
+                remisiones.append([None, cid, filas[elegida][2], eleccion, "ACEPTADA", eleccion, None, tarifa[inc[5]]])
+                if estado == C_CERR:
+                    cierre = min(eleccion + timedelta(days=random.randint(15, 40)), FIN)
+            postulaciones.extend(filas)
         elif estado == C_RECH:
-            for k in range(2):
-                resp = envio + timedelta(hours=random.randint(4, 72))
-                remisiones.append([None, cid, activos[k][0], envio, "RECHAZADA", resp,
-                                   random.choice(["Evidencia insuficiente del daño.", "Plazo de caducidad comprometido."]), valor])
-                envio = resp + timedelta(hours=2)
-        casos.append((cid, iid, estado, random.choice(operadores), creacion, cierre,
-                      "Incidente con antecedentes previos en el punto." if ante_por_reporte.get(rid, 0) else "Incidente sin antecedentes registrados."))
-    remisiones.sort(key=lambda r: r[3])
-    for i, r in enumerate(remisiones, 1):
-        r[0] = i
+            # ningún abogado se interesó en el plazo: el caso se cierra sin abogado
+            cierre = min(creacion + timedelta(days=30), FIN)
+        casos.append((cid, iid, estado, validacion[4], creacion, cierre,
+                      "Incidente con antecedentes previos en el punto." if ante_por_reporte.get(rid, 0) else "Incidente sin antecedentes registrados.",
+                      creacion))
+    for lista in (remisiones, postulaciones):
+        lista.sort(key=lambda r: r[3] if lista is remisiones else r[5])
+        for k, r in enumerate(lista, 1):
+            r[0] = k
 
     # --------------------------------------------------------------- archivos
     cab = ("-- DATOS SIMULADOS generados por scripts/generar_semilla.py (no editar a mano).\n"
@@ -481,7 +502,8 @@ def main():
     with open(os.path.join(SALIDA, "02_usuarios.sql"), "w", encoding="utf-8") as f:
         f.write(cab + "-- Contraseña de todos los usuarios de prueba: Reda2026*\n\n")
         f.write(inserts("usuarios", ["id_usuario", "nombre", "correo", "password_hash", "id_rol", "fecha_registro", "activo", "fecha_consentimiento"], usuarios))
-        f.write(inserts("abogados", ["id_abogado", "id_usuario", "tarjeta_profesional", "especialidad", "ciudad", "activo"], abogados))
+        f.write(inserts("abogados", ["id_abogado", "id_usuario", "tarjeta_profesional", "especialidad", "ciudad", "activo",
+                                     "anios_experiencia", "presentacion"], abogados))
 
     with open(os.path.join(SALIDA, "03_reportes.sql"), "w", encoding="utf-8") as f:
         f.write(cab)
@@ -503,7 +525,10 @@ def main():
 
     with open(os.path.join(SALIDA, "05_casos.sql"), "w", encoding="utf-8") as f:
         f.write(cab)
-        f.write(inserts("casos", ["id_caso", "id_incidente", "id_estado_caso", "id_operador", "fecha_creacion", "fecha_cierre", "observacion"], casos))
+        f.write(inserts("casos", ["id_caso", "id_incidente", "id_estado_caso", "id_operador", "fecha_creacion", "fecha_cierre",
+                                  "observacion", "fecha_consentimiento"], casos))
+        f.write(inserts("postulaciones", ["id_postulacion", "id_caso", "id_abogado", "mensaje", "estado", "fecha_postulacion",
+                                          "fecha_resolucion"], postulaciones))
         f.write(inserts("remisiones", ["id_remision", "id_caso", "id_abogado", "fecha_envio", "estado_remision", "fecha_respuesta",
                                        "motivo_rechazo", "valor_cobrado"], remisiones))
 
@@ -515,13 +540,14 @@ def main():
                      ("usuarios", "id_usuario"), ("abogados", "id_abogado"), ("reportes", "id_reporte"),
                      ("evidencias", "id_evidencia"), ("evaluaciones", "id_evaluacion"), ("historial_estados", "id_historial"),
                      ("incidentes", "id_incidente"), ("testigos", "id_testigo"), ("casos", "id_caso"),
-                     ("remisiones", "id_remision"), ("versiones_indice", "id_version"), ("calculos_indice", "id_calculo")]:
+                     ("remisiones", "id_remision"), ("versiones_indice", "id_version"), ("calculos_indice", "id_calculo"),
+                     ("postulaciones", "id_postulacion"), ("tokens_recuperacion", "id_token")]:
             f.write(f"  PERFORM setval(pg_get_serial_sequence('{t}', '{c}'), coalesce((SELECT max({c}) FROM {t}), 0) + 1, false);\n")
         f.write("END $$;\n")
 
     print(f"usuarios={len(usuarios)} reportes={len(reportes)} (incidentes={len(incidentes)}) evidencias={len(evidencias)} "
           f"historial={len(historial)} evaluaciones={len(evaluaciones)} relacionados={len(relacionados)} "
-          f"testigos={len(testigos)} casos={len(casos)} remisiones={len(remisiones)}")
+          f"testigos={len(testigos)} casos={len(casos)} remisiones={len(remisiones)} postulaciones={len(postulaciones)}")
     print(f"incidente demo: id_incidente={id_incidente_demo}")
 
 
