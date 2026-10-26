@@ -43,6 +43,20 @@ class ReporteTest {
     }
 
     @Test
+    void elDetalleSoloLoVenElAutorYElPersonalDeRevision() {
+        Usuario autor = org.mockito.Mockito.mock(Usuario.class);
+        Usuario vecino = org.mockito.Mockito.mock(Usuario.class);
+        org.mockito.Mockito.when(autor.getId()).thenReturn(10);
+        org.mockito.Mockito.when(vecino.getId()).thenReturn(11);
+        Reporte r = Reporte.nuevo(TipoReporte.INCIDENTE, autor, null, null, pendiente, "Alcantarilla sin tapa",
+                BigDecimal.ONE, BigDecimal.ONE, null);
+
+        assertTrue(r.puedeSerVistoPor(autor));
+        assertFalse(r.puedeSerVistoPor(vecino));
+        assertTrue(r.puedeSerVistoPor(operador), "el operador no es el autor, pero revisa reportes");
+    }
+
+    @Test
     void elCorreoSeNormalizaAMinusculas() {
         assertEquals("ana@correo.test", ciudadano.getCorreo());
     }

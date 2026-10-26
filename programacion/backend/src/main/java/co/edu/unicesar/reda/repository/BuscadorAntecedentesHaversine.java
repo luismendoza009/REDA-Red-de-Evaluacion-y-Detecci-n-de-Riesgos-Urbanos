@@ -1,5 +1,6 @@
 package co.edu.unicesar.reda.repository;
 
+import co.edu.unicesar.reda.config.PropiedadesReda;
 import co.edu.unicesar.reda.service.BuscadorAntecedentes;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -47,14 +48,16 @@ public class BuscadorAntecedentesHaversine implements BuscadorAntecedentes {
             """;
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final int radioMetros;
 
-    public BuscadorAntecedentesHaversine(NamedParameterJdbcTemplate jdbc) {
+    public BuscadorAntecedentesHaversine(NamedParameterJdbcTemplate jdbc, PropiedadesReda propiedades) {
         this.jdbc = jdbc;
+        this.radioMetros = propiedades.antecedentes().radioMetros();
     }
 
     @Override
     public List<Antecedente> buscar(Integer idCategoria, BigDecimal latitud, BigDecimal longitud,
-                                    OffsetDateTime anterioresA, int radioMetros) {
+                                    OffsetDateTime anterioresA) {
         double lat = latitud.doubleValue();
         double lon = longitud.doubleValue();
         double deltaLat = radioMetros / METROS_POR_GRADO;

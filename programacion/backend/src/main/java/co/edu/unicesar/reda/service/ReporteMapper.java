@@ -4,7 +4,7 @@ import co.edu.unicesar.reda.dto.ReporteDtos.*;
 import co.edu.unicesar.reda.model.HistorialEstado;
 import co.edu.unicesar.reda.model.Incidente;
 import co.edu.unicesar.reda.model.Reporte;
-import co.edu.unicesar.reda.repository.ReporteRepository.PuntoMapa;
+import co.edu.unicesar.reda.repository.MapaPublicoRepository.PuntoMapa;
 
 /**
  * Convierte entidades en DTO de respuesta.
@@ -46,8 +46,7 @@ final class ReporteMapper {
     }
 
     static PuntoMapaResponse punto(PuntoMapa p) {
-        return new PuntoMapaResponse(p.getIdReporte(), p.getTipoReporte(), p.getCategoria(), p.getZona(),
-                p.getEstado(), p.getLatitud(), p.getLongitud(), p.getFecha(), p.getNivelGravedad(),
-                p.getNumEvidencias() == null ? 0 : p.getNumEvidencias());
+        return new PuntoMapaResponse(p.idReporte(), p.tipoReporte(), p.categoria(), p.zona(), p.estado(),
+                p.latitud(), p.longitud(), p.fecha(), p.nivelGravedad(), p.numEvidencias());
     }
 }
