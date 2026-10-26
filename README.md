@@ -32,6 +32,15 @@ programacion/             PROGRAMACIÓN 3
 
 Requisitos: PostgreSQL 16+, Java 17, Maven. La primera vez Maven descarga dependencias.
 
+**Atajo (un solo comando):** pide la clave de PostgreSQL la primera vez, aplica las migraciones pendientes y arranca
+el servidor. Con `-Recrear` reconstruye la base desde cero con los datos de demostración.
+```powershell
+cd programacion\backend
+.\iniciar.ps1            # o: .\iniciar.ps1 -Recrear
+```
+
+Pasos manuales equivalentes:
+
 **1. Crear la base con los datos de demostración** (borra y recrea la base `reda`):
 ```powershell
 cd base-de-datos
