@@ -70,6 +70,21 @@ SELECT count(*) FROM (
 ) x JOIN usuarios u USING (id_usuario) JOIN roles ro USING (id_rol)
 WHERE ro.nombre NOT IN ('OPERADOR', 'ADMINISTRADOR');
 
+\echo '12. Toda remisión ACEPTADA corresponde a la postulación ELEGIDA del mismo abogado. Esperado: 0'
+SELECT count(*) FROM remisiones rm
+WHERE rm.estado_remision = 'ACEPTADA'
+  AND NOT EXISTS (SELECT 1 FROM postulaciones p
+                  WHERE p.id_caso = rm.id_caso AND p.id_abogado = rm.id_abogado AND p.estado = 'ELEGIDA');
+
+\echo '13. Casos con abogado: exactamente una postulación elegida; casos buscando abogado: todas pendientes. Esperado: 0'
+SELECT count(*) FROM casos c JOIN estados_caso ec USING (id_estado_caso)
+WHERE (ec.nombre IN ('Aceptado por abogado', 'Cerrado') AND c.id_caso IN (SELECT id_caso FROM remisiones)
+       AND (SELECT count(*) FROM postulaciones p WHERE p.id_caso = c.id_caso AND p.estado = 'ELEGIDA') <> 1)
+   OR (ec.nombre = 'Remitido' AND EXISTS (SELECT 1 FROM postulaciones p WHERE p.id_caso = c.id_caso AND p.estado <> 'PENDIENTE'));
+
+\echo '14. Solo se postulan abogados activos (verificados). Esperado: 0'
+SELECT count(*) FROM postulaciones p JOIN abogados a USING (id_abogado) WHERE NOT a.activo;
+
 \echo 'Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)'
 SELECT i.id_incidente, count(rr.*) AS antecedentes, min(rc.fecha_reporte)::date AS primero
 FROM incidentes i

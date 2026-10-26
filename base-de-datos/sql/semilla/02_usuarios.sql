@@ -60,10 +60,10 @@ INSERT INTO usuarios (id_usuario, nombre, correo, password_hash, id_rol, fecha_r
   (54, 'Sandra Fuentes Castro', 'sandra.fuentes54@correo.test', '$2a$10$Ddurwe.W/MljJhBgg5s3z..g9R20NWTvvdmVVh7epzSY9cx4u/Ti2', 1, '2026-04-02T09:41:46-05:00', true, '2026-04-02T09:41:46-05:00'),
   (55, 'Sandra Villazón Montero', 'sandra.villazon55@correo.test', '$2a$10$Ddurwe.W/MljJhBgg5s3z..g9R20NWTvvdmVVh7epzSY9cx4u/Ti2', 1, '2026-03-17T02:52:19-05:00', true, '2026-03-17T02:52:19-05:00');
 
-INSERT INTO abogados (id_abogado, id_usuario, tarjeta_profesional, especialidad, ciudad, activo) VALUES
-  (1, 6, '142322', 'Responsabilidad del Estado', 'Valledupar', true),
-  (2, 7, '335748', 'Derecho administrativo', 'Valledupar', true),
-  (3, 8, '264748', 'Responsabilidad civil y del Estado', 'Valledupar', true),
-  (4, 9, '282272', 'Responsabilidad del Estado', 'Valledupar', true),
-  (5, 10, '369267', 'Derecho administrativo', 'Valledupar', false);
+INSERT INTO abogados (id_abogado, id_usuario, tarjeta_profesional, especialidad, ciudad, activo, anios_experiencia, presentacion) VALUES
+  (1, 6, '142322', 'Responsabilidad del Estado', 'Valledupar', true, 12, 'Litigante en reparación directa contra entidades públicas del Cesar. Atiendo en el centro de Valledupar.'),
+  (2, 7, '335748', 'Derecho administrativo', 'Valledupar', true, 7, 'Abogada administrativista. Acompaño a víctimas de fallas en servicios públicos desde la primera consulta.'),
+  (3, 8, '264748', 'Responsabilidad civil y del Estado', 'Valledupar', true, 15, 'Más de quince años en responsabilidad del Estado; casos de vías, alcantarillado y alumbrado público.'),
+  (4, 9, '282272', 'Responsabilidad del Estado', 'Valledupar', true, 4, 'Abogado joven, cercano y con disponibilidad inmediata para revisar su caso.'),
+  (5, 10, '369267', 'Derecho administrativo', 'Valledupar', false, 2, 'Recién vinculado a la red; en verificación de tarjeta profesional.');
 

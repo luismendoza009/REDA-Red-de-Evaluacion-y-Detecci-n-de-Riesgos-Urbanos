@@ -14,10 +14,12 @@ SELECT 'C01 una fila por incidente' AS verificacion,
        = (SELECT count(*) FROM incidentes) AS coincide
 
 UNION ALL
--- C02: lo facturado por abogado suma lo mismo que lo cobrado por caso en la vista
-SELECT 'C02 total facturado = total cobrado por casos',
-       (SELECT sum(valor_cobrado) FROM remisiones rm JOIN abogados a USING (id_abogado) JOIN usuarios u ON u.id_usuario = a.id_usuario)
-       = (SELECT sum(total_cobrado) FROM v_resumen_casos)
+-- C02: sumar por abogado da lo mismo que sumar todas las remisiones aceptadas,
+-- y el total de remisiones es el mismo que el total cobrado por caso en la vista
+SELECT 'C02 facturado por abogado = total aceptado = total de la vista',
+       (SELECT sum(t) FROM (SELECT sum(valor_cobrado) t FROM remisiones WHERE estado_remision = 'ACEPTADA' GROUP BY id_abogado) x)
+       = (SELECT sum(valor_cobrado) FROM remisiones WHERE estado_remision = 'ACEPTADA')
+   AND (SELECT sum(valor_cobrado) FROM remisiones) = (SELECT sum(total_cobrado) FROM v_resumen_casos)
 
 UNION ALL
 -- C03: anti-join con LEFT JOIN vs NOT EXISTS
@@ -71,10 +73,10 @@ SELECT 'C06 HAVING = subconsulta correlacionada',
 
 UNION ALL
 -- C07: la tasa promedio de la red calculada como cociente de conteos
-SELECT 'C07 promedio con avg = aceptadas / respondidas',
-       (SELECT avg((estado_remision = 'ACEPTADA')::int) FROM remisiones WHERE estado_remision IN ('ACEPTADA', 'RECHAZADA'))
-       = (SELECT count(*) FILTER (WHERE estado_remision = 'ACEPTADA')::numeric
-                 / count(*) FILTER (WHERE estado_remision IN ('ACEPTADA', 'RECHAZADA')) FROM remisiones)
+SELECT 'C07 promedio con avg = elegidas / resueltas',
+       (SELECT avg((estado = 'ELEGIDA')::int) FROM postulaciones WHERE estado IN ('ELEGIDA', 'NO_ELEGIDA'))
+       = (SELECT count(*) FILTER (WHERE estado = 'ELEGIDA')::numeric
+                 / count(*) FILTER (WHERE estado IN ('ELEGIDA', 'NO_ELEGIDA')) FROM postulaciones)
 
 UNION ALL
 -- C08: reportes solucionados contados desde el estado actual = desde el historial
