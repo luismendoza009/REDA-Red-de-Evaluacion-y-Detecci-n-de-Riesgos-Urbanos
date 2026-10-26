@@ -37,6 +37,7 @@ INSERT INTO testigos (id_testigo, id_incidente, nombre, contacto) VALUES
   (13, 18, 'Carlos Arzuaga', '3006823614');
 
 INSERT INTO reportes_relacionados (id_reporte, id_reporte_relacionado, tipo_relacion, origen, fecha_vinculo) VALUES
+  (121, 5, 'ANTECEDENTE', 'AUTOMATICO', '2026-05-23T08:07:43-05:00'),
   (126, 5, 'ANTECEDENTE', 'AUTOMATICO', '2026-07-16T06:41:00-05:00'),
   (126, 6, 'ANTECEDENTE', 'AUTOMATICO', '2026-07-16T06:41:00-05:00'),
   (126, 7, 'ANTECEDENTE', 'AUTOMATICO', '2026-07-16T06:41:00-05:00'),
@@ -79,5 +80,6 @@ INSERT INTO reportes_relacionados (id_reporte, id_reporte_relacionado, tipo_rela
   (22, 20, 'SIMILAR', 'MANUAL', '2026-07-12T02:29:24-05:00'),
   (24, 23, 'SIMILAR', 'MANUAL', '2026-08-06T13:49:07-05:00'),
   (26, 25, 'SIMILAR', 'MANUAL', '2026-06-13T12:28:35-05:00'),
-  (27, 26, 'SIMILAR', 'MANUAL', '2026-06-17T10:03:34-05:00');
+  (27, 26, 'SIMILAR', 'MANUAL', '2026-06-17T10:03:34-05:00'),
+  (77, 63, 'SIMILAR', 'MANUAL', '2026-06-12T22:41:15-05:00');
 
