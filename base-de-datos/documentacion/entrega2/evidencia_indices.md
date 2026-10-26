@@ -26,14 +26,14 @@ alrededor del incidente demo y anteriores a la fecha del hecho. Es el filtro pre
 |---|---|---|
 | Plan sobre reportes | Index Scan con `ix_reportes_categoria` (solo categoría) | Index Scan con `ix_reportes_antecedentes` |
 | Condición resuelta por el índice | `id_categoria` | `id_categoria`, `tipo_reporte`, rango de `latitud` |
-| Filas descartadas por filtro | 25 051 | 541 |
-| Páginas leídas (buffers) | 3 475 | 576 |
-| Tiempo de ejecución | 8,88 ms | 0,65 ms |
+| Filas descartadas por filtro | 25 052 | 539 |
+| Páginas leídas (buffers) | 3 476 | 574 |
+| Tiempo de ejecución | 8,33 ms | 0,58 ms |
 
 **Conclusión:** la comparación es honesta: el "antes" ya tenía el índice simple de la FK `id_categoria`,
 y aun así tenía que leer y descartar todos los reportes de la categoría (unos 25 000). El índice compuesto
 pone primero las columnas de igualdad (categoría, tipo) y después la de rango (latitud), que es el orden
-en que un B-tree puede usarlas. Así el recorrido baja a una franja de ~100 m de latitud: **13,7 veces más
+en que un B-tree puede usarlas. Así el recorrido baja a una franja de ~100 m de latitud: **14 veces más
 rápido y 6 veces menos páginas**. La longitud va en `INCLUDE` porque una segunda condición de rango no
 reduciría más el recorrido del B-tree, pero tenerla en el índice evita ir a la tabla a evaluarla.
 Este es el índice que usará la función PL/pgSQL de búsqueda de antecedentes de la Entrega 3.
@@ -47,13 +47,13 @@ Este es el índice que usará la función PL/pgSQL de búsqueda de antecedentes 
 | | Antes | Después |
 |---|---|---|
 | Plan sobre evidencias | Parallel Seq Scan (2 workers) + Hash Join | Index Scan + Nested Loop |
-| Filas leídas de evidencias | 400 206 (133 402 por proceso × 3) | 2 |
+| Filas leídas de evidencias | ≈ 400 214 (133 405 por proceso × 3) | 1 |
 | Páginas leídas | 7 688 | 8 |
-| Tiempo de ejecución | 40,35 ms | 0,074 ms |
+| Tiempo de ejecución | 39,71 ms | 0,064 ms |
 
 **Conclusión:** PostgreSQL **no crea índices para las claves foráneas** (solo para PK y UNIQUE). Sin el
-índice, ver las 2 fotos de un caso obliga a recorrer las 400 000 evidencias; con el índice, el plan cambia
-de Hash Join a Nested Loop y lee 8 páginas: unas **500 veces más rápido**. El mismo índice acelera el
+índice, ver la foto de un caso obliga a recorrer las 400 000 evidencias; con el índice, el plan cambia
+de Hash Join a Nested Loop y lee 8 páginas: unas **600 veces más rápido**. El mismo índice acelera el
 `ON DELETE CASCADE` desde reportes (borrar un reporte no recorre toda la tabla de evidencias). Por eso la
 migración 007 indexa todas las FK de joins frecuentes que no estaban cubiertas por una PK o UNIQUE.
 
