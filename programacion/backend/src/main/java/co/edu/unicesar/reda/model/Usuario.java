@@ -61,6 +61,15 @@ public class Usuario {
         return correo.trim().toLowerCase(Locale.ROOT);
     }
 
+    /** Recibe el hash ya calculado: esta clase no sabe de algoritmos de cifrado. */
+    public void cambiarPassword(String nuevoHash) {
+        this.passwordHash = nuevoHash;
+    }
+
+    public void cambiarNombre(String nuevoNombre) {
+        this.nombre = nuevoNombre.trim();
+    }
+
     public boolean tieneRol(NombreRol nombreRol) {
         return rol.getNombre() == nombreRol;
     }

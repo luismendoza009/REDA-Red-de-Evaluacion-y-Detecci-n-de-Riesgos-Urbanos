@@ -47,6 +47,7 @@ public class ManejadorGlobalExcepciones {
             case CONFLICTO -> HttpStatus.CONFLICT;
             case NO_AUTENTICADO -> HttpStatus.UNAUTHORIZED;
             case ACCESO_DENEGADO -> HttpStatus.FORBIDDEN;
+            case DEMASIADOS_INTENTOS -> HttpStatus.TOO_MANY_REQUESTS;
         };
     }
 

@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Endpoints sin sesión. Nada de lo que devuelven contiene datos personales, del daño ni fotos. */
+/** Mapa (exige sesión). Nada de lo que devuelve contiene datos personales, del daño ni fotos. */
 @RestController
-@RequestMapping("/api/publico")
-@Tag(name = "Público")
+@RequestMapping("/api/mapa")
+@Tag(name = "Mapa")
 public class MapaPublicoController {
 
     private final MapaPublicoService mapa;

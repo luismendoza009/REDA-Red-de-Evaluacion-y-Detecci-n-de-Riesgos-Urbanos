@@ -58,7 +58,7 @@ public class ReporteController {
     @GetMapping("/mios")
     @PreAuthorize("hasRole('CIUDADANO')")
     @Operation(summary = "Reportes del ciudadano autenticado")
-    public List<ReporteResumenResponse> misReportes(@AuthenticationPrincipal UsuarioAutenticado usuario) {
+    public List<MiReporteResponse> misReportes(@AuthenticationPrincipal UsuarioAutenticado usuario) {
         return consulta.misReportes(usuario.id());
     }
 
