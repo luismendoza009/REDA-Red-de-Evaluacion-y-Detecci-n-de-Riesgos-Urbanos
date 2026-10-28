@@ -9,7 +9,7 @@
 
 | Parte | Qué hizo la IA | Cómo se verificó |
 |---|---|---|
-| Migraciones 001–011 | Redactó el DDL a partir del esquema de la Entrega 1 y de las decisiones del grupo (enfoque probatorio, elección del abogado por el ciudadano, calificaciones) | Se ejecutan en orden sobre una base vacía de PostgreSQL 18 (`scripts/migrar.ps1 -Recrear`). 27 pruebas negativas (`sql/pruebas/probar_restricciones.sql`) comprueban que cada restricción clave rechaza datos inválidos y que la detiene la restricción esperada |
+| Migraciones 001–013 | Redactó el DDL a partir del esquema de la Entrega 1 y de las decisiones del grupo (enfoque probatorio, elección del abogado por el ciudadano, calificaciones) | Se ejecutan en orden sobre una base vacía de PostgreSQL 18 (`scripts/migrar.ps1 -Recrear` y `scripts/verificar_desde_cero.ps1`). 32 pruebas negativas (`sql/pruebas/probar_restricciones.sql`) comprueban que cada restricción clave rechaza datos inválidos y que la detiene la restricción esperada |
 | `scripts/migrar.ps1` | Lo escribió | Se ejecutó sobre base vacía y se volvió a ejecutar para comprobar que no reaplica migraciones |
 | Generador y datos semilla | Escribió el generador en Python | 15 comprobaciones de coherencia (`sql/pruebas/verificar_semilla.sql`), todas en 0 |
 | Banco de consultas | Redactó las 10 consultas | Cada resultado se recalculó por otro camino SQL (`sql/consultas/verificacion_consultas.sql`). Las cifras de C02 y C07 se comprobaron a mano |
