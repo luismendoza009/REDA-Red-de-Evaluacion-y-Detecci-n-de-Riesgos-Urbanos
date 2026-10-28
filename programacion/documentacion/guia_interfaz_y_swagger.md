@@ -35,7 +35,7 @@ aplica el principio de **privilegio mínimo**.
 **Swagger (OpenAPI)** es una página que se genera **automáticamente** a partir del código del backend y lista
 todos los servicios (endpoints) de la API: la ruta, el método HTTP (GET, POST, PATCH, DELETE), qué datos recibe,
 qué responde y qué errores puede devolver. En REDA la genera la librería **springdoc-openapi** leyendo los
-`@RestController` y los DTO con sus validaciones.
+`@RestController` y las peticiones (`peticion/`) con sus validaciones.
 
 - Dirección: **http://localhost:8080/swagger-ui.html** (en el menú del administrador: *Documentación de la API*).
 - **No es para el usuario final**: es para desarrolladores y para el profesor. Sirve para ver el «contrato» entre
