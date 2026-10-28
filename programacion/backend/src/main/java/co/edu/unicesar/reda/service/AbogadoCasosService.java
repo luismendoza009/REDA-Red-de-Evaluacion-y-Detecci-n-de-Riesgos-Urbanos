@@ -1,7 +1,9 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.CasoDtos.*;
 import co.edu.unicesar.reda.exception.AccesoDenegadoException;
+import co.edu.unicesar.reda.respuesta.CasoDisponibleResponse;
+import co.edu.unicesar.reda.respuesta.ExpedienteResponse;
+import co.edu.unicesar.reda.respuesta.TestigoResponse;
 import co.edu.unicesar.reda.model.*;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
 import co.edu.unicesar.reda.repository.CasoRepository;

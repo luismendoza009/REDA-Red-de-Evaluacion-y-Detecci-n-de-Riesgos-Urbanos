@@ -1,13 +1,18 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.*;
 import co.edu.unicesar.reda.model.HistorialEstado;
 import co.edu.unicesar.reda.model.Incidente;
 import co.edu.unicesar.reda.model.Reporte;
 import co.edu.unicesar.reda.repository.MapaPublicoRepository.PuntoMapa;
+import co.edu.unicesar.reda.respuesta.AntecedenteResponse;
+import co.edu.unicesar.reda.respuesta.CambioEstadoResponse;
+import co.edu.unicesar.reda.respuesta.IncidenteResponse;
+import co.edu.unicesar.reda.respuesta.PuntoMapaResponse;
+import co.edu.unicesar.reda.respuesta.ReporteDetalleResponse;
+import co.edu.unicesar.reda.respuesta.ReporteResumenResponse;
 
 /**
- * Convierte entidades en DTO de respuesta.
+ * Convierte entidades en respuestas de la API (paquete respuesta).
  * GRASP Indirección: separa el modelo de dominio del contrato de la API. Si cambia una tabla,
  * no tiene por qué cambiar el JSON que usa el frontend (y viceversa). Además evita exponer
  * datos que no deben salir (correo del autor, hash de la contraseña...).

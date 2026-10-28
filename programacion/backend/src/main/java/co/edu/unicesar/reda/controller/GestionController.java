@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.AdminDtos.AbogadoAdminResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.ReporteEnRevision;
+import co.edu.unicesar.reda.respuesta.AbogadoAdminResponse;
+import co.edu.unicesar.reda.respuesta.ReporteEnRevision;
 import co.edu.unicesar.reda.service.AdminService;
 import co.edu.unicesar.reda.service.RevisionReporteService;
 import io.swagger.v3.oas.annotations.Operation;

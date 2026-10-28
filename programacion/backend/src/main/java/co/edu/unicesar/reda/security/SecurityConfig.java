@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.security;
 
 import co.edu.unicesar.reda.config.PropiedadesReda;
-import co.edu.unicesar.reda.dto.ErrorRespuesta;
+import co.edu.unicesar.reda.exception.ErrorRespuesta;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

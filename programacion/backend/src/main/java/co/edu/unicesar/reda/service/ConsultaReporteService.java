@@ -1,16 +1,16 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.AntecedenteResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.MiReporteResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.ReporteDetalleResponse;
-import co.edu.unicesar.reda.model.Caso;
-import co.edu.unicesar.reda.model.NombreEstado;
 import co.edu.unicesar.reda.exception.AccesoDenegadoException;
 import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
+import co.edu.unicesar.reda.model.Caso;
+import co.edu.unicesar.reda.model.NombreEstado;
 import co.edu.unicesar.reda.model.Reporte;
 import co.edu.unicesar.reda.repository.ReporteRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
+import co.edu.unicesar.reda.respuesta.AntecedenteResponse;
+import co.edu.unicesar.reda.respuesta.MiReporteResponse;
+import co.edu.unicesar.reda.respuesta.ReporteDetalleResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,9 +1,9 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.CrearIncidenteRequest;
-import co.edu.unicesar.reda.dto.ReporteDtos.FallaRequest;
-import co.edu.unicesar.reda.dto.ReporteDtos.IncidenteCreadoResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.ReporteDetalleResponse;
+import co.edu.unicesar.reda.peticion.CrearIncidenteRequest;
+import co.edu.unicesar.reda.peticion.FallaRequest;
+import co.edu.unicesar.reda.respuesta.IncidenteCreadoResponse;
+import co.edu.unicesar.reda.respuesta.ReporteDetalleResponse;
 import co.edu.unicesar.reda.model.*;
 import co.edu.unicesar.reda.repository.*;
 import org.springframework.stereotype.Service;

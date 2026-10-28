@@ -1,14 +1,18 @@
 package co.edu.unicesar.reda.service;
 
 import co.edu.unicesar.reda.config.PropiedadesReda;
-import co.edu.unicesar.reda.dto.MapaDtos.*;
-import co.edu.unicesar.reda.dto.ReporteDtos.PuntoMapaResponse;
 import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.model.AgrupadorPuntos;
 import co.edu.unicesar.reda.model.Frecuencia;
 import co.edu.unicesar.reda.model.SituacionCaso;
-import co.edu.unicesar.reda.repository.MapaPublicoRepository;
 import co.edu.unicesar.reda.repository.MapaPublicoRepository.PuntoMapa;
+import co.edu.unicesar.reda.repository.MapaPublicoRepository;
+import co.edu.unicesar.reda.respuesta.ConteoSituaciones;
+import co.edu.unicesar.reda.respuesta.DetallePublicoResponse;
+import co.edu.unicesar.reda.respuesta.Hito;
+import co.edu.unicesar.reda.respuesta.PuntoMapaResponse;
+import co.edu.unicesar.reda.respuesta.PuntoResponse;
+import co.edu.unicesar.reda.respuesta.ReporteEnPunto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

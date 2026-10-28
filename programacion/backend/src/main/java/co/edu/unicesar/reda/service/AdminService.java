@@ -1,8 +1,8 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.AdminDtos.AbogadoAdminResponse;
 import co.edu.unicesar.reda.model.Abogado;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
+import co.edu.unicesar.reda.respuesta.AbogadoAdminResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,6 +1,10 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.AuthDtos.*;
+import co.edu.unicesar.reda.peticion.ActualizarPerfilAbogadoRequest;
+import co.edu.unicesar.reda.peticion.ActualizarPerfilRequest;
+import co.edu.unicesar.reda.peticion.CambioPasswordRequest;
+import co.edu.unicesar.reda.respuesta.MensajeResponse;
+import co.edu.unicesar.reda.respuesta.PerfilResponse;
 import co.edu.unicesar.reda.security.UsuarioAutenticado;
 import co.edu.unicesar.reda.service.PerfilService;
 import io.swagger.v3.oas.annotations.Operation;

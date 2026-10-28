@@ -1,14 +1,14 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.CatalogoDtos.CategoriaResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.EntidadResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.ZonaResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.ZonaSugeridaResponse;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import co.edu.unicesar.reda.model.Zona;
 import co.edu.unicesar.reda.repository.CategoriaRepository;
 import co.edu.unicesar.reda.repository.EntidadPublicaRepository;
 import co.edu.unicesar.reda.repository.ZonaRepository;
+import co.edu.unicesar.reda.respuesta.CategoriaResponse;
+import co.edu.unicesar.reda.respuesta.EntidadResponse;
+import co.edu.unicesar.reda.respuesta.ZonaResponse;
+import co.edu.unicesar.reda.respuesta.ZonaSugeridaResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

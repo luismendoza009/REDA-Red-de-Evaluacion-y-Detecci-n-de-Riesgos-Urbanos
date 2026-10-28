@@ -40,7 +40,7 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- Validaciones declarativas en los DTO (Bean Validation) -->
+        <!-- Validaciones declarativas en las peticiones (Bean Validation) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>

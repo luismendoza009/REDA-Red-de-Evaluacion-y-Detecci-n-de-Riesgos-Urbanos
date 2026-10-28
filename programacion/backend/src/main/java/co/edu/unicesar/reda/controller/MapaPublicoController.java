@@ -1,8 +1,8 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.MapaDtos.DetallePublicoResponse;
-import co.edu.unicesar.reda.dto.MapaDtos.PuntoResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.PuntoMapaResponse;
+import co.edu.unicesar.reda.respuesta.DetallePublicoResponse;
+import co.edu.unicesar.reda.respuesta.PuntoMapaResponse;
+import co.edu.unicesar.reda.respuesta.PuntoResponse;
 import co.edu.unicesar.reda.service.MapaPublicoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
