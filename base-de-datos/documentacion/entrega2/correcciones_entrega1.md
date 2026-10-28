@@ -10,15 +10,15 @@ evidencia y lo vincula con los reportes previos del mismo punto, que demuestran 
 Si el caso es viable, se remite a un abogado (que paga una cuota fija por caso remitido).
 
 El esquema de la Entrega 1 **se conserva completo**: las 10 tablas siguen existiendo, con sus llaves y
-sus políticas de borrado. Lo que hay son columnas y restricciones nuevas y 10 tablas adicionales.
+sus políticas de borrado. Lo que hay son columnas y restricciones nuevas y 13 tablas adicionales (23 en total).
 
 ## 2. Cambios en tablas existentes
 
 | Tabla | Cambio | Por qué |
 |---|---|---|
 | roles | CHECK con la lista cerrada; nuevos roles ABOGADO y ANALISTA | El nuevo negocio necesita abogados; ANALISTA prepara el rol de solo lectura de la Entrega 3 |
-| usuarios | `fecha_registro` pasa a TIMESTAMPTZ; nuevas `activo` y `fecha_consentimiento`; CHECK de correo en minúsculas y de hash BCrypt | Las cuentas se desactivan, no se borran (sus reportes son evidencia). Registro del consentimiento (Ley 1581 de 2012). Evita guardar contraseñas en texto plano |
-| zonas | nuevas `ciudad`, `nivel_trafico`, `centros_educativos`, `centros_salud`; UNIQUE (nombre, ciudad); CHECK de tipo | Supuesto 2 de la Entrega 1: las variables de contexto del IRU se guardan como datos simulados de la zona. La ciudad permite escalar a otras ciudades |
+| usuarios | `fecha_registro` pasa a TIMESTAMPTZ; nuevas `activo` y `fecha_consentimiento`; CHECK de correo en minúsculas y de hash BCrypt. Migración 013: `foto_perfil` (UQ), `foto_perfil_mime`, `fecha_foto_perfil` con CHECK de que los tres van juntos | Las cuentas se desactivan, no se borran (sus reportes son evidencia). Registro del consentimiento (Ley 1581 de 2012). Evita guardar contraseñas en texto plano. La foto se guarda como ruta, no como archivo dentro de la base |
+| zonas | nuevas `ciudad`, `nivel_trafico`, `centros_educativos`, `centros_salud`; UNIQUE (nombre, ciudad); CHECK de tipo. Migración 012: `latitud_referencia`, `longitud_referencia`, `fuente_ubicacion` | Supuesto 2 de la Entrega 1: las variables de contexto del IRU se guardan como datos simulados de la zona. La ciudad permite escalar a otras ciudades. El punto de referencia (tomado de OpenStreetMap) permite sugerir el barrio según el punto marcado en el mapa; el supuesto 6 se mantiene: no se usan polígonos |
 | estados | "Priorizado" pasa a llamarse **"Validado"** | Ahora el operador no prioriza: verifica que la falla y la evidencia sean reales. Es el paso que habilita abrir un caso |
 | reportes | nueva `tipo_reporte` (CONDICION / INCIDENTE); `fecha` pasa a `fecha_reporte` TIMESTAMPTZ; CHECK de rango de coordenadas y de longitud mínima de la descripción; UNIQUE (id_reporte, tipo_reporte) | Distinguir antecedentes de incidentes. El sello de tiempo con zona horaria tiene valor probatorio. La UNIQUE habilita la FK compuesta de incidentes |
 | evidencias | nuevas `tipo_mime`, `tamano_bytes`, `hash_sha256`, `fecha_captura`; `fecha` pasa a `fecha_carga` TIMESTAMPTZ; CHECK de tipo y tamaño | El hash SHA-256 demuestra que la foto no fue alterada después de cargarla y evita cargar la misma foto dos veces. Valida el tipo de archivo desde la base |
@@ -32,8 +32,22 @@ sean legibles y las pruebas puedan verificar qué regla detuvo cada dato inváli
 ## 3. Tablas nuevas
 
 `entidades_publicas`, `abogados`, `incidentes`, `testigos`, `estados_caso`, `casos`, `remisiones`,
-`versiones_indice`, `parametros_indice`, `calculos_indice`. Están descritas en el diccionario de datos y
-justificadas en la auditoría de normalización.
+`versiones_indice`, `parametros_indice`, `calculos_indice` (migraciones 001–006) y, después,
+`postulaciones` y `tokens_recuperacion` (010) y `calificaciones` (011). Están descritas en el diccionario de
+datos y justificadas en la auditoría de normalización.
+
+Por qué las tres últimas:
+
+- **postulaciones**: el ciudadano ya no recibe un abogado asignado; los abogados se postulan y el ciudadano
+  elige. La elección genera la remisión que se le cobra al abogado. Un índice único parcial garantiza un
+  solo abogado elegido por caso.
+- **tokens_recuperacion**: recuperación de contraseña con enlaces de un solo uso. Se guarda el hash del
+  token, nunca el token.
+- **calificaciones**: el ciudadano califica al abogado (1 a 5) al cerrar el caso. El promedio no se guarda
+  (dato derivado, 3FN): lo calcula la vista `v_reputacion_abogados`.
+
+También se agregaron `abogados.anios_experiencia` y `abogados.presentacion` y `casos.fecha_consentimiento`
+(momento en que el ciudadano autoriza mostrar el resumen anónimo de su caso a los abogados), en la 010.
 
 ## 4. Desviaciones respecto a la propuesta inicial del modelo extendido
 
@@ -46,5 +60,20 @@ justificadas en la auditoría de normalización.
 
 ## 5. Diagrama
 
-El diagrama EER se actualizó a 20 tablas (`diagramas/reda_eer.drawio` y `.png`). La versión de la Entrega 1
+El diagrama EER se actualizó a 23 tablas y 31 relaciones (`diagramas/reda_eer.drawio` y `.png`). La versión de la Entrega 1
 se conserva en `diagramas/especificacion_eer_v1.json` y en el tag `entrega-1` del repositorio.
+
+## 6. Ubicación de los archivos de la Entrega 1
+
+Desde la Entrega 2 el repositorio se separa por asignatura: todo lo de Base de Datos I está en
+`base-de-datos/`. Por eso las rutas que cita el documento de la Entrega 1 cambiaron:
+
+| En la Entrega 1 | Ahora |
+|---|---|
+| `documentacion/Entrega1_REDA.docx` (y .pdf) | `base-de-datos/documentacion/Entrega1_REDA.docx` (y .pdf) |
+| `diagramas/reda_eer.drawio` y `.png` | `base-de-datos/diagramas/reda_eer.drawio` y `.png` (actualizados a 23 tablas) |
+| `migraciones/` (vacía) | `base-de-datos/migraciones/` (001 a 013) |
+
+El documento de la Entrega 1 se conserva tal como se entregó (versión con los integrantes y el enlace al
+repositorio); los cambios de diseño posteriores se explican en este archivo y no reescribiendo aquel.
+El diagrama en notación de Chen de Rafael Rivera está en `base-de-datos/diagramas/reda_eer_chen.drawio` y `.png`.

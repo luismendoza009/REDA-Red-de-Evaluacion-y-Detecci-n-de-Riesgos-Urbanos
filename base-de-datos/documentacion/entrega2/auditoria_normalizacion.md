@@ -1,5 +1,7 @@
 # Auditoría de normalización — REDA (Entrega 2)
 
+> Actualizada al esquema real: migraciones 001 a 013 (23 tablas).
+
 Método: para cada tabla se listan las dependencias funcionales (DF) no triviales, las claves
 candidatas y la verificación de forma normal. Recordatorio de criterios:
 
@@ -37,6 +39,9 @@ guarda y se muestra entero, nunca se consulta ni se actualiza por partes (ver ex
 | 18 | versiones_indice | {id_version}, {nombre_indice, numero_version} | FNBC | Nació de corregir una violación de 2FN |
 | 19 | parametros_indice | {id_version, variable} | FNBC | |
 | 20 | calculos_indice | {id_calculo} | FNBC | E4: JSONB del desglose |
+| 21 | postulaciones | {id_postulacion}, {id_caso, id_abogado} | FNBC | E5: la postulación elegida y la remisión guardan el mismo par caso-abogado |
+| 22 | tokens_recuperacion | {id_token}, {hash_token} | FNBC | |
+| 23 | calificaciones | {id_calificacion}, {id_caso} | FNBC | E6: id_abogado también se deduce del caso |
 
 ## Detalle por tabla
 
@@ -44,8 +49,11 @@ guarda y se muestra entero, nunca se consulta ni se actualiza por partes (ver ex
 
 **2. categorias** — id_categoria → nombre, descripcion; nombre → id_categoria, descripcion. FNBC.
 
-**3. zonas** — id_zona → nombre, tipo, ciudad, nivel_trafico, centros_educativos, centros_salud;
-{nombre, ciudad} → id_zona, (resto). Un mismo nombre de barrio puede existir en dos ciudades, por eso
+**3. zonas** — id_zona → nombre, tipo, ciudad, nivel_trafico, centros_educativos, centros_salud,
+latitud_referencia, longitud_referencia, fuente_ubicacion; {nombre, ciudad} → id_zona, (resto).
+El punto de referencia (012) es un dato **de la zona** (su ubicación aproximada y de dónde se tomó);
+no introduce ninguna DF nueva en reportes: sirve para *sugerir* la zona al ciudadano, no para deducirla
+(ver E1). Un mismo nombre de barrio puede existir en dos ciudades, por eso
 la clave natural incluye la ciudad. Las variables de contexto (tráfico, colegios, salud) describen la
 zona y dependen solo de ella. FNBC.
 
@@ -56,10 +64,14 @@ dominios distintos (ciclo de la falla vs. ciclo del caso legal); unirlos en un c
 **6. entidades_publicas** — id_entidad → nombre, tipo, ciudad; nombre → id_entidad, tipo, ciudad. FNBC.
 
 **7. usuarios** — id_usuario → nombre, correo, password_hash, id_rol, fecha_registro, activo,
-fecha_consentimiento; correo → id_usuario (y lo demás). El nombre del rol no está aquí (está en roles),
+fecha_consentimiento, foto_perfil, foto_perfil_mime, fecha_foto_perfil; correo → id_usuario (y lo demás).
+`foto_perfil` es UNIQUE (cada archivo pertenece a un solo usuario), así que la DF
+foto_perfil → foto_perfil_mime, fecha_foto_perfil tiene como determinante una clave alterna (cuando no es
+nula) y no rompe FNBC. El nombre del rol no está aquí (está en roles),
 lo que evita la dependencia transitiva id_usuario → id_rol → nombre_rol. FNBC.
 
-**8. abogados** — id_abogado → id_usuario, tarjeta_profesional, especialidad, ciudad, activo;
+**8. abogados** — id_abogado → id_usuario, tarjeta_profesional, especialidad, ciudad, activo,
+anios_experiencia, presentacion;
 id_usuario → id_abogado…; tarjeta_profesional → id_abogado… Tres claves candidatas. El nombre y
 el correo del abogado no se repiten aquí: se obtienen de usuarios. FNBC.
 
@@ -114,7 +126,7 @@ pero el operador puede atribuir la falla a otra (p. ej. una vía nacional), así
 contacto. FNBC.
 
 **16. casos** — id_caso → id_incidente, id_estado_caso, id_operador, fecha_creacion, fecha_cierre,
-observacion; id_incidente → id_caso… FNBC. El IVC **no** se guarda en casos: es un valor derivado de
+fecha_consentimiento, observacion; id_incidente → id_caso… FNBC. El IVC **no** se guarda en casos: es un valor derivado de
 varias tablas (ver calculos_indice).
 
 **17. remisiones** — id_remision → (todo); {id_caso, id_abogado} → (todo). FNBC. `valor_cobrado`
@@ -143,10 +155,36 @@ transitivas (id_calculo → id_version → nombre_indice).
   una variable concreta. Por eso se trata como valor atómico. Si en el futuro hubiera que consultar
   aportes por variable, se pasaría a una tabla `calculos_detalle(id_calculo, variable, valor, aporte)`.
 
+**21. postulaciones** — id_postulacion → id_caso, id_abogado, mensaje, estado, fecha_postulacion,
+fecha_resolucion; {id_caso, id_abogado} → (todo) (UNIQUE: un abogado se postula una vez por caso). FNBC.
+La regla "un solo abogado elegido por caso" no es una DF de la tabla: se garantiza con el índice único
+parcial `uq_postulaciones_una_elegida (id_caso) WHERE estado = 'ELEGIDA'`.
+
+- **E5 — postulación elegida y remisión.** Cuando el ciudadano elige, la postulación pasa a ELEGIDA y se
+  crea la remisión ACEPTADA con el mismo par (id_caso, id_abogado). Es una redundancia entre tablas, a
+  propósito: la postulación registra el *interés* del abogado y la remisión el *hecho que se cobra*, con
+  su valor pactado. Las dos se escriben en la misma transacción de la aplicación, de modo que no pueden
+  quedar desalineadas.
+
+**22. tokens_recuperacion** — id_token → id_usuario, hash_token, fecha_creacion, fecha_expiracion, fecha_uso;
+hash_token → id_token (y lo demás). FNBC. `fecha_expiracion` no se deriva de `fecha_creacion`: la vigencia
+(hoy 30 minutos) es una política que puede cambiar, así que la fecha de expiración es un hecho de cada
+token, igual que `valor_cobrado` en remisiones.
+
+**23. calificaciones** — id_calificacion → id_caso, id_abogado, puntaje, comentario, fecha;
+id_caso → (todo) (UNIQUE: una calificación por caso). FNBC. El promedio de cada abogado **no** se guarda
+(sería un dato derivado): lo calcula la vista `v_reputacion_abogados` con AVG.
+
+- **E6 — id_abogado.** El abogado calificado también se puede deducir del caso (es el de su remisión
+  aceptada). Se guarda para tener la FK a abogados y el índice `ix_calificaciones_abogado`, que hace
+  rápida la consulta de reputación. Que coincida con el abogado del caso lo valida hoy la aplicación;
+  es candidato a un trigger de validación en la Entrega 3.
+
 ## Conclusión
 
-18 de 20 tablas están en FNBC sin observaciones. `reportes` está en FNBC, con una dependencia del mundo
-real que no es verificable con los datos actuales (E1) y una redundancia controlada entre tablas (E2).
-`incidentes` está en 3FN por una columna constante que existe para ganar integridad declarativa (E3).
-Ninguna excepción permite anomalías de actualización sin control: cada una tiene un mecanismo de
+22 de 23 tablas están en FNBC. `reportes` está en FNBC, con una dependencia del mundo real que no es
+verificable con los datos actuales (E1) y una redundancia controlada entre tablas (E2). `incidentes` está
+en 3FN por una columna constante que existe para ganar integridad declarativa (E3). E5 y E6 no son
+violaciones de forma normal sino redundancias controladas entre tablas (la elección se guarda en una sola
+transacción y el abogado calificado lo toma la aplicación del propio caso). Ninguna excepción permite anomalías de actualización sin control: cada una tiene un mecanismo de
 verificación (CHECK, prueba o trigger planificado).
