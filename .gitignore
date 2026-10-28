@@ -31,3 +31,6 @@ programacion/frontend/.angular/
 *.log
 ~$*
 Thumbs.db
+
+# Memoria local del asistente de IA (no se publica)
+CLAUDE.md

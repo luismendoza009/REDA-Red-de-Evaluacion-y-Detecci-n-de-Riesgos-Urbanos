@@ -52,7 +52,7 @@ confirmación del grupo y pueden revisarse.
 
 ## Supuestos pendientes de confirmar con el grupo
 
-- **(supuesto)** Hasta tener la guía de Programación 3 se mantiene el stack de CLAUDE.md: Spring Boot 3 + Angular + Leaflet.
+- **(supuesto)** Hasta tener la guía de Programación 3 se mantiene el stack acordado por el grupo: Spring Boot 3 + Angular + Leaflet.
 - **(supuesto)** El cuarto integrante exigido por la guía aún no está identificado; el README lista 3.
 - **(por verificar con un abogado)** El plazo de caducidad de la acción de reparación directa, la legalidad
   del modelo de cobro por caso remitido y el valor probatorio de fotos y geolocalización tomadas con una app.
