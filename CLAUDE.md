@@ -55,9 +55,9 @@ El vínculo entre un incidente y sus antecedentes es la función estrella del si
 ## 2. ESTADO ACTUAL DEL REPOSITORIO
 
 - Repo: https://github.com/luismendoza009/REDA-Red-de-Evaluacion-y-Detecci-n-de-Riesgos-Urbanos
-- Integrantes: Rafael Alfonso Rivera Restrepo, Ivan Andres Rodriguez Rodriguez, Luis Eliecer Mendoza Perpiñán.
+- Integrantes: Rafael Alfonso Rivera Restrepo, Ivan Andres Rodriguez Rodriguez, Luis Eliecer Mendoza Perpiñán, Carlos Eduardo Camelo Montaño (cuarto integrante; GitHub `carloscamelo2008-lang`).
 - **Entrega 1 (diseño):** documento Word/PDF hecho (`documentacion/Entrega1_REDA.docx` y `.pdf`). Esquema de 10 tablas: `roles, usuarios, categorias, zonas, estados, reportes, evidencias, evaluaciones, historial_estados, reportes_relacionados`.
-- **Estado (2026-10-25):** Entrega 1 cerrada en local (diagrama .drawio + .png en `base-de-datos/diagramas/`). Entrega 2 completa en la rama `feature/entrega-2-migraciones` (sin push). Backend en `feature/backend-base`. PENDIENTE con autorización del usuario: push (bloqueado por credencial 403), mover tag `entrega-1`, crear tag `entrega-2`.
+- **Estado (2026-10-28):** todo integrado en `main` en GitHub (PR #1). Tag `entrega-1` ya está en GitHub (lo puso el equipo). Esquema: 13 migraciones, 23 tablas. Documentos de Entrega 2 actualizados a la migración 013 en la rama `docs/actualiza-entrega-2`. PENDIENTE con autorización del usuario: crear tag `entrega-2`. Entrega 3: NO empezar hasta que Luis lo pida. Verificación antes de un tag: `base-de-datos/scripts/verificar_desde_cero.ps1`.
 - Si los archivos del diagrama no existen en el equipo, regenera el diagrama (ver sección 5) como `.drawio` y también como imagen `.png`.
 - Problema de autenticación Git que ocurrió: el equipo estuvo autenticado con otra cuenta de GitHub (`leliecermendoza`) y dio error 403 contra la cuenta dueña (`luismendoza009`). Si vuelve a pasar, guía al usuario a limpiar la credencial en el Administrador de credenciales de Windows.
 
@@ -80,7 +80,7 @@ PROGRAMACIÓN 3         → aplicación Java (backend) + interfaz (frontend),
 
 ## 4. REQUISITOS DE BASE DE DATOS I (guía del profesor — OBLIGATORIOS)
 
-Reglas generales: grupo ≥ 4 integrantes (el repo lista 3; confirmar si hay un cuarto), tema propio con 6–8+ tablas y reglas de negocio reales, PostgreSQL 16+, Git desde la Entrega 1, diagramas en Draw.io. **Lo que no está en el repositorio no existe.** Cada entrega = repositorio con tag + PDF breve que indica dónde encontrar todo. Todos los integrantes deben hacer commits y poder explicar cualquier parte (la sustentación incluye preguntas individuales).
+Reglas generales: grupo ≥ 4 integrantes (son 4, ver sección 2), tema propio con 6–8+ tablas y reglas de negocio reales, PostgreSQL 16+, Git desde la Entrega 1, diagramas en Draw.io. **Lo que no está en el repositorio no existe.** Cada entrega = repositorio con tag + PDF breve que indica dónde encontrar todo. Todos los integrantes deben hacer commits y poder explicar cualquier parte (la sustentación incluye preguntas individuales).
 
 ### Entrega 1 — Planteamiento y diseño (10 % del corte 1) — CASI LISTA
 Planteamiento, requisitos + preguntas/supuestos, EER completo, esquema relacional con políticas de borrado, diccionario de datos, repo con README. Tag: `entrega-1`.
