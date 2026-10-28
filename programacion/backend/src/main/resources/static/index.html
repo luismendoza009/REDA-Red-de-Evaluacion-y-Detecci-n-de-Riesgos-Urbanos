@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0d">
+  <meta name="description" content="REDA documenta fallas en la infraestructura pública de Valledupar y conecta a quienes sufrieron un daño con abogados.">
+  <title>REDA · Red de Evaluación y Detección de Riesgos Urbanos</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/css/reda.css">
+</head>
+<body>
+  <noscript><p class="sin-js">REDA necesita JavaScript activado.</p></noscript>
+
+  <!-- ====================== PANTALLA DE ACCESO (sin sesión) ====================== -->
+  <div id="pantalla-acceso" class="acceso" hidden>
+    <section class="acceso-portada" aria-hidden="true">
+      <div class="acceso-marca">
+        <svg viewBox="0 0 32 32" class="acceso-logo">
+          <g fill="none" stroke-width="5" transform="rotate(-90 16 16)">
+            <circle cx="16" cy="16" r="11" stroke="#3987e5" stroke-dasharray="22 69.1"/>
+            <circle cx="16" cy="16" r="11" stroke="#d95926" stroke-dasharray="22 69.1" stroke-dashoffset="-23"/>
+            <circle cx="16" cy="16" r="11" stroke="#199e70" stroke-dasharray="21 69.1" stroke-dashoffset="-46"/>
+          </g>
+        </svg>
+        <span>REDA</span>
+      </div>
+      <h1>Cuando una falla de la ciudad te causa un daño, <em>la evidencia es tu fuerza.</em></h1>
+      <ul class="acceso-puntos">
+        <li><b>Reporta</b> huecos, alcantarillas y luminarias con foto y ubicación.</li>
+        <li><b>Demuestra</b> que la entidad ya sabía: REDA encuentra los reportes previos del mismo punto.</li>
+        <li><b>Elige</b> entre los abogados que se interesan en tu caso.</li>
+      </ul>
+      <div class="acceso-puntitos"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </section>
+    <section class="acceso-tarjeta">
+      <div id="acceso-contenido"></div>
+      <p class="acceso-legal"><a href="#/terminos">Términos</a> · <a href="#/privacidad">Privacidad</a> · <a href="#/ayuda">Ayuda</a></p>
+    </section>
+  </div>
+
+  <!-- ====================== APLICACIÓN (con sesión) ====================== -->
+  <div id="pantalla-app" hidden>
+    <div id="mapa" aria-label="Mapa de reportes de Valledupar"></div>
+
+    <!-- Menú lateral: en computador siempre visible; en celular se abre con el botón ☰ -->
+    <aside class="lateral" id="lateral" aria-label="Menú principal">
+      <a class="marca" href="#/inicio" aria-label="REDA, ir al inicio">
+        <svg class="marca-logo" viewBox="0 0 32 32" aria-hidden="true">
+          <g fill="none" stroke-width="5" transform="rotate(-90 16 16)">
+            <circle cx="16" cy="16" r="11" stroke="#3987e5" stroke-dasharray="22 69.1"/>
+            <circle cx="16" cy="16" r="11" stroke="#d95926" stroke-dasharray="22 69.1" stroke-dashoffset="-23"/>
+            <circle cx="16" cy="16" r="11" stroke="#199e70" stroke-dasharray="21 69.1" stroke-dashoffset="-46"/>
+          </g>
+        </svg>
+        <div><h1>REDA</h1><p>Valledupar</p></div>
+      </a>
+
+      <a class="perfil-lateral" href="#/cuenta" title="Mi cuenta">
+        <span class="avatar" id="avatar" aria-hidden="true"></span>
+        <span class="perfil-texto"><b id="usuario-nombre"></b><small id="usuario-rol"></small></span>
+      </a>
+
+      <nav class="menu" id="menu" aria-label="Secciones"></nav>
+
+      <div class="lateral-pie">
+        <a href="#/cuenta" data-icono="cuenta">Mi cuenta</a>
+        <a href="#/ayuda" data-icono="ayuda">Ayuda</a>
+        <button type="button" id="btn-salir" data-icono="salir">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="velo" id="velo" hidden></div>
+
+    <!-- Cabecera solo para celular -->
+    <header class="cabecera-movil">
+      <button class="boton boton-icono" id="btn-menu" type="button" aria-expanded="false" aria-controls="lateral" aria-label="Abrir menú">☰</button>
+      <span class="cabecera-titulo" id="titulo-movil">REDA</span>
+      <a href="#/cuenta" aria-label="Mi cuenta"><span class="avatar" id="avatar-movil" aria-hidden="true"></span></a>
+    </header>
+
+    <div class="mapa-superior solo-mapa">
+      <section class="cifras" aria-label="Resumen del mapa">
+        <div class="cifra"><span class="cifra-valor" id="k-reportes">–</span><span class="cifra-nombre">Reportes</span></div>
+        <div class="cifra"><span class="cifra-valor" id="k-puntos">–</span><span class="cifra-nombre">Alta frecuencia</span></div>
+        <div class="cifra"><span class="cifra-valor" id="k-incidentes">–</span><span class="cifra-nombre">Incidentes</span></div>
+      </section>
+      <nav class="filtros" aria-label="Filtros del mapa">
+        <div class="chips" id="chips-situacion" role="group" aria-label="Situación del caso"></div>
+        <label class="selector"><span class="visualmente-oculto">Categoría</span>
+          <select id="filtro-categoria"><option value="">Todas las categorías</option></select></label>
+        <label class="interruptor"><input type="checkbox" id="filtro-alta"><span>Solo alta frecuencia</span></label>
+        <label class="interruptor"><input type="checkbox" id="filtro-calor" checked><span>Mapa de calor</span></label>
+      </nav>
+    </div>
+
+    <aside class="leyenda solo-mapa" aria-label="Leyenda">
+      <h2>Cómo leer el mapa</h2>
+      <ul>
+        <li><span class="ley-tamano"><i></i><i></i><i></i></span>Tamaño y número: reportes en el punto</li>
+        <li><span class="ley-anillo"></span>Anillo: situación de los casos</li>
+        <li><span class="ley-pulso"></span>Pulso: hubo un incidente con daño</li>
+        <li><span class="ley-calor"></span>Calor: concentración de reportes</li>
+      </ul>
+    </aside>
+
+    <a class="boton-flotante solo-mapa solo-ciudadano" href="#/reportar">＋ Reportar</a>
+
+    <aside class="panel" id="panel" aria-hidden="true" aria-labelledby="panel-titulo" role="dialog">
+      <button class="panel-cerrar" id="panel-cerrar" type="button" aria-label="Cerrar panel">✕</button>
+      <div class="panel-contenido" id="panel-contenido"></div>
+    </aside>
+
+    <main class="pagina" id="pagina" tabindex="-1" hidden></main>
+  </div>
+
+  <dialog class="visor" id="visor" aria-label="Foto de evidencia">
+    <button class="panel-cerrar" type="button" id="visor-cerrar" aria-label="Cerrar foto">✕</button>
+    <img id="visor-img" alt="">
+    <p id="visor-pie"></p>
+  </dialog>
+
+  <p class="aviso solo-mapa">REDA documenta fallas en la infraestructura pública. No presta asesoría jurídica ni garantiza el resultado de un caso.</p>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
