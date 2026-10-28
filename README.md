@@ -90,8 +90,9 @@ Las fotos de perfil no vienen en la semilla (no se usan fotos de personas): se s
 ```powershell
 cd base-de-datos            # con PGPASSWORD definido
 psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql        # 15 comprobaciones de coherencia
-psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 27 pruebas negativas
+psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 32 pruebas negativas
 psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificación cruzada del banco
+.\scripts\verificar_desde_cero.ps1   # todo lo anterior sobre una base aparte creada desde cero (no toca 'reda')
 
 cd ..\programacion\backend
 mvn test                                  # 81 pruebas unitarias
