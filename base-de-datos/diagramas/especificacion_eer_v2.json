@@ -1,82 +1,910 @@
 {
-  "titulo": "REDA - Modelo EER (Entrega 2)",
-  "leyenda": "Notación pata de gallo: || exactamente uno · o< cero o muchos · |< uno o muchos · o| cero o uno (1:1).   Azul: catálogos · Amarillo: núcleo de reportes · Verde: dominio legal · Gris: índices IRU/IVC.   20 tablas, 26 relaciones.",
-  "tablas": [
-    {"id": "roles", "nombre": "roles", "x": 40, "y": 40, "ancho": 230,
-     "columnas": ["PK id_rol", "nombre (UQ)"]},
-    {"id": "categorias", "nombre": "categorias", "x": 380, "y": 40, "ancho": 220,
-     "columnas": ["PK id_categoria", "nombre (UQ)", "descripcion"]},
-    {"id": "zonas", "nombre": "zonas", "x": 640, "y": 40, "ancho": 240,
-     "columnas": ["PK id_zona", "nombre (UQ con ciudad)", "tipo", "ciudad", "nivel_trafico", "centros_educativos", "centros_salud"]},
-    {"id": "estados", "nombre": "estados", "x": 920, "y": 40, "ancho": 200,
-     "columnas": ["PK id_estado", "nombre (UQ)"]},
-    {"id": "entidades", "nombre": "entidades_publicas", "x": 1300, "y": 40, "ancho": 280,
-     "columnas": ["PK id_entidad", "nombre (UQ)", "tipo", "ciudad"]},
-    {"id": "estados_caso", "nombre": "estados_caso", "x": 1640, "y": 40, "ancho": 220,
-     "columnas": ["PK id_estado_caso", "nombre (UQ)"]},
-
-    {"id": "usuarios", "nombre": "usuarios", "x": 40, "y": 300, "ancho": 230,
-     "columnas": ["PK id_usuario", "nombre", "correo (UQ)", "password_hash", "FK id_rol", "fecha_registro", "activo", "fecha_consentimiento"]},
-    {"id": "reportes", "nombre": "reportes", "x": 420, "y": 300, "ancho": 320, "color": "nucleo",
-     "columnas": ["PK id_reporte", "FK id_usuario", "FK id_categoria", "FK id_zona", "FK id_estado", "tipo_reporte (CONDICION/INCIDENTE)",
-                  "descripcion", "latitud", "longitud", "fecha_reporte", "nivel_gravedad (1-5)"]},
-    {"id": "incidentes", "nombre": "incidentes", "x": 1240, "y": 300, "ancho": 300, "color": "legal",
-     "columnas": ["PK id_incidente", "FK id_reporte, tipo_reporte (UQ)", "FK id_entidad", "fecha_hora_hecho", "tipo_dano",
-                  "descripcion_dano", "hubo_atencion_medica", "(tipo_reporte = 'INCIDENTE')"]},
-    {"id": "casos", "nombre": "casos", "x": 1640, "y": 300, "ancho": 260, "color": "legal",
-     "columnas": ["PK id_caso", "FK id_incidente (UQ)", "FK id_estado_caso", "FK id_operador", "fecha_creacion", "fecha_cierre", "observacion"]},
-
-    {"id": "evaluaciones", "nombre": "evaluaciones", "x": 40, "y": 640, "ancho": 240, "color": "nucleo",
-     "columnas": ["PK id_evaluacion", "FK id_reporte", "FK id_usuario", "gravedad (0-100)", "impacto (0-100)", "frecuencia (0-100)", "fecha_evaluacion"]},
-    {"id": "evidencias", "nombre": "evidencias", "x": 320, "y": 640, "ancho": 260, "color": "nucleo",
-     "columnas": ["PK id_evidencia", "FK id_reporte", "ruta_imagen (UQ)", "tipo_mime", "tamano_bytes", "hash_sha256 (UQ)", "fecha_captura", "fecha_carga"]},
-    {"id": "relacionados", "nombre": "reportes_relacionados", "x": 620, "y": 640, "ancho": 300, "color": "nucleo",
-     "columnas": ["PK FK id_reporte", "PK FK id_reporte_relacionado", "tipo_relacion (SIMILAR/ANTECEDENTE)", "origen", "fecha_vinculo"]},
-    {"id": "historial", "nombre": "historial_estados", "x": 960, "y": 640, "ancho": 250, "color": "nucleo",
-     "columnas": ["PK id_historial", "FK id_reporte", "FK id_estado_anterior", "FK id_estado_nuevo", "FK id_usuario", "fecha_cambio", "observacion"]},
-    {"id": "testigos", "nombre": "testigos", "x": 1240, "y": 640, "ancho": 300, "color": "legal",
-     "columnas": ["PK id_testigo", "FK id_incidente", "nombre (UQ con incidente)", "contacto"]},
-    {"id": "remisiones", "nombre": "remisiones", "x": 1640, "y": 640, "ancho": 260, "color": "legal",
-     "columnas": ["PK id_remision", "FK id_caso", "FK id_abogado", "fecha_envio", "estado_remision", "fecha_respuesta", "motivo_rechazo", "valor_cobrado"]},
-
-    {"id": "calculos", "nombre": "calculos_indice", "x": 440, "y": 900, "ancho": 280, "color": "soporte",
-     "columnas": ["PK id_calculo", "FK id_reporte", "FK id_version", "valor (0-100)", "desglose (JSONB)", "fecha_calculo"]},
-    {"id": "versiones", "nombre": "versiones_indice", "x": 820, "y": 900, "ancho": 280, "color": "soporte",
-     "columnas": ["PK id_version", "nombre_indice (IRU/IVC)", "numero_version", "descripcion", "umbral_medio", "umbral_alto",
-                  "umbral_critico", "vigente (1 por índice)", "fecha_creacion"]},
-    {"id": "parametros", "nombre": "parametros_indice", "x": 1180, "y": 900, "ancho": 280, "color": "soporte",
-     "columnas": ["PK FK id_version", "PK variable", "peso", "descripcion"]},
-    {"id": "abogados", "nombre": "abogados", "x": 1640, "y": 920, "ancho": 260, "color": "legal",
-     "columnas": ["PK id_abogado", "FK id_usuario (UQ)", "tarjeta_profesional (UQ)", "especialidad", "ciudad", "activo"]}
-  ],
-  "relaciones": [
-    {"desde": "roles", "hacia": "usuarios", "puntos": [[155, 110], [155, 300]]},
-    {"desde": "usuarios", "hacia": "reportes", "etiqueta": "crea", "puntos": [[270, 340], [420, 340]]},
-    {"desde": "usuarios", "hacia": "evaluaciones", "etiqueta": "evalúa", "puntos": [[100, 478], [100, 640]]},
-    {"desde": "usuarios", "hacia": "historial", "etiqueta": "ejecuta el cambio", "puntos": [[250, 478], [250, 600], [1160, 600], [1160, 640]]},
-    {"desde": "usuarios", "hacia": "casos", "etiqueta": "operador que abre el caso", "puntos": [[240, 300], [240, 260], [1770, 260], [1770, 300]]},
-    {"desde": "usuarios", "hacia": "abogados", "etiqueta": "es abogado (1:1)", "destino": "ERzeroToOne",
-     "puntos": [[40, 440], [20, 440], [20, 1120], [1770, 1120], [1770, 1062]]},
-    {"desde": "categorias", "hacia": "reportes", "puntos": [[490, 128], [490, 300]]},
-    {"desde": "zonas", "hacia": "reportes", "puntos": [[700, 200], [700, 300]]},
-    {"desde": "estados", "hacia": "reportes", "etiqueta": "estado actual", "puntos": [[960, 110], [960, 320], [740, 320]]},
-    {"desde": "estados", "hacia": "historial", "etiqueta": "anterior", "puntos": [[1020, 110], [1020, 640]]},
-    {"desde": "estados", "hacia": "historial", "etiqueta": "nuevo", "puntos": [[1080, 110], [1080, 640]]},
-    {"desde": "reportes", "hacia": "historial", "etiqueta": "bitácora", "puntos": [[740, 500], [990, 500], [990, 640]]},
-    {"desde": "reportes", "hacia": "evidencias", "puntos": [[450, 532], [450, 640]]},
-    {"desde": "reportes", "hacia": "relacionados", "etiqueta": "origen", "puntos": [[640, 532], [640, 640]]},
-    {"desde": "reportes", "hacia": "relacionados", "etiqueta": "relacionado", "puntos": [[700, 532], [700, 640]]},
-    {"desde": "reportes", "hacia": "evaluaciones", "puntos": [[420, 500], [200, 500], [200, 640]]},
-    {"desde": "reportes", "hacia": "incidentes", "etiqueta": "especialización 1:1 (solo tipo INCIDENTE)", "destino": "ERzeroToOne",
-     "puntos": [[740, 420], [1240, 420]]},
-    {"desde": "entidades", "hacia": "incidentes", "etiqueta": "presunta responsable", "origen": "ERzeroToOne", "puntos": [[1400, 146], [1400, 300]]},
-    {"desde": "incidentes", "hacia": "testigos", "puntos": [[1390, 478], [1390, 640]]},
-    {"desde": "incidentes", "hacia": "casos", "destino": "ERzeroToOne", "puntos": [[1540, 380], [1640, 380]]},
-    {"desde": "estados_caso", "hacia": "casos", "puntos": [[1700, 110], [1700, 300]]},
-    {"desde": "casos", "hacia": "remisiones", "puntos": [[1770, 460], [1770, 640]]},
-    {"desde": "abogados", "hacia": "remisiones", "etiqueta": "recibe", "puntos": [[1770, 920], [1770, 818]]},
-    {"desde": "reportes", "hacia": "calculos", "puntos": [[600, 532], [600, 900]]},
-    {"desde": "versiones", "hacia": "calculos", "puntos": [[820, 980], [720, 980]]},
-    {"desde": "versiones", "hacia": "parametros", "destino": "ERoneToMany", "puntos": [[1100, 980], [1180, 980]]}
-  ]
+ "titulo": "REDA - Modelo EER (Entrega 2)",
+ "leyenda": "Notación pata de gallo: || exactamente uno · o< cero o muchos · |< uno o muchos · o| cero o uno (1:1).   Azul: catálogos · Amarillo: núcleo de reportes · Verde: dominio legal · Gris: índices IRU/IVC.   23 tablas, 31 relaciones.",
+ "tablas": [
+  {
+   "id": "roles",
+   "nombre": "roles",
+   "x": 40,
+   "y": 40,
+   "ancho": 230,
+   "columnas": [
+    "PK id_rol",
+    "nombre (UQ)"
+   ]
+  },
+  {
+   "id": "categorias",
+   "nombre": "categorias",
+   "x": 380,
+   "y": 40,
+   "ancho": 220,
+   "columnas": [
+    "PK id_categoria",
+    "nombre (UQ)",
+    "descripcion"
+   ]
+  },
+  {
+   "id": "zonas",
+   "nombre": "zonas",
+   "x": 640,
+   "y": 40,
+   "ancho": 240,
+   "columnas": [
+    "PK id_zona",
+    "nombre (UQ con ciudad)",
+    "tipo",
+    "ciudad",
+    "nivel_trafico",
+    "centros_educativos",
+    "centros_salud",
+    "latitud_referencia",
+    "longitud_referencia",
+    "fuente_ubicacion"
+   ]
+  },
+  {
+   "id": "estados",
+   "nombre": "estados",
+   "x": 920,
+   "y": 40,
+   "ancho": 200,
+   "columnas": [
+    "PK id_estado",
+    "nombre (UQ)"
+   ]
+  },
+  {
+   "id": "entidades",
+   "nombre": "entidades_publicas",
+   "x": 1300,
+   "y": 40,
+   "ancho": 280,
+   "columnas": [
+    "PK id_entidad",
+    "nombre (UQ)",
+    "tipo",
+    "ciudad"
+   ]
+  },
+  {
+   "id": "estados_caso",
+   "nombre": "estados_caso",
+   "x": 1640,
+   "y": 40,
+   "ancho": 220,
+   "columnas": [
+    "PK id_estado_caso",
+    "nombre (UQ)"
+   ]
+  },
+  {
+   "id": "usuarios",
+   "nombre": "usuarios",
+   "x": 40,
+   "y": 300,
+   "ancho": 230,
+   "columnas": [
+    "PK id_usuario",
+    "nombre",
+    "correo (UQ)",
+    "password_hash",
+    "FK id_rol",
+    "fecha_registro",
+    "activo",
+    "fecha_consentimiento",
+    "foto_perfil (UQ)",
+    "foto_perfil_mime",
+    "fecha_foto_perfil"
+   ]
+  },
+  {
+   "id": "reportes",
+   "nombre": "reportes",
+   "x": 420,
+   "y": 300,
+   "ancho": 320,
+   "color": "nucleo",
+   "columnas": [
+    "PK id_reporte",
+    "FK id_usuario",
+    "FK id_categoria",
+    "FK id_zona",
+    "FK id_estado",
+    "tipo_reporte (CONDICION/INCIDENTE)",
+    "descripcion",
+    "latitud",
+    "longitud",
+    "fecha_reporte",
+    "nivel_gravedad (1-5)"
+   ]
+  },
+  {
+   "id": "incidentes",
+   "nombre": "incidentes",
+   "x": 1240,
+   "y": 300,
+   "ancho": 300,
+   "color": "legal",
+   "columnas": [
+    "PK id_incidente",
+    "FK id_reporte, tipo_reporte (UQ)",
+    "FK id_entidad",
+    "fecha_hora_hecho",
+    "tipo_dano",
+    "descripcion_dano",
+    "hubo_atencion_medica",
+    "(tipo_reporte = 'INCIDENTE')"
+   ]
+  },
+  {
+   "id": "casos",
+   "nombre": "casos",
+   "x": 1640,
+   "y": 300,
+   "ancho": 260,
+   "color": "legal",
+   "columnas": [
+    "PK id_caso",
+    "FK id_incidente (UQ)",
+    "FK id_estado_caso",
+    "FK id_operador",
+    "fecha_creacion",
+    "fecha_cierre",
+    "fecha_consentimiento",
+    "observacion"
+   ]
+  },
+  {
+   "id": "evaluaciones",
+   "nombre": "evaluaciones",
+   "x": 40,
+   "y": 640,
+   "ancho": 240,
+   "color": "nucleo",
+   "columnas": [
+    "PK id_evaluacion",
+    "FK id_reporte",
+    "FK id_usuario",
+    "gravedad (0-100)",
+    "impacto (0-100)",
+    "frecuencia (0-100)",
+    "fecha_evaluacion"
+   ]
+  },
+  {
+   "id": "evidencias",
+   "nombre": "evidencias",
+   "x": 320,
+   "y": 640,
+   "ancho": 260,
+   "color": "nucleo",
+   "columnas": [
+    "PK id_evidencia",
+    "FK id_reporte",
+    "ruta_imagen (UQ)",
+    "tipo_mime",
+    "tamano_bytes",
+    "hash_sha256 (UQ)",
+    "fecha_captura",
+    "fecha_carga"
+   ]
+  },
+  {
+   "id": "relacionados",
+   "nombre": "reportes_relacionados",
+   "x": 620,
+   "y": 640,
+   "ancho": 300,
+   "color": "nucleo",
+   "columnas": [
+    "PK FK id_reporte",
+    "PK FK id_reporte_relacionado",
+    "tipo_relacion (SIMILAR/ANTECEDENTE)",
+    "origen",
+    "fecha_vinculo"
+   ]
+  },
+  {
+   "id": "historial",
+   "nombre": "historial_estados",
+   "x": 960,
+   "y": 640,
+   "ancho": 250,
+   "color": "nucleo",
+   "columnas": [
+    "PK id_historial",
+    "FK id_reporte",
+    "FK id_estado_anterior",
+    "FK id_estado_nuevo",
+    "FK id_usuario",
+    "fecha_cambio",
+    "observacion"
+   ]
+  },
+  {
+   "id": "testigos",
+   "nombre": "testigos",
+   "x": 1240,
+   "y": 640,
+   "ancho": 300,
+   "color": "legal",
+   "columnas": [
+    "PK id_testigo",
+    "FK id_incidente",
+    "nombre (UQ con incidente)",
+    "contacto"
+   ]
+  },
+  {
+   "id": "remisiones",
+   "nombre": "remisiones",
+   "x": 1640,
+   "y": 640,
+   "ancho": 260,
+   "color": "legal",
+   "columnas": [
+    "PK id_remision",
+    "FK id_caso",
+    "FK id_abogado",
+    "fecha_envio",
+    "estado_remision",
+    "fecha_respuesta",
+    "motivo_rechazo",
+    "valor_cobrado"
+   ]
+  },
+  {
+   "id": "calculos",
+   "nombre": "calculos_indice",
+   "x": 440,
+   "y": 900,
+   "ancho": 280,
+   "color": "soporte",
+   "columnas": [
+    "PK id_calculo",
+    "FK id_reporte",
+    "FK id_version",
+    "valor (0-100)",
+    "desglose (JSONB)",
+    "fecha_calculo"
+   ]
+  },
+  {
+   "id": "versiones",
+   "nombre": "versiones_indice",
+   "x": 820,
+   "y": 900,
+   "ancho": 280,
+   "color": "soporte",
+   "columnas": [
+    "PK id_version",
+    "nombre_indice (IRU/IVC)",
+    "numero_version",
+    "descripcion",
+    "umbral_medio",
+    "umbral_alto",
+    "umbral_critico",
+    "vigente (1 por índice)",
+    "fecha_creacion"
+   ]
+  },
+  {
+   "id": "parametros",
+   "nombre": "parametros_indice",
+   "x": 1180,
+   "y": 900,
+   "ancho": 280,
+   "color": "soporte",
+   "columnas": [
+    "PK FK id_version",
+    "PK variable",
+    "peso",
+    "descripcion"
+   ]
+  },
+  {
+   "id": "abogados",
+   "nombre": "abogados",
+   "x": 1640,
+   "y": 920,
+   "ancho": 260,
+   "color": "legal",
+   "columnas": [
+    "PK id_abogado",
+    "FK id_usuario (UQ)",
+    "tarjeta_profesional (UQ)",
+    "especialidad",
+    "ciudad",
+    "activo",
+    "anios_experiencia",
+    "presentacion"
+   ]
+  },
+  {
+   "id": "postulaciones",
+   "nombre": "postulaciones",
+   "x": 1960,
+   "y": 640,
+   "ancho": 270,
+   "color": "legal",
+   "columnas": [
+    "PK id_postulacion",
+    "FK id_caso",
+    "FK id_abogado",
+    "(UQ caso + abogado)",
+    "mensaje",
+    "estado",
+    "fecha_postulacion",
+    "fecha_resolucion"
+   ]
+  },
+  {
+   "id": "calificaciones",
+   "nombre": "calificaciones",
+   "x": 1960,
+   "y": 900,
+   "ancho": 270,
+   "color": "legal",
+   "columnas": [
+    "PK id_calificacion",
+    "FK id_caso (UQ)",
+    "FK id_abogado",
+    "puntaje (1-5)",
+    "comentario",
+    "fecha"
+   ]
+  },
+  {
+   "id": "tokens",
+   "nombre": "tokens_recuperacion",
+   "x": 40,
+   "y": 900,
+   "ancho": 240,
+   "columnas": [
+    "PK id_token",
+    "FK id_usuario",
+    "hash_token (UQ)",
+    "fecha_creacion",
+    "fecha_expiracion",
+    "fecha_uso"
+   ]
+  }
+ ],
+ "relaciones": [
+  {
+   "desde": "roles",
+   "hacia": "usuarios",
+   "puntos": [
+    [
+     155,
+     110
+    ],
+    [
+     155,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "reportes",
+   "etiqueta": "crea",
+   "puntos": [
+    [
+     270,
+     340
+    ],
+    [
+     420,
+     340
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "evaluaciones",
+   "etiqueta": "evalúa",
+   "puntos": [
+    [
+     100,
+     532
+    ],
+    [
+     100,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "historial",
+   "etiqueta": "ejecuta el cambio",
+   "puntos": [
+    [
+     250,
+     532
+    ],
+    [
+     250,
+     610
+    ],
+    [
+     1160,
+     610
+    ],
+    [
+     1160,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "casos",
+   "etiqueta": "operador que abre el caso",
+   "puntos": [
+    [
+     240,
+     300
+    ],
+    [
+     240,
+     260
+    ],
+    [
+     1770,
+     260
+    ],
+    [
+     1770,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "abogados",
+   "etiqueta": "es abogado (1:1)",
+   "destino": "ERzeroToOne",
+   "puntos": [
+    [
+     40,
+     440
+    ],
+    [
+     20,
+     440
+    ],
+    [
+     20,
+     1130
+    ],
+    [
+     1770,
+     1130
+    ],
+    [
+     1770,
+     1098
+    ]
+   ]
+  },
+  {
+   "desde": "categorias",
+   "hacia": "reportes",
+   "puntos": [
+    [
+     490,
+     128
+    ],
+    [
+     490,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "zonas",
+   "hacia": "reportes",
+   "puntos": [
+    [
+     700,
+     254
+    ],
+    [
+     700,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "estados",
+   "hacia": "reportes",
+   "etiqueta": "estado actual",
+   "puntos": [
+    [
+     960,
+     110
+    ],
+    [
+     960,
+     320
+    ],
+    [
+     740,
+     320
+    ]
+   ]
+  },
+  {
+   "desde": "estados",
+   "hacia": "historial",
+   "etiqueta": "anterior",
+   "puntos": [
+    [
+     1020,
+     110
+    ],
+    [
+     1020,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "estados",
+   "hacia": "historial",
+   "etiqueta": "nuevo",
+   "puntos": [
+    [
+     1080,
+     110
+    ],
+    [
+     1080,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "historial",
+   "etiqueta": "bitácora",
+   "puntos": [
+    [
+     740,
+     500
+    ],
+    [
+     990,
+     500
+    ],
+    [
+     990,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "evidencias",
+   "puntos": [
+    [
+     450,
+     532
+    ],
+    [
+     450,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "relacionados",
+   "etiqueta": "origen",
+   "puntos": [
+    [
+     640,
+     532
+    ],
+    [
+     640,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "relacionados",
+   "etiqueta": "relacionado",
+   "puntos": [
+    [
+     700,
+     532
+    ],
+    [
+     700,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "evaluaciones",
+   "puntos": [
+    [
+     420,
+     520
+    ],
+    [
+     340,
+     520
+    ],
+    [
+     340,
+     590
+    ],
+    [
+     200,
+     590
+    ],
+    [
+     200,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "incidentes",
+   "etiqueta": "especialización 1:1 (solo tipo INCIDENTE)",
+   "destino": "ERzeroToOne",
+   "puntos": [
+    [
+     740,
+     420
+    ],
+    [
+     1240,
+     420
+    ]
+   ]
+  },
+  {
+   "desde": "entidades",
+   "hacia": "incidentes",
+   "etiqueta": "presunta responsable",
+   "origen": "ERzeroToOne",
+   "puntos": [
+    [
+     1400,
+     146
+    ],
+    [
+     1400,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "incidentes",
+   "hacia": "testigos",
+   "puntos": [
+    [
+     1390,
+     478
+    ],
+    [
+     1390,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "incidentes",
+   "hacia": "casos",
+   "destino": "ERzeroToOne",
+   "puntos": [
+    [
+     1540,
+     380
+    ],
+    [
+     1640,
+     380
+    ]
+   ]
+  },
+  {
+   "desde": "estados_caso",
+   "hacia": "casos",
+   "puntos": [
+    [
+     1700,
+     110
+    ],
+    [
+     1700,
+     300
+    ]
+   ]
+  },
+  {
+   "desde": "casos",
+   "hacia": "remisiones",
+   "puntos": [
+    [
+     1770,
+     478
+    ],
+    [
+     1770,
+     640
+    ]
+   ]
+  },
+  {
+   "desde": "abogados",
+   "hacia": "remisiones",
+   "etiqueta": "recibe",
+   "puntos": [
+    [
+     1770,
+     920
+    ],
+    [
+     1770,
+     818
+    ]
+   ]
+  },
+  {
+   "desde": "reportes",
+   "hacia": "calculos",
+   "puntos": [
+    [
+     600,
+     532
+    ],
+    [
+     600,
+     900
+    ]
+   ]
+  },
+  {
+   "desde": "versiones",
+   "hacia": "calculos",
+   "puntos": [
+    [
+     820,
+     980
+    ],
+    [
+     720,
+     980
+    ]
+   ]
+  },
+  {
+   "desde": "versiones",
+   "hacia": "parametros",
+   "destino": "ERoneToMany",
+   "puntos": [
+    [
+     1100,
+     980
+    ],
+    [
+     1180,
+     980
+    ]
+   ]
+  },
+  {
+   "desde": "casos",
+   "hacia": "postulaciones",
+   "puntos": [
+    [
+     1900,
+     400
+    ],
+    [
+     2095,
+     400
+    ],
+    [
+     2095,
+     640
+    ]
+   ],
+   "etiqueta": "recibe"
+  },
+  {
+   "desde": "abogados",
+   "hacia": "postulaciones",
+   "puntos": [
+    [
+     1900,
+     940
+    ],
+    [
+     1930,
+     940
+    ],
+    [
+     1930,
+     720
+    ],
+    [
+     1960,
+     720
+    ]
+   ],
+   "etiqueta": "se postula"
+  },
+  {
+   "desde": "casos",
+   "hacia": "calificaciones",
+   "puntos": [
+    [
+     1900,
+     330
+    ],
+    [
+     2255,
+     330
+    ],
+    [
+     2255,
+     950
+    ],
+    [
+     2230,
+     950
+    ]
+   ],
+   "destino": "ERzeroToOne"
+  },
+  {
+   "desde": "abogados",
+   "hacia": "calificaciones",
+   "puntos": [
+    [
+     1900,
+     1010
+    ],
+    [
+     1960,
+     1010
+    ]
+   ],
+   "etiqueta": "recibe"
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "tokens",
+   "puntos": [
+    [
+     270,
+     510
+    ],
+    [
+     300,
+     510
+    ],
+    [
+     300,
+     960
+    ],
+    [
+     280,
+     960
+    ]
+   ]
+  }
+ ]
 }
