@@ -1,0 +1,11 @@
+{
+  "name": "REDA · Red de Evaluación y Detección de Riesgos Urbanos",
+  "short_name": "REDA",
+  "description": "Documenta fallas en la infraestructura pública y conecta a quienes sufrieron un daño con abogados.",
+  "lang": "es-CO",
+  "start_url": "/#/mapa",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
