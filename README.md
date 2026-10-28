@@ -10,8 +10,9 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 
 ## Integrantes
 - Rafael Alfonso Rivera Restrepo
-- Ivan Andres Rodriguez Rodriguez
-- Luis Eliecer Mendoza Perpiñan
+- Ivan Andrés Rodriguez Rodriguez
+- Luis Eliecer Mendoza Perpiñán
+- Carlos Eduardo Camelo Montaño
 
 ## Organización del repositorio
 
