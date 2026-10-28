@@ -1,6 +1,12 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.AuthDtos.*;
+import co.edu.unicesar.reda.peticion.LoginRequest;
+import co.edu.unicesar.reda.peticion.RecuperarRequest;
+import co.edu.unicesar.reda.peticion.RegistroAbogadoRequest;
+import co.edu.unicesar.reda.peticion.RegistroRequest;
+import co.edu.unicesar.reda.peticion.RestablecerRequest;
+import co.edu.unicesar.reda.respuesta.MensajeResponse;
+import co.edu.unicesar.reda.respuesta.TokenResponse;
 import co.edu.unicesar.reda.service.AuthService;
 import co.edu.unicesar.reda.service.RecuperacionService;
 import io.swagger.v3.oas.annotations.Operation;

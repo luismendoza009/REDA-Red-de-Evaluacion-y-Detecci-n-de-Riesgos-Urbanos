@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.CrearIncidenteRequest;
-import co.edu.unicesar.reda.dto.ReporteDtos.FallaRequest;
+import co.edu.unicesar.reda.peticion.CrearIncidenteRequest;
+import co.edu.unicesar.reda.peticion.FallaRequest;
 import co.edu.unicesar.reda.model.*;
 import co.edu.unicesar.reda.repository.*;
 import org.junit.jupiter.api.BeforeEach;

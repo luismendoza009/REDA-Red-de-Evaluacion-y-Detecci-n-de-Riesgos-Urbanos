@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.CasoDtos.CasoCiudadanoResponse;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
+import co.edu.unicesar.reda.respuesta.CasoCiudadanoResponse;
 import co.edu.unicesar.reda.model.*;
 import co.edu.unicesar.reda.repository.CasoRepository;
 import co.edu.unicesar.reda.repository.EstadoCasoRepository;

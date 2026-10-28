@@ -1,16 +1,16 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.CambioEstadoRequest;
-import co.edu.unicesar.reda.dto.ReporteDtos.CambioEstadoResponse;
-import co.edu.unicesar.reda.dto.ReporteDtos.ReporteEnRevision;
 import co.edu.unicesar.reda.model.Estado;
 import co.edu.unicesar.reda.model.HistorialEstado;
 import co.edu.unicesar.reda.model.NombreEstado;
 import co.edu.unicesar.reda.model.Reporte;
+import co.edu.unicesar.reda.peticion.CambioEstadoRequest;
 import co.edu.unicesar.reda.repository.EstadoRepository;
 import co.edu.unicesar.reda.repository.ReporteRepository;
 import co.edu.unicesar.reda.repository.RevisionRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
+import co.edu.unicesar.reda.respuesta.CambioEstadoResponse;
+import co.edu.unicesar.reda.respuesta.ReporteEnRevision;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

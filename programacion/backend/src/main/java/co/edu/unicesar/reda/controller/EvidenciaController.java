@@ -1,8 +1,8 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.EvidenciaDtos.ArchivoResponse;
-import co.edu.unicesar.reda.dto.EvidenciaDtos.EvidenciaResponse;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
+import co.edu.unicesar.reda.respuesta.ArchivoResponse;
+import co.edu.unicesar.reda.respuesta.EvidenciaResponse;
 import co.edu.unicesar.reda.security.UsuarioAutenticado;
 import co.edu.unicesar.reda.service.EvidenciaService;
 import io.swagger.v3.oas.annotations.Operation;

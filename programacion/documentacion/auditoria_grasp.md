@@ -16,7 +16,7 @@
 | **Bajo acoplamiento** | Los controladores dependen de servicios, nunca de repositorios ni de entidades | Un cambio de tabla no llega a la API |
 | **Alta cohesión** | Un servicio por caso de uso (corregido, ver hallazgo G1) | Cada clase tiene un motivo para existir |
 | **Fabricación pura** | Repositorios, `JwtService`, `ReporteMapper`, `Busqueda` | No son conceptos del negocio; existen para que las entidades no carguen con persistencia, tokens o conversión |
-| **Indirección** | `ReporteMapper` entre entidades y DTO; `BuscadorAntecedentes` entre servicios y SQL | Desacopla dos partes que cambian por motivos distintos |
+| **Indirección** | `ReporteMapper` y `CasoMapper` entre entidades y respuestas de la API; `BuscadorAntecedentes` entre servicios y SQL | Desacopla dos partes que cambian por motivos distintos |
 | **Variaciones protegidas** | `BuscadorAntecedentes` (interfaz) | El punto de cambio previsto (Haversine hoy, PL/pgSQL en la Entrega 3 de BD, PostGIS en el futuro) queda detrás de una interfaz estable |
 
 ## 2. Hallazgos y correcciones

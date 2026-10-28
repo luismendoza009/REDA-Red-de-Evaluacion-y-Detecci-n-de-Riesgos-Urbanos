@@ -18,7 +18,7 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 
 ```
 base-de-datos/            BASE DE DATOS I
-├─ migraciones/           DDL numerado (001_ … 011_) ejecutable en orden sobre base vacía
+├─ migraciones/           DDL numerado (001_ … 013_) ejecutable en orden sobre base vacía
 ├─ sql/                   semilla, consultas, índices, pruebas, herramientas
 ├─ scripts/               migrar.ps1 y generadores (semilla, diccionario, diagrama, documento)
 ├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
@@ -96,7 +96,7 @@ psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificac
 
 cd ..\programacion\backend
 mvn test                                  # 81 pruebas unitarias
-mvn verify -Pintegracion                  # + 17 de integración contra PostgreSQL (base recién creada)
+mvn verify -Pintegracion                  # + 17 de integración (requiere las variables del paso 2)
 ```
 
 ## Regenerar el diagrama

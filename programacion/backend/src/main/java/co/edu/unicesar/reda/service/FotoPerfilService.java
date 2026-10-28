@@ -1,6 +1,5 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.EvidenciaDtos.ArchivoResponse;
 import co.edu.unicesar.reda.exception.AccesoDenegadoException;
 import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
@@ -9,6 +8,7 @@ import co.edu.unicesar.reda.model.FormatoImagen;
 import co.edu.unicesar.reda.model.Usuario;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
+import co.edu.unicesar.reda.respuesta.ArchivoResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
