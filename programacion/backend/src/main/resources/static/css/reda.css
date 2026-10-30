@@ -621,6 +621,10 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
 .nota { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(57, 135, 229, .10); border: 1px solid rgba(57, 135, 229, .35); color: var(--texto-2); font-size: 13.5px; }
 .nota-error { background: rgba(230, 103, 103, .10); border-color: rgba(230, 103, 103, .4); }
 .nota-espera { background: rgba(217, 89, 38, .10); border-color: rgba(217, 89, 38, .4); }
+.borrador-local { display: grid; gap: 8px; border-color: rgba(25, 158, 112, .35); background: rgba(25, 158, 112, .08); }
+.borrador-local p { margin: 0; }
+.borrador-local-acciones { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.borrador-local-acciones #borrador-estado { color: var(--texto); font-size: 12.5px; }
 
 /* reportar */
 .tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

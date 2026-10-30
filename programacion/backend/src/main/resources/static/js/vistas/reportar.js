@@ -4,7 +4,7 @@
 // fecha y hora del hecho, tipo de daño, atención médica, entidad y testigos.
 // Al crear un incidente, el sistema muestra cuántos reportes previos había en ese punto.
 // =============================================================================
-import { api } from "../api.js";
+import { api, sesion } from "../api.js";
 import { $, $$, escapar, fecha, plural, avisar, mostrarErrores, conBotonOcupado, cargando } from "../ui.js";
 import * as mapaPrincipal from "./mapa.js";
 
@@ -32,6 +32,16 @@ export async function mostrar(contenedor) {
           punto, tu reporte ayuda a demostrar que la entidad responsable ya lo sabía.</p>
       </header>
       <form id="f-reporte" class="formulario tarjeta-formulario" novalidate>
+        <aside class="borrador-local nota" aria-label="Guardado del borrador">
+          <p>Este borrador se guarda solo en este dispositivo. Se conservan el tipo, la categoría, el barrio, el punto, la descripción general y la gravedad; las fotos, los testigos y los datos del daño personal no se guardan.</p>
+          <div class="borrador-local-acciones">
+            <span id="borrador-estado" role="status" aria-live="polite">Al completar el formulario, se guardará automáticamente.</span>
+            <div class="fila-acciones">
+              <button type="button" class="boton" id="borrador-restaurar" hidden>Restaurar borrador</button>
+              <button type="button" class="boton" id="borrador-eliminar" hidden>Eliminar borrador</button>
+            </div>
+          </div>
+        </aside>
         <fieldset class="tipos">
           <legend>¿Qué quieres reportar?</legend>
           <label class="tipo"><input type="radio" name="tipo" value="CONDICION" checked>
@@ -117,6 +127,7 @@ export async function mostrar(contenedor) {
   conectarTipo(form);
   conectarTestigos();
   conectarFotos(fotos);
+  const borrarBorrador = conectarBorrador(form, selector);
   form.descripcion.addEventListener("input", () => { $("#contador").textContent = form.descripcion.value.length; });
 
   form.addEventListener("submit", async (e) => {
@@ -124,9 +135,11 @@ export async function mostrar(contenedor) {
     await conBotonOcupado(form.querySelector("button[type=submit]"), async () => {
       try {
         const resultado = await enviar(form, fotos);
+        const borradorEliminado = borrarBorrador();
         selector.remove();
         mapaPrincipal.invalidar();
         mostrarResultado(contenedor, resultado);
+        if (!borradorEliminado) avisar("El reporte se envió, pero no se pudo borrar su copia local. Elimínala desde el formulario si este dispositivo es compartido.", "error");
       } catch (err) {
         mostrarErrores(form, err);
         form.querySelector("[aria-invalid]")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -161,6 +174,7 @@ function crearSelector(form, zonas) {
       form.idZona.value = sugerida.id;
       form.idZona.removeAttribute("aria-invalid");
       pista.textContent = `Sugerido por el punto marcado (a ${sugerida.distanciaMetros} m). Cámbialo si no es tu barrio.`;
+      form.idZona.dispatchEvent(new Event("change", { bubbles: true }));
     } else {
       form.idZona.value = "";
       pista.textContent = "No reconocemos el barrio de este punto: elígelo de la lista.";
@@ -173,6 +187,23 @@ function crearSelector(form, zonas) {
     form.longitud.value = ll[1];
     $("#coordenadas").textContent = `Punto marcado: ${ll[0]}, ${ll[1]}`;
     sugerirBarrio(ll[0], ll[1]);
+    form.latitud.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+  const restaurarPunto = (lat, lon) => {
+    const ll = [Number(lat), Number(lon)];
+    if (!ll.every(Number.isFinite) || Math.abs(ll[0]) > 90 || Math.abs(ll[1]) > 180) return;
+    const punto = L.latLng(ll);
+    if (marcador) marcador.setLatLng(punto);
+    else marcador = L.circleMarker(punto, { radius: 9, color: "#f0efec", weight: 3, fillColor: "#d95926", fillOpacity: 1 }).addTo(m);
+    form.latitud.value = ll[0].toFixed(6);
+    form.longitud.value = ll[1].toFixed(6);
+    $("#coordenadas").textContent = `Punto marcado: ${form.latitud.value}, ${form.longitud.value}`;
+    m.setView(punto, 17);
+    barrioAMano = Boolean(form.idZona.value);
+    pista.textContent = barrioAMano
+      ? "Barrio restaurado desde tu borrador. Cámbialo si no corresponde."
+      : "Se sugiere un barrio para el punto restaurado.";
+    if (!barrioAMano) sugerirBarrio(ll[0], ll[1]);
   };
   m.on("click", (e) => marcar(e.latlng.lat, e.latlng.lng));
   $("#btn-gps").addEventListener("click", () => {
@@ -184,7 +215,129 @@ function crearSelector(form, zonas) {
       { enableHighAccuracy: true, timeout: 10000 });
   });
   setTimeout(() => m.invalidateSize(), 50);
-  return m;
+  return { remove: () => m.remove(), restaurarPunto };
+}
+
+function conectarBorrador(form, selector) {
+  const estado = $("#borrador-estado");
+  const restaurar = $("#borrador-restaurar");
+  const eliminar = $("#borrador-eliminar");
+  const idUsuario = Number(sesion.actual()?.idUsuario);
+  if (!Number.isSafeInteger(idUsuario) || idUsuario < 1) {
+    estado.textContent = "No se pudo asociar el borrador a tu cuenta; el guardado automático está desactivado.";
+    return () => true;
+  }
+  const clave = `reda.borrador.reporte.${idUsuario}`;
+  let temporizador = null;
+  let hayBorrador = false;
+  let pausado = false;
+
+  const mostrarError = (accion, error) => {
+    estado.textContent = `No se pudo ${accion} el borrador en este dispositivo.`;
+    console.error(`No se pudo ${accion} el borrador local del reporte.`, error);
+  };
+  const quitar = (notificar = false) => {
+    clearTimeout(temporizador);
+    try {
+      localStorage.removeItem(clave);
+      hayBorrador = false;
+      restaurar.hidden = true;
+      eliminar.hidden = true;
+      estado.textContent = "Borrador eliminado de este dispositivo.";
+      if (notificar) avisar("Borrador eliminado de este dispositivo.", "exito");
+      return true;
+    } catch (error) {
+      mostrarError("eliminar", error);
+      if (notificar) avisar("No se pudo eliminar el borrador de este dispositivo.", "error");
+      return false;
+    }
+  };
+  const valorBorrador = () => ({
+    version: 1,
+    guardadoEn: new Date().toISOString(),
+    tipo: form.tipo.value,
+    idCategoria: form.idCategoria.value,
+    idZona: form.idZona.value,
+    descripcion: form.descripcion.value,
+    latitud: form.latitud.value,
+    longitud: form.longitud.value,
+    nivelGravedad: form.querySelector('input[name="nivelGravedad"]:checked')?.value ?? "",
+  });
+  const guardar = () => {
+    temporizador = null;
+    if (pausado) return;
+    const borrador = valorBorrador();
+    const tieneContenido = borrador.descripcion.trim() || borrador.idCategoria || borrador.idZona
+      || (borrador.latitud && borrador.longitud);
+    if (!tieneContenido) {
+      if (hayBorrador) quitar();
+      return;
+    }
+    try {
+      localStorage.setItem(clave, JSON.stringify(borrador));
+      hayBorrador = true;
+      restaurar.hidden = false;
+      eliminar.hidden = false;
+      estado.textContent = `Guardado automáticamente en este dispositivo a las ${new Date(borrador.guardadoEn).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}.`;
+    } catch (error) {
+      mostrarError("guardar", error);
+    }
+  };
+  const programarGuardado = () => {
+    clearTimeout(temporizador);
+    estado.textContent = "Guardando borrador…";
+    temporizador = setTimeout(guardar, 450);
+  };
+  const valorGuardado = (() => {
+    try {
+      const texto = localStorage.getItem(clave);
+      if (!texto) return null;
+      const borrador = JSON.parse(texto);
+      if (borrador?.version !== 1 || typeof borrador.descripcion !== "string") {
+        localStorage.removeItem(clave);
+        return null;
+      }
+      return borrador;
+    } catch (error) {
+      mostrarError("leer", error);
+      return null;
+    }
+  })();
+
+  if (valorGuardado) {
+    hayBorrador = true;
+    restaurar.hidden = false;
+    eliminar.hidden = false;
+    const fechaGuardado = new Date(valorGuardado.guardadoEn);
+    estado.textContent = `Hay un borrador de ${Number.isNaN(fechaGuardado.valueOf()) ? "una fecha anterior" : fechaGuardado.toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" })}.`;
+    restaurar.addEventListener("click", () => {
+      pausado = true;
+      const tipos = $$('input[name="tipo"]', form);
+      const tipoGuardado = tipos.find((radio) => radio.value === valorGuardado.tipo);
+      if (tipoGuardado) {
+        tipoGuardado.checked = true;
+        tipoGuardado.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      if ([...form.idCategoria.options].some((option) => option.value === valorGuardado.idCategoria)) {
+        form.idCategoria.value = valorGuardado.idCategoria;
+      }
+      if ([...form.idZona.options].some((option) => option.value === valorGuardado.idZona)) {
+        form.idZona.value = valorGuardado.idZona;
+      }
+      form.descripcion.value = valorGuardado.descripcion.slice(0, 2000);
+      $("#contador").textContent = form.descripcion.value.length;
+      const gravedad = form.querySelector(`input[name="nivelGravedad"][value="${Number(valorGuardado.nivelGravedad)}"]`);
+      if (gravedad) gravedad.checked = true;
+      selector.restaurarPunto(valorGuardado.latitud, valorGuardado.longitud);
+      pausado = false;
+      estado.textContent = "Borrador restaurado. Los datos del daño, los testigos y las fotos debes agregarlos de nuevo.";
+      avisar("Borrador restaurado. Revisa los datos antes de enviar.", "exito");
+    });
+  }
+  eliminar.addEventListener("click", () => quitar(true));
+  form.addEventListener("input", programarGuardado);
+  form.addEventListener("change", programarGuardado);
+  return () => quitar();
 }
 
 function conectarTipo(form) {
