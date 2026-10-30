@@ -42,6 +42,8 @@ if (-not $psql) {
             Sort-Object { [int]$_.Directory.Parent.Name } -Descending | Select-Object -First 1 -ExpandProperty FullName
 }
 $env:PGCLIENTENCODING = "UTF8"
+# psql escribe en UTF-8; sin esto PowerShell lo lee como la pagina de la consola y las tildes salen mal
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $conexion = @("-h", $Servidor, "-p", $Puerto, "-U", $Usuario)
 $fallos = 0
 
@@ -57,7 +59,8 @@ Write-Host "`n=== 1. Base vacia + migraciones + semilla ($BaseDatos)" -Foregroun
 Write-Host "`n=== 2. Pruebas negativas de restricciones" -ForegroundColor Cyan
 $r = Ejecutar "sql\pruebas\probar_restricciones.sql"
 $ok = @($r | Where-Object { $_ -match '^\s*OK\s' }).Count
-$r | Where-Object { $_ -match 'FALLA|ERROR' } | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+# -cmatch distingue mayusculas: el encabezado de la columna "debe_fallar" no es una falla
+$r | Where-Object { $_ -cmatch 'FALLA:|ERROR' } | ForEach-Object { Write-Host $_ -ForegroundColor Red }
 Write-Host "Rechazadas por la restriccion esperada: $ok"
 
 Write-Host "`n=== 3. Coherencia de la semilla (cada comprobacion debe dar 0)" -ForegroundColor Cyan
@@ -73,7 +76,7 @@ Write-Host "Verificaciones: $($filas.Count) - no coinciden: $($malas.Count)"
 if ($malas.Count -gt 0) { $fallos++ }
 
 Write-Host "`n=== 5. Filas por tabla" -ForegroundColor Cyan
-& $psql @conexion -d $BaseDatos -At -c @"
+& $psql @conexion -d $BaseDatos -At -P pager=off -c @"
 SELECT rpad(c.relname, 24) || (xpath('//n/text()', query_to_xml('SELECT count(*) AS n FROM ' || quote_ident(c.relname), false, false, '')))[1]::text
 FROM pg_class c JOIN pg_namespace s ON s.oid = c.relnamespace
 WHERE s.nspname = 'public' AND c.relkind = 'r' AND c.relname <> 'control_migraciones' ORDER BY c.relname;
