@@ -48,5 +48,5 @@ que cada uno leyó y verificó lo que firma.
 |---|---|---|---|
 | Rafael Alfonso Rivera Restrepo | Ejecutó `scripts/verificar_desde_cero.ps1` en su equipo (PostgreSQL 18) sobre una base vacía: las 14 migraciones y la semilla corren sin errores, 35 de 35 pruebas negativas rechazadas por la restricción esperada, 17 de 17 comprobaciones de la semilla en 0 y 10 de 10 consultas verificadas. Salida en `documentacion/entrega2/evidencia_verificacion.txt` | — | Sí |
 | Ivan Andrés Rodriguez Rodriguez | | | |
-| Luis Eliecer Mendoza Perpiñán | | | |
+| Luis Eliecer Mendoza Perpiñán | Revisó el repositorio contra la rúbrica de la Entrega 2 (esquema, restricciones, datos de prueba, sustentación y repositorio) ubicando cada criterio en las migraciones, la semilla, las pruebas y `decisiones.md`. Ejecutó en su equipo (PostgreSQL 18) `scripts/verificar_desde_cero.ps1` con las migraciones 001–014: 35 de 35 pruebas negativas rechazadas por la restricción esperada, 17 de 17 comprobaciones de la semilla en 0 y 10 de 10 consultas verificadas. Ejecutó `sql/pruebas/demostracion_tres_casos.sql`: las consultas devuelven filas y las cuatro sentencias de rechazo terminan en ERROR con el nombre de su restricción | — | Sí |
 | Carlos Eduardo Camelo Montaño | | | |
