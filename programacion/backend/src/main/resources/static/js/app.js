@@ -19,6 +19,7 @@ import * as gestion from "./vistas/gestion.js";
 import * as cuenta from "./vistas/cuenta.js";
 import * as info from "./vistas/info.js";
 import * as inicio from "./vistas/inicio.js";
+import * as notificaciones from "./vistas/notificaciones.js";
 
 const ROLES = { CIUDADANO: "Ciudadano", OPERADOR: "Operador", ABOGADO: "Abogado", ADMINISTRADOR: "Administrador", ANALISTA: "Analista" };
 
@@ -34,6 +35,7 @@ const RUTAS = [
   { patron: /^\/mapa(?:\/(punto|reporte)\/(\d+))?$/, vista: mapa.mostrar, esMapa: true },
   { patron: /^\/reportar$/, roles: ["CIUDADANO"], vista: reportar.mostrar },
   { patron: /^\/mis-reportes$/, roles: ["CIUDADANO"], vista: misReportes.mostrar },
+  { patron: /^\/notificaciones$/, roles: ["CIUDADANO"], vista: notificaciones.mostrar },
   { patron: /^\/mis-casos$/, roles: ["CIUDADANO"], vista: misCasos.mostrar },
   { patron: /^\/abogado\/disponibles$/, roles: ["ABOGADO"], vista: abogado.disponibles },
   { patron: /^\/abogado\/mis-casos$/, roles: ["ABOGADO"], vista: abogado.misCasos },
@@ -51,7 +53,8 @@ const MAPA = ["#/mapa", "Mapa de reportes", "mapa"];
 const MENU = {
   CIUDADANO: [
     ["", [INICIO]],
-    ["Mis reportes", [["#/reportar", "Nuevo reporte", "reportar"], ["#/mis-reportes", "Mis reportes", "reportes"]]],
+    ["Mis reportes", [["#/reportar", "Nuevo reporte", "reportar"], ["#/mis-reportes", "Mis reportes", "reportes"],
+      ["#/notificaciones", "Notificaciones", "notificaciones"]]],
     ["Asesoría legal", [["#/mis-casos", "Mis casos y abogados", "casos"]]],
     ["Ciudad", [MAPA]],
   ],
@@ -108,6 +111,7 @@ async function enrutar() {
 
   mostrarPantalla("app");
   armarMenu(s);
+  actualizarContadorNotificaciones();
   cerrarMenuMovil();
   document.body.classList.toggle("en-mapa", !!r.esMapa);
   marcarActivo(ruta);
@@ -121,6 +125,25 @@ async function enrutar() {
     await r.vista(pagina, m.slice(1));
     pagina.focus({ preventScroll: true });
   }
+}
+
+function actualizarContadorNotificaciones() {
+  const enlace = $('#menu a[href="#/notificaciones"]');
+  if (!enlace) return;
+  api.notificacionesNoLeidas().then((cantidad) => {
+    let indicador = enlace.querySelector(".contador-notificaciones");
+    if (!indicador) {
+      indicador = document.createElement("span");
+      indicador.className = "contador-notificaciones";
+      indicador.setAttribute("aria-hidden", "true");
+      enlace.append(indicador);
+    }
+    indicador.hidden = cantidad === 0;
+    indicador.textContent = cantidad > 99 ? "99+" : String(cantidad);
+    enlace.setAttribute("aria-label", cantidad ? `Notificaciones, ${cantidad} sin leer` : "Notificaciones");
+  }).catch((error) => {
+    console.error("No se pudo actualizar el contador de notificaciones.", error);
+  });
 }
 
 function mostrarPantalla(cual) {

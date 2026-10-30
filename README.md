@@ -18,7 +18,7 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 
 ```
 base-de-datos/            BASE DE DATOS I
-├─ migraciones/           DDL numerado (001_ … 014_) ejecutable en orden sobre base vacía
+├─ migraciones/           DDL numerado (001_ … 015_) ejecutable en orden sobre base vacía
 ├─ sql/                   semilla, consultas, índices, pruebas, herramientas
 ├─ scripts/               migrar.ps1 y generadores (semilla, diccionario, diagrama, documento)
 ├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
@@ -76,6 +76,9 @@ El inicio de sesión aplica pausas progresivas: después de 5 fallos, 3 minutos;
 10 minutos; y al completar 15 fallos, el acceso queda bloqueado hasta que un administrador lo habilite.
 La pantalla muestra el tiempo restante. El administrador puede desbloquearlo desde Swagger con
 `POST /api/admin/accesos/desbloqueo?correo=...` usando una sesión de administrador.
+
+Los cambios de estado de los reportes generan avisos privados en **Notificaciones**. El autor puede marcarlos
+como leídos y abrir desde allí la línea de tiempo del reporte.
 
 Para no escribir las variables cada vez: copiar `programacion/backend/application-example.properties` como
 `application-local.properties` (está en `.gitignore`).

@@ -674,6 +674,24 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
 .tarjeta-pagina > p { margin: 0; }
 .tarjeta-pagina .tarjeta-desc { margin: 2px 0 4px; }
 .tarjeta-pagina.prioritaria { border-left: 3px solid var(--abierto); }
+.lista-notificaciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.notificacion {
+  width: 100%; display: grid; grid-template-columns: 10px minmax(0, 1fr); align-items: start; gap: 12px;
+  padding: 14px; border: 1px solid var(--borde); border-radius: 12px;
+  background: var(--superficie-solida); text-align: left; cursor: pointer;
+}
+.notificacion:hover { border-color: var(--borde-fuerte); background: var(--superficie-2); }
+.notificacion.no-leida { border-color: rgba(57, 135, 229, .45); background: rgba(57, 135, 229, .08); }
+.notificacion-punto { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: transparent; }
+.notificacion.no-leida .notificacion-punto { background: #68a8f3; }
+.notificacion-contenido { min-width: 0; display: grid; gap: 5px; }
+.notificacion-contenido strong { color: var(--texto); font-weight: 600; }
+.notificacion-contenido small { color: var(--texto-tenue); font-size: 12px; }
+.contador-notificaciones {
+  min-width: 20px; height: 20px; margin-left: auto; padding: 0 6px; border-radius: 999px;
+  display: inline-grid; place-items: center; background: #3987e5; color: #fff; font-size: 11px; font-weight: 700;
+}
+.contador-notificaciones[hidden] { display: none; }
 .tarjeta-pie .boton { padding: 7px 12px; font-size: 13px; }
 .progreso { list-style: none; margin: 4px 0; padding: 0; display: flex; gap: 4px; }
 .progreso li { flex: 1; display: grid; gap: 5px; font-size: 11px; color: var(--texto-tenue); }

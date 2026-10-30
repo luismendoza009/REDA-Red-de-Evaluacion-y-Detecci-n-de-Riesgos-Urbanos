@@ -51,6 +51,7 @@ public class HistorialEstado {
     }
 
     public Integer getId() { return id; }
+    public Reporte getReporte() { return reporte; }
     public Estado getEstadoAnterior() { return estadoAnterior; }
     public Estado getEstadoNuevo() { return estadoNuevo; }
     public Usuario getResponsable() { return responsable; }

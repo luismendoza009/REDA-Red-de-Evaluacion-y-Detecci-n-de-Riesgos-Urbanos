@@ -104,6 +104,9 @@ export const api = {
   cambiarEstado: (id, nuevoEstado, observacion) =>
     pedir(`/api/reportes/${id}/estado`, { metodo: "PATCH", json: { nuevoEstado, observacion } }),
   bandejaRevision: () => pedir("/api/revision/bandeja"),
+  notificaciones: () => pedir("/api/notificaciones"),
+  notificacionesNoLeidas: () => pedir("/api/notificaciones/no-leidas"),
+  marcarNotificacionLeida: (id) => pedir(`/api/notificaciones/${id}/leida`, { metodo: "PATCH" }),
   // fotos (privadas)
   evidencias: (idReporte) => pedir(`/api/reportes/${idReporte}/evidencias`),
   archivo: (url) => pedir(url, { binario: true }),

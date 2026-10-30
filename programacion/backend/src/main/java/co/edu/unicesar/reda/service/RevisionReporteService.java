@@ -24,13 +24,15 @@ public class RevisionReporteService {
     private final RevisionRepository revision;
     private final UsuarioRepository usuarios;
     private final EstadoRepository estados;
+    private final NotificacionService notificaciones;
 
     public RevisionReporteService(ReporteRepository reportes, RevisionRepository revision, UsuarioRepository usuarios,
-                                  EstadoRepository estados) {
+                                  EstadoRepository estados, NotificacionService notificaciones) {
         this.reportes = reportes;
         this.revision = revision;
         this.usuarios = usuarios;
         this.estados = estados;
+        this.notificaciones = notificaciones;
     }
 
     /** Bandeja: pendientes y en revisión, primero los incidentes; con los estados a los que puede pasar cada uno. */
@@ -55,6 +57,7 @@ public class RevisionReporteService {
         // propaga la inserción del historial). flush() escribe el cambio y el historial ahora mismo,
         // para que un error de la base salga dentro de este método y no al confirmar.
         reportes.flush();
+        notificaciones.registrarCambioReporte(reporte, cambio);
         return ReporteMapper.cambio(cambio);
     }
 }
