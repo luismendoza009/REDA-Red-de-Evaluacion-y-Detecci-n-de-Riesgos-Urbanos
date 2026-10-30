@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_bloqueos_login.sql, 015_notificaciones.sql, 016_textos_acotados.sql, 017_bloqueos_login_nombre_check.sql, 018_fechas_date.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_bloqueos_login.sql, 015_notificaciones.sql, 016_textos_acotados.sql, 017_bloqueos_login_nombre_check.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -411,7 +411,7 @@ Envío de un caso a un abogado; unidad de facturación del negocio (cuota fija p
 - `ck_remisiones_estado`: `CHECK (((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'ACEPTADA'::character varying, 'RECHAZADA'::character varying, 'VENCIDA'::character varying])::text[])))`
 - `ck_remisiones_motivo`: `CHECK (((motivo_rechazo IS NULL) OR ((estado_remision)::text = 'RECHAZADA'::text)))`
 - `ck_remisiones_motivo_max`: `CHECK ((length(motivo_rechazo) <= 1000))`
-- `ck_remisiones_respuesta`: `CHECK (((((estado_remision)::text = ANY (ARRAY[('ENVIADA'::character varying)::text, ('VENCIDA'::character varying)::text])) AND (fecha_respuesta IS NULL)) OR (((estado_remision)::text = ANY (ARRAY[('ACEPTADA'::character varying)::text, ('RECHAZADA'::character varying)::text])) AND (fecha_respuesta IS NOT NULL) AND (fecha_respuesta >= fecha_envio))))`
+- `ck_remisiones_respuesta`: `CHECK (((((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'VENCIDA'::character varying])::text[])) AND (fecha_respuesta IS NULL)) OR (((estado_remision)::text = ANY ((ARRAY['ACEPTADA'::character varying, 'RECHAZADA'::character varying])::text[])) AND (fecha_respuesta IS NOT NULL) AND (fecha_respuesta >= fecha_envio))))`
 - `ck_remisiones_valor`: `CHECK ((valor_cobrado >= (0)::numeric))`
 - `fk_remisiones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
 - `fk_remisiones_caso`: `FOREIGN KEY (id_caso) REFERENCES casos(id_caso) ON DELETE RESTRICT`

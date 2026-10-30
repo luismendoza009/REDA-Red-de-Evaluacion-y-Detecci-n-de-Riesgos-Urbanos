@@ -60,7 +60,7 @@ Invoke-Psql $BaseDatos @("-c", @"
 CREATE TABLE IF NOT EXISTS control_migraciones (
     version     VARCHAR(10) PRIMARY KEY,
     archivo     VARCHAR(200) NOT NULL,
-    aplicada_en TIMESTAMPTZ NOT NULL DEFAULT now()
+    aplicada_en DATE NOT NULL DEFAULT CURRENT_DATE
 );
 "@)
 

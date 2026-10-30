@@ -10,7 +10,7 @@
 ALTER TABLE usuarios
     ADD COLUMN foto_perfil       VARCHAR(255),
     ADD COLUMN foto_perfil_mime  VARCHAR(20),
-    ADD COLUMN fecha_foto_perfil TIMESTAMPTZ,
+    ADD COLUMN fecha_foto_perfil DATE,
     -- los tres datos van juntos: o hay foto completa o no hay foto
     ADD CONSTRAINT ck_usuarios_foto_completa CHECK (
         (foto_perfil IS NULL AND foto_perfil_mime IS NULL AND fecha_foto_perfil IS NULL)
@@ -21,4 +21,4 @@ ALTER TABLE usuarios
 
 COMMENT ON COLUMN usuarios.foto_perfil IS '[PERSONAL] Ruta relativa (nombre generado) de la foto de perfil. Solo la ven el propio usuario y el personal; la de un abogado verificado, cualquier usuario con sesión.';
 COMMENT ON COLUMN usuarios.foto_perfil_mime IS 'Formato real de la foto de perfil (detectado por sus bytes): image/jpeg, image/png o image/webp.';
-COMMENT ON COLUMN usuarios.fecha_foto_perfil IS 'Cuándo se cargó la foto de perfil actual.';
+COMMENT ON COLUMN usuarios.fecha_foto_perfil IS 'Fecha en que se cargó la foto de perfil actual.';

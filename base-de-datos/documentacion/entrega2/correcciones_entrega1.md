@@ -17,12 +17,12 @@ sus políticas de borrado. Lo que hay son columnas y restricciones nuevas y 15 t
 | Tabla | Cambio | Por qué |
 |---|---|---|
 | roles | CHECK con la lista cerrada; nuevos roles ABOGADO y ANALISTA | El nuevo negocio necesita abogados; ANALISTA prepara el rol de solo lectura de la Entrega 3 |
-| usuarios | `fecha_registro` y `fecha_consentimiento` fueron `TIMESTAMPTZ` y pasan a `DATE` en la migración 018; nuevas `activo` y consentimiento; CHECK de correo en minúsculas y de hash BCrypt. Migración 013: `foto_perfil` (UQ), `foto_perfil_mime`, `fecha_foto_perfil` (también convertido a `DATE`) con CHECK de que los tres van juntos | Las cuentas se desactivan, no se borran (sus reportes son evidencia). Registro del consentimiento (Ley 1581 de 2012). Evita guardar contraseñas en texto plano. La foto se guarda como ruta, no como archivo dentro de la base |
+| usuarios | `fecha_registro` y `fecha_consentimiento` de tipo `DATE`; nuevas `activo` y consentimiento; CHECK de correo en minúsculas y de hash BCrypt. Migración 013: `foto_perfil` (UQ), `foto_perfil_mime`, `fecha_foto_perfil` (`DATE`) con CHECK de que los tres van juntos | Las cuentas se desactivan, no se borran (sus reportes son evidencia). Registro del consentimiento (Ley 1581 de 2012). Evita guardar contraseñas en texto plano. La foto se guarda como ruta, no como archivo dentro de la base |
 | zonas | nuevas `ciudad`, `nivel_trafico`, `centros_educativos`, `centros_salud`; UNIQUE (nombre, ciudad); CHECK de tipo. Migración 012: `latitud_referencia`, `longitud_referencia`, `fuente_ubicacion` | Supuesto 2 de la Entrega 1: las variables de contexto del IRU se guardan como datos simulados de la zona. La ciudad permite escalar a otras ciudades. El punto de referencia (tomado de OpenStreetMap) permite sugerir el barrio según el punto marcado en el mapa; el supuesto 6 se mantiene: no se usan polígonos |
 | estados | "Priorizado" pasa a llamarse **"Validado"** | Ahora el operador no prioriza: verifica que la falla y la evidencia sean reales. Es el paso que habilita abrir un caso |
-| reportes | nueva `tipo_reporte` (CONDICION / INCIDENTE); `fecha` pasa a `fecha_reporte` (convertida de `TIMESTAMPTZ` a `DATE` en 018); CHECK de rango de coordenadas y de longitud mínima de la descripción; UNIQUE (id_reporte, tipo_reporte) | Distinguir antecedentes de incidentes. La fecha ubica el reporte en el calendario. La UNIQUE habilita la FK compuesta de incidentes |
-| evidencias | nuevas `tipo_mime`, `tamano_bytes`, `hash_sha256`, `fecha_captura`; `fecha` pasa a `fecha_carga` (ambas convertidas a `DATE` en 018); CHECK de tipo y tamaño | El hash SHA-256 demuestra que la foto no fue alterada después de cargarla y evita cargar la misma foto dos veces. Valida el tipo de archivo desde la base |
-| evaluaciones | nueva `id_usuario` (operador que evalúa); CHECK de al menos un puntaje; fecha convertida de `TIMESTAMPTZ` a `DATE` en 018 | Trazabilidad: saber quién evaluó |
+| reportes | nueva `tipo_reporte` (CONDICION / INCIDENTE); `fecha` pasa a `fecha_reporte` (de tipo `DATE`); CHECK de rango de coordenadas y de longitud mínima de la descripción; UNIQUE (id_reporte, tipo_reporte) | Distinguir antecedentes de incidentes. La fecha ubica el reporte en el calendario. La UNIQUE habilita la FK compuesta de incidentes |
+| evidencias | nuevas `tipo_mime`, `tamano_bytes`, `hash_sha256`, `fecha_captura`; `fecha` pasa a `fecha_carga` (ambas `DATE`); CHECK de tipo y tamaño | El hash SHA-256 demuestra que la foto no fue alterada después de cargarla y evita cargar la misma foto dos veces. Valida el tipo de archivo desde la base |
+| evaluaciones | nueva `id_usuario` (operador que evalúa); CHECK de al menos un puntaje; fecha de tipo `DATE` | Trazabilidad: saber quién evaluó |
 | historial_estados | `fecha` pasa a `fecha_cambio`; CHECK de anterior ≠ nuevo | Un "cambio" al mismo estado no es un cambio |
 | reportes_relacionados | nuevas `tipo_relacion` (SIMILAR / ANTECEDENTE), `origen` (AUTOMATICO / MANUAL), `fecha_vinculo` | El vínculo incidente → antecedente es la función central del nuevo enfoque |
 
@@ -81,14 +81,16 @@ El documento de la Entrega 1 se conserva tal como se entregó (versión con los 
 repositorio); los cambios de diseño posteriores se explican en este archivo y no reescribiendo aquel.
 El diagrama en notación de Chen de Rafael Rivera está en `base-de-datos/diagramas/reda_eer_chen.drawio` y `.png`.
 
-## Migración 018: fechas como DATE
+## Fechas como DATE
 
-La rúbrica de la Entrega 2 exige que las fechas persistidas sean de tipo `DATE`. La migración
-`018_fechas_date.sql` convierte las 26 columnas de fecha usando `America/Bogota`, reemplaza las vistas
-dependientes y renombra `incidentes.fecha_hora_hecho` a `incidentes.fecha_hecho`. No se modifican las
-migraciones ya aplicadas.
+La rúbrica de la Entrega 2 exige que las fechas persistidas sean de tipo `DATE`. Las 26 columnas de
+fecha se declaran como `DATE` directamente en la migración que crea cada tabla, y
+`incidentes.fecha_hora_hecho` pasa a llamarse `incidentes.fecha_hecho`. Antes de la entrega, esta
+conversión estaba en una migración aparte (`018_fechas_date.sql`); se integró en las migraciones
+originales para que el DDL muestre el tipo final. Se comprobó que el esquema resultante es el mismo
+comparando `pg_dump --schema-only` antes y después.
 
-La conversión pierde la hora y, por tanto, el orden de eventos del mismo día. Según la decisión D34,
+Usar `DATE` pierde la hora y, por tanto, el orden de eventos del mismo día. Según la decisión D34,
 un antecedente debe haberse reportado en un día anterior al hecho; los cambios del historial se ordenan
 por `id_historial`. Los tokens de recuperación vencen al comenzar el día siguiente y los bloqueos
 temporales de inicio de sesión se expresan en días completos.

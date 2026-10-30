@@ -17,7 +17,7 @@ SELECT r.id_reporte,
        e.nombre                     AS estado,
        round(r.latitud, 4)          AS latitud,
        round(r.longitud, 4)         AS longitud,
-       r.fecha_reporte::date        AS fecha,
+       r.fecha_reporte              AS fecha,
        r.nivel_gravedad,
        (SELECT count(*) FROM evidencias ev WHERE ev.id_reporte = r.id_reporte) AS num_evidencias,
        -- columnas nuevas (al final, como exige CREATE OR REPLACE VIEW)
