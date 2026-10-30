@@ -186,7 +186,7 @@ Navegador (HTML + CSS + JavaScript con módulos, sin framework; Leaflet 1.9.4 + 
         │  HTTP/JSON, token JWT en la cabecera
 API REST: Java 17 + Spring Boot 3.5 (Spring Web, Data JPA, Security, Validation, springdoc/Swagger)
         │  JPA para el CRUD + SQL explícito (JdbcTemplate) para mapa y búsqueda de antecedentes
-PostgreSQL 18 (migraciones SQL numeradas 001–013, sin Flyway)
+PostgreSQL 18 (migraciones SQL numeradas 001–014, sin Flyway)
 ```
 - La interfaz la sirve el mismo Spring Boot (`src/main/resources/static`): una URL, un comando. SPA con rutas `#/`,
   un módulo JS por vista, el menú cambia según el rol (el backend vuelve a verificar cada permiso).
@@ -229,7 +229,7 @@ PostgreSQL 18 (migraciones SQL numeradas 001–013, sin Flyway)
 
 ## 8. Datos
 
-Todos los datos de la demo son **simulados** (137 reportes, 18 incidentes, 9 casos, 55 usuarios ficticios con correos
+Todos los datos de la demo son **simulados** (137 reportes, 18 incidentes, 10 casos, 55 usuarios ficticios con correos
 `.test`). Los nombres de barrios y entidades son de Valledupar.
 **Ubicaciones:** cada uno de los 30 barrios tiene un punto de referencia **real** tomado de OpenStreetMap y comprobado
 contra el límite de su comuna; los reportes simulados caen a menos de 170 m de ese punto. Al marcar el punto en el

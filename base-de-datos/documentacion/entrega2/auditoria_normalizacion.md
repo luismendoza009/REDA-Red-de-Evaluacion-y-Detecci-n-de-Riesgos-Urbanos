@@ -1,6 +1,7 @@
 # Auditoría de normalización — REDA (Entrega 2)
 
-> Actualizada al esquema real: migraciones 001 a 013 (23 tablas).
+> Actualizada al esquema real: migraciones 001 a 014 (23 tablas).
+> La migración 014 añade CHECK de longitud máxima a textos libres; no agrega tablas ni modifica las dependencias funcionales aquí analizadas.
 
 Método: para cada tabla se listan las dependencias funcionales (DF) no triviales, las claves
 candidatas y la verificación de forma normal. Recordatorio de criterios:

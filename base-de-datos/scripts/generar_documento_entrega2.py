@@ -1,6 +1,6 @@
 """
 Genera documentacion/entrega2/Entrega2_REDA.docx (Times New Roman 12, estilo de la Entrega 1).
-El PDF se exporta después con Word:  scripts/exportar_pdf.ps1
+El PDF se exporta después con Word (scripts/exportar_pdf.ps1) o LibreOffice.
 Uso: python scripts/generar_documento_entrega2.py
 """
 import os
@@ -139,7 +139,7 @@ tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resume
     ("2. DDL como migraciones numeradas", "migraciones/001_ … 014_*.sql", "14 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
     ("   Evidencia de verificación", "documentacion/entrega2/evidencia_verificacion.txt", "Salida real: 14 migraciones, semilla y verificaciones completas"),
-    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 9 casos; simulados y coherentes"),
+    ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 10 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
     ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 23 tablas, con 6 observaciones justificadas (E1–E6)"),
     ("5. Banco de consultas", "sql/consultas/banco_consultas.sql", "10 consultas comentadas con la pregunta de negocio"),

@@ -29,6 +29,9 @@ sus políticas de borrado. Lo que hay son columnas y restricciones nuevas y 13 t
 Además, todas las restricciones tienen **nombre explícito** (`fk_`, `ck_`, `uq_`) para que los errores
 sean legibles y las pruebas puedan verificar qué regla detuvo cada dato inválido.
 
+La migración 014 añade restricciones `CHECK` con nombre para limitar la longitud máxima de los textos
+libres, sin cambiar los tipos `TEXT` ni agregar tablas.
+
 ## 3. Tablas nuevas
 
 `entidades_publicas`, `abogados`, `incidentes`, `testigos`, `estados_caso`, `casos`, `remisiones`,
@@ -72,7 +75,7 @@ Desde la Entrega 2 el repositorio se separa por asignatura: todo lo de Base de D
 |---|---|
 | `documentacion/Entrega1_REDA.docx` (y .pdf) | `base-de-datos/documentacion/Entrega1_REDA.docx` (y .pdf) |
 | `diagramas/reda_eer.drawio` y `.png` | `base-de-datos/diagramas/reda_eer.drawio` y `.png` (actualizados a 23 tablas) |
-| `migraciones/` (vacía) | `base-de-datos/migraciones/` (001 a 013) |
+| `migraciones/` (vacía) | `base-de-datos/migraciones/` (001 a 014) |
 
 El documento de la Entrega 1 se conserva tal como se entregó (versión con los integrantes y el enlace al
 repositorio); los cambios de diseño posteriores se explican en este archivo y no reescribiendo aquel.
