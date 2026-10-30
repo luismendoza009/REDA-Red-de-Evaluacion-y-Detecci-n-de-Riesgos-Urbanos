@@ -134,6 +134,70 @@ class CuentasYCasosIT {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void segundaEtapaPersisteLaPausaDeDiezMinutos() throws Exception {
+        String correo = "it-" + UUID.randomUUID() + "@correo.test";
+        jdbc.update("""
+                INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_hasta, bloqueado_permanente)
+                VALUES (?, 9, NULL, false)
+                """, correo);
+        try {
+            enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"))
+                    .andExpect(jsonPath("$.segundosRestantes").value(600))
+                    .andExpect(jsonPath("$.intentosRestantes").value(5));
+
+            assertEquals(10, jdbc.queryForObject(
+                    "SELECT intentos_fallidos FROM bloqueos_login WHERE correo = ?", Integer.class, correo));
+            assertTrue(jdbc.queryForObject("""
+                    SELECT bloqueado_hasta > CURRENT_TIMESTAMP
+                    FROM bloqueos_login WHERE correo = ?
+                    """, Boolean.class, correo));
+
+            enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.intentosRestantes").value(5));
+        } finally {
+            limitador.desbloquearLogin("login:" + correo);
+        }
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void bloqueoPermanenteSeRetiraSoloConUnaCuentaAdministradora() throws Exception {
+        String correo = "it-" + UUID.randomUUID() + "@correo.test";
+        String ciudadano = registrar("it-" + UUID.randomUUID() + "@correo.test", "Segura2026");
+        jdbc.update("""
+                INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_hasta, bloqueado_permanente)
+                VALUES (?, 14, NULL, false)
+                """, correo);
+        try {
+            enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.codigo").value("CUENTA_BLOQUEADA"))
+                    .andExpect(jsonPath("$.intentosRestantes").value(0));
+            assertTrue(jdbc.queryForObject(
+                    "SELECT bloqueado_permanente FROM bloqueos_login WHERE correo = ?", Boolean.class, correo));
+
+            enviar(HttpMethod.POST, "/api/admin/accesos/desbloqueo?correo=" + correo, null, ciudadano)
+                    .andExpect(status().isForbidden());
+
+            String administrador = login("luis.fuentes1@correo.test", "Reda2026*");
+            enviar(HttpMethod.POST, "/api/admin/accesos/desbloqueo?correo=" + correo, null, administrador)
+                    .andExpect(status().isOk());
+            assertEquals(0, jdbc.queryForObject(
+                    "SELECT count(*) FROM bloqueos_login WHERE correo = ?", Integer.class, correo));
+
+            enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.intentosRestantes").value(4));
+        } finally {
+            limitador.desbloquearLogin("login:" + correo);
+        }
+    }
+
+    @Test
     void laContrasenaDebeTenerLetrasYNumeros() throws Exception {
         enviar(HttpMethod.POST, "/api/auth/registro", Map.of("nombre", "Ana", "correo", "it-" + UUID.randomUUID() + "@correo.test",
                 "password", "solamenteletras", "aceptaTratamientoDatos", true), null)
