@@ -22,7 +22,7 @@ export async function mostrar(contenedor) {
   const armar = { CIUDADANO: ciudadano, ABOGADO: abogado, OPERADOR: gestion, ADMINISTRADOR: gestion }[s.rol] ?? analista;
   const cuerpo = await armar(s.rol);
   contenedor.innerHTML = `
-    <div class="contenido vista">
+    <div class="contenido vista inicio-dashboard">
       <header class="encabezado bienvenida">
         <p class="etiqueta-superior">${saludo()}</p>
         <h1>${escapar(s.nombre.split(" ")[0])}, ¿qué hacemos hoy?</h1>
