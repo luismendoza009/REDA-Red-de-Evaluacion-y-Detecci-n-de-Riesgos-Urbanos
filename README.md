@@ -59,6 +59,19 @@ mvn spring-boot:run
 Abrir **http://localhost:8080** (desde el celular en la misma red: `http://IP-del-PC:8080`).
 Documentación de la API: http://localhost:8080/swagger-ui.html
 
+### Búsqueda de direcciones
+
+El formulario consulta Nominatim de OpenStreetMap solo cuando la persona escribe una dirección, acepta el aviso
+de privacidad y pulsa «Buscar dirección» (no se usa autocompletado). La dirección y datos técnicos de conexión
+se envían al proveedor; REDA mantiene temporalmente la consulta y sus resultados en una caché acotada en memoria.
+No se deben introducir datos personales. La interfaz muestra la atribución de OpenStreetMap y enlaces a sus
+políticas de uso y privacidad.
+
+El servicio público limita las solicitudes a una por segundo por aplicación. El backend aplica ese límite por
+instancia y permite reemplazar el proveedor por un endpoint compatible con la API de búsqueda Nominatim mediante
+`REDA_GEOCODIFICACION_ENDPOINT`. En despliegues con varias instancias se necesita un límite compartido para
+mantener el máximo global.
+
 El inicio de sesión aplica pausas progresivas: después de 5 fallos, 3 minutos; después de otros 5,
 10 minutos; y al completar 15 fallos, el acceso queda bloqueado hasta que un administrador lo habilite.
 La pantalla muestra el tiempo restante. El administrador puede desbloquearlo desde Swagger con

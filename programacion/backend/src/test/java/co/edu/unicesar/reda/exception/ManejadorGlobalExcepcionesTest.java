@@ -24,6 +24,8 @@ class ManejadorGlobalExcepcionesTest {
         assertEquals(HttpStatus.CONFLICT, estado(new ConflictoException("X", "conflicto")));
         assertEquals(HttpStatus.UNAUTHORIZED, estado(new CredencialesInvalidasException()));
         assertEquals(HttpStatus.FORBIDDEN, estado(new AccesoDenegadoException("no")));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
+                ManejadorGlobalExcepciones.estadoHttp(CategoriaError.SERVICIO_NO_DISPONIBLE));
     }
 
     private static HttpStatus estado(RedaException e) {

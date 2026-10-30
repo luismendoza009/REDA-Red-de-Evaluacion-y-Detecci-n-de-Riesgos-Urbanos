@@ -60,6 +60,27 @@ export async function mostrar(contenedor) {
 
         <div class="campo">
           <span class="etiqueta-campo">Ubicación exacta</span>
+          <div class="busqueda-direccion">
+            <label for="direccion-busqueda">Buscar dirección o lugar
+              <input id="direccion-busqueda" type="search" maxlength="200" autocomplete="off"
+                placeholder="Ej.: Calle 16 con Carrera 9, Valledupar">
+            </label>
+            <small>Al buscar, la dirección y datos técnicos de conexión se envían a Nominatim de OpenStreetMap.
+              REDA conserva temporalmente la consulta y sus resultados en memoria para reducir solicitudes.
+              No incluyas datos personales. Consulta la
+              <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener noreferrer">política de uso</a>
+              y la <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">política de privacidad</a>.
+              Solo se consulta cuando pulsas el botón.</small>
+            <label class="casilla"><input type="checkbox" id="consentimiento-direccion">
+              <span>Entiendo que la dirección escrita se enviará al servicio público de OpenStreetMap para buscarla.</span></label>
+            <div class="fila-acciones">
+              <button type="button" class="boton" id="btn-buscar-direccion" disabled>Buscar dirección</button>
+              <span id="estado-busqueda-direccion" role="status" aria-live="polite">Activa el consentimiento para buscar.</span>
+            </div>
+            <ul id="resultados-direccion" class="resultados-direccion" aria-label="Resultados de búsqueda"></ul>
+            <small class="atribucion-mapa">Búsqueda y mapa: © <a href="https://www.openstreetmap.org/copyright"
+              target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</small>
+          </div>
           <div id="mapa-selector" class="mapa-selector" aria-label="Toca el mapa para marcar dónde está la falla"></div>
           <div class="fila-acciones">
             <button type="button" class="boton" id="btn-gps">📍 Usar mi ubicación</button>
@@ -156,8 +177,12 @@ export async function mostrar(contenedor) {
 }
 
 function crearSelector(form, zonas) {
-  const m = L.map("mapa-selector", { zoomControl: true, attributionControl: false }).setView(VALLEDUPAR, 13);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, className: "teselas-oscuras" }).addTo(m);
+  const m = L.map("mapa-selector", { zoomControl: true }).setView(VALLEDUPAR, 13);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    className: "teselas-oscuras",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+  }).addTo(m);
   let marcador = null;
   // Si el ciudadano eligió el barrio a mano, la sugerencia ya no lo cambia (él conoce su barrio mejor que el mapa).
   let barrioAMano = false;
@@ -221,8 +246,66 @@ function crearSelector(form, zonas) {
       () => { $("#coordenadas").textContent = "No se pudo obtener tu ubicación. Marca el punto en el mapa."; },
       { enableHighAccuracy: true, timeout: 10000 });
   });
+  conectarBusquedaDireccion(m, marcar);
   setTimeout(() => m.invalidateSize(), 50);
   return { remove: () => m.remove(), restaurarPunto };
+}
+
+function conectarBusquedaDireccion(mapa, marcar) {
+  const campo = $("#direccion-busqueda");
+  const consentimiento = $("#consentimiento-direccion");
+  const boton = $("#btn-buscar-direccion");
+  const estado = $("#estado-busqueda-direccion");
+  const resultados = $("#resultados-direccion");
+  let buscando = false;
+  const actualizarBoton = () => {
+    boton.disabled = buscando || !consentimiento.checked || campo.value.trim().length < 3;
+  };
+  const buscar = async () => {
+    const consulta = campo.value.trim();
+    if (!consentimiento.checked || consulta.length < 3 || buscando) return;
+    buscando = true;
+    actualizarBoton();
+    resultados.replaceChildren();
+    estado.textContent = "Buscando dirección…";
+    try {
+      const lugares = await api.buscarDireccion(consulta);
+      if (!lugares.length) {
+        estado.textContent = "No encontramos resultados. Prueba con otra dirección o marca el punto en el mapa.";
+        return;
+      }
+      estado.textContent = `Elige un resultado (${lugares.length}) para marcar el punto en el mapa.`;
+      lugares.forEach((lugar) => {
+        const elemento = document.createElement("li");
+        const opcion = document.createElement("button");
+        opcion.type = "button";
+        opcion.className = "boton resultado-direccion";
+        opcion.textContent = lugar.nombre;
+        opcion.addEventListener("click", () => {
+          marcar(lugar.latitud, lugar.longitud);
+          mapa.setView([lugar.latitud, lugar.longitud], 17);
+          estado.textContent = `Punto seleccionado: ${lugar.nombre}. Verifica que el marcador esté en el lugar correcto.`;
+          resultados.replaceChildren();
+        });
+        elemento.append(opcion);
+        resultados.append(elemento);
+      });
+    } catch (error) {
+      estado.textContent = error.message || "No se pudo buscar la dirección. Usa el mapa o el GPS.";
+    } finally {
+      buscando = false;
+      actualizarBoton();
+    }
+  };
+  consentimiento.addEventListener("change", actualizarBoton);
+  campo.addEventListener("input", actualizarBoton);
+  boton.addEventListener("click", buscar);
+  campo.addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter") {
+      evento.preventDefault();
+      buscar();
+    }
+  });
 }
 
 function conectarBorrador(form, selector) {

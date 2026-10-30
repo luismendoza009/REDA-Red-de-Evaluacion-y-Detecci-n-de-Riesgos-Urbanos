@@ -94,6 +94,7 @@ export const api = {
   zonas: () => pedir("/api/catalogos/zonas"),
   zonaSugerida: (lat, lon) => pedir(`/api/catalogos/zonas/sugerida?latitud=${lat}&longitud=${lon}`),
   entidades: () => pedir("/api/catalogos/entidades"),
+  buscarDireccion: (consulta) => pedir(`/api/geocodificacion/direcciones?consulta=${encodeURIComponent(consulta)}`),
   puntos: () => pedir("/api/mapa/puntos"),
   detallePublico: (id) => pedir(`/api/mapa/reportes/${id}`),
   // reportes

@@ -60,6 +60,7 @@ public class ManejadorGlobalExcepciones {
             case NO_AUTENTICADO -> HttpStatus.UNAUTHORIZED;
             case ACCESO_DENEGADO -> HttpStatus.FORBIDDEN;
             case DEMASIADOS_INTENTOS -> HttpStatus.TOO_MANY_REQUESTS;
+            case SERVICIO_NO_DISPONIBLE -> HttpStatus.SERVICE_UNAVAILABLE;
         };
     }
 
@@ -79,7 +80,7 @@ public class ManejadorGlobalExcepciones {
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
-            MissingServletRequestParameterException.class})
+            MissingServletRequestParameterException.class, jakarta.validation.ConstraintViolationException.class})
     ResponseEntity<ErrorRespuesta> formato(Exception e, HttpServletRequest p) {
         return responder(HttpStatus.BAD_REQUEST, "FORMATO_INVALIDO",
                 "El cuerpo o los parámetros de la petición no tienen el formato esperado", p);
