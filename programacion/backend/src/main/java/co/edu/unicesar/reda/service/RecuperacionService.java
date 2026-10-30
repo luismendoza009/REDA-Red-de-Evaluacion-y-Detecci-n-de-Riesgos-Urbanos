@@ -1,11 +1,11 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.AuthDtos.MensajeResponse;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import co.edu.unicesar.reda.model.TokenRecuperacion;
 import co.edu.unicesar.reda.model.Usuario;
 import co.edu.unicesar.reda.repository.TokenRecuperacionRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
+import co.edu.unicesar.reda.respuesta.MensajeResponse;
 import co.edu.unicesar.reda.security.LimitadorIntentos;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;

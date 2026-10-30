@@ -1,13 +1,18 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.CasoDtos.*;
 import co.edu.unicesar.reda.model.Abogado;
 import co.edu.unicesar.reda.model.Caso;
+import co.edu.unicesar.reda.model.EstadoCaso;
 import co.edu.unicesar.reda.model.Postulacion;
 import co.edu.unicesar.reda.model.Reporte;
-import co.edu.unicesar.reda.model.EstadoCaso;
 import co.edu.unicesar.reda.repository.CalificacionRepository;
 import co.edu.unicesar.reda.repository.CasoRepository;
+import co.edu.unicesar.reda.respuesta.CasoCiudadanoResponse;
+import co.edu.unicesar.reda.respuesta.CasoDisponibleResponse;
+import co.edu.unicesar.reda.respuesta.ComentarioPublico;
+import co.edu.unicesar.reda.respuesta.ExpedienteResponse;
+import co.edu.unicesar.reda.respuesta.PerfilPublicoAbogado;
+import co.edu.unicesar.reda.respuesta.PostulacionResponse;
 import org.springframework.data.domain.Limit;
 
 import java.time.format.DateTimeFormatter;

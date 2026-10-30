@@ -1,6 +1,13 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.*;
+import co.edu.unicesar.reda.peticion.CambioEstadoRequest;
+import co.edu.unicesar.reda.peticion.CrearIncidenteRequest;
+import co.edu.unicesar.reda.peticion.FallaRequest;
+import co.edu.unicesar.reda.respuesta.AntecedenteResponse;
+import co.edu.unicesar.reda.respuesta.CambioEstadoResponse;
+import co.edu.unicesar.reda.respuesta.IncidenteCreadoResponse;
+import co.edu.unicesar.reda.respuesta.MiReporteResponse;
+import co.edu.unicesar.reda.respuesta.ReporteDetalleResponse;
 import co.edu.unicesar.reda.security.UsuarioAutenticado;
 import co.edu.unicesar.reda.service.ConsultaReporteService;
 import co.edu.unicesar.reda.service.RegistroReporteService;

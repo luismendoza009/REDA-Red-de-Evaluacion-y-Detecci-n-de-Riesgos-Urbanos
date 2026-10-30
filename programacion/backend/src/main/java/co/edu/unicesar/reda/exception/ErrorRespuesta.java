@@ -1,4 +1,4 @@
-package co.edu.unicesar.reda.dto;
+package co.edu.unicesar.reda.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

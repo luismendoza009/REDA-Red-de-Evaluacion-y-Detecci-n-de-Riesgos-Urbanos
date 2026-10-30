@@ -1,12 +1,17 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.AuthDtos.*;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import co.edu.unicesar.reda.model.Abogado;
 import co.edu.unicesar.reda.model.Usuario;
+import co.edu.unicesar.reda.peticion.ActualizarPerfilAbogadoRequest;
+import co.edu.unicesar.reda.peticion.ActualizarPerfilRequest;
+import co.edu.unicesar.reda.peticion.CambioPasswordRequest;
 import co.edu.unicesar.reda.repository.AbogadoRepository;
 import co.edu.unicesar.reda.repository.CalificacionRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;
+import co.edu.unicesar.reda.respuesta.MensajeResponse;
+import co.edu.unicesar.reda.respuesta.PerfilAbogado;
+import co.edu.unicesar.reda.respuesta.PerfilResponse;
 import co.edu.unicesar.reda.security.LimitadorIntentos;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

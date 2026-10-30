@@ -1,9 +1,9 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.CatalogoDtos.CategoriaResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.EntidadResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.ZonaResponse;
-import co.edu.unicesar.reda.dto.CatalogoDtos.ZonaSugeridaResponse;
+import co.edu.unicesar.reda.respuesta.CategoriaResponse;
+import co.edu.unicesar.reda.respuesta.EntidadResponse;
+import co.edu.unicesar.reda.respuesta.ZonaResponse;
+import co.edu.unicesar.reda.respuesta.ZonaSugeridaResponse;
 import co.edu.unicesar.reda.service.CatalogoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
 package co.edu.unicesar.reda.service;
 
-import co.edu.unicesar.reda.dto.ReporteDtos.CambioEstadoRequest;
 import co.edu.unicesar.reda.exception.RecursoNoEncontradoException;
 import co.edu.unicesar.reda.model.NombreEstado;
+import co.edu.unicesar.reda.peticion.CambioEstadoRequest;
 import co.edu.unicesar.reda.repository.EstadoRepository;
 import co.edu.unicesar.reda.repository.ReporteRepository;
 import co.edu.unicesar.reda.repository.UsuarioRepository;

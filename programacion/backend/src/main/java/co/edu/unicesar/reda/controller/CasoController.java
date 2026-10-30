@@ -1,6 +1,13 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.CasoDtos.*;
+import co.edu.unicesar.reda.peticion.CalificarRequest;
+import co.edu.unicesar.reda.peticion.CerrarRequest;
+import co.edu.unicesar.reda.peticion.ElegirRequest;
+import co.edu.unicesar.reda.peticion.PostularRequest;
+import co.edu.unicesar.reda.peticion.SolicitarAbogadoRequest;
+import co.edu.unicesar.reda.respuesta.CasoCiudadanoResponse;
+import co.edu.unicesar.reda.respuesta.CasoDisponibleResponse;
+import co.edu.unicesar.reda.respuesta.ExpedienteResponse;
 import co.edu.unicesar.reda.security.UsuarioAutenticado;
 import co.edu.unicesar.reda.service.AbogadoCasosService;
 import co.edu.unicesar.reda.service.CasoCiudadanoService;

@@ -1,6 +1,6 @@
 package co.edu.unicesar.reda.controller;
 
-import co.edu.unicesar.reda.dto.EvidenciaDtos.ArchivoResponse;
+import co.edu.unicesar.reda.respuesta.ArchivoResponse;
 import co.edu.unicesar.reda.security.UsuarioAutenticado;
 import co.edu.unicesar.reda.service.FotoPerfilService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,6 +1,5 @@
 package co.edu.unicesar.reda.exception;
 
-import co.edu.unicesar.reda.dto.ErrorRespuesta;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
