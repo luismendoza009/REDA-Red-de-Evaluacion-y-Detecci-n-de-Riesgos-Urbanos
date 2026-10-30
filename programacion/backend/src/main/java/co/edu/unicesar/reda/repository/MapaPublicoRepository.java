@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +44,7 @@ public class MapaPublicoRepository {
     }
 
     /** Un cambio de estado tal como se muestra al público: sin nombres ni observaciones internas. */
-    public record HitoPublico(String estado, OffsetDateTime fecha) {
+    public record HitoPublico(String estado, LocalDate fecha) {
     }
 
     public List<PuntoMapa> puntos() {
@@ -63,8 +62,8 @@ public class MapaPublicoRepository {
                 FROM historial_estados h
                 JOIN estados e ON e.id_estado = h.id_estado_nuevo
                 WHERE h.id_reporte = ?
-                ORDER BY h.fecha_cambio
-                """, (rs, i) -> new HitoPublico(rs.getString("estado"), rs.getObject("fecha_cambio", OffsetDateTime.class)),
+                ORDER BY h.id_historial
+                """, (rs, i) -> new HitoPublico(rs.getString("estado"), rs.getObject("fecha_cambio", LocalDate.class)),
                 idReporte);
     }
 }

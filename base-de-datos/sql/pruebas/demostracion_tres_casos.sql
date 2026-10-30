@@ -75,7 +75,7 @@ WHERE rm.estado_remision = 'ACEPTADA'
 LIMIT 1;
 
 \echo '3d. Regla: solo un reporte de tipo INCIDENTE puede tener datos de daño  ->  fk_incidentes_reporte (FK compuesta)'
-INSERT INTO incidentes (id_reporte, fecha_hora_hecho, tipo_dano, descripcion_dano)
+INSERT INTO incidentes (id_reporte, fecha_hecho, tipo_dano, descripcion_dano)
 VALUES ((SELECT min(id_reporte) FROM reportes WHERE tipo_reporte = 'CONDICION'), now(), 'LESION', 'Caída del peatón en el hueco');
 
 \echo

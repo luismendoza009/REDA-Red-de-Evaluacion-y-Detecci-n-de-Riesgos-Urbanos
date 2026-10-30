@@ -30,7 +30,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT pg_temp.debe_fallar('incidente colgado de un reporte de CONDICION (FK compuesta)', 'fk_incidentes_reporte',
-  $q$INSERT INTO incidentes (id_reporte, fecha_hora_hecho, tipo_dano, descripcion_dano)
+  $q$INSERT INTO incidentes (id_reporte, fecha_hecho, tipo_dano, descripcion_dano)
      VALUES ((SELECT min(id_reporte) FROM reportes WHERE tipo_reporte = 'CONDICION'), now(), 'LESION', 'Caída del peatón en el hueco')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('cambiar a CONDICION un reporte que ya tiene incidente', 'fk_incidentes_reporte',
@@ -110,7 +110,7 @@ SELECT pg_temp.debe_fallar('token de recuperación guardado en claro (no es un h
   $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, 'MiTokenSecreto', now() + interval '30 minutes')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('token que vence antes de crearse', 'ck_tokens_vigencia',
-  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), now() - interval '1 minute')$q$)
+  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), CURRENT_DATE - 1)$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('calificación de 6 estrellas', 'ck_calificaciones_puntaje',
   $q$UPDATE calificaciones SET puntaje = 6 WHERE id_calificacion = (SELECT min(id_calificacion) FROM calificaciones)$q$)

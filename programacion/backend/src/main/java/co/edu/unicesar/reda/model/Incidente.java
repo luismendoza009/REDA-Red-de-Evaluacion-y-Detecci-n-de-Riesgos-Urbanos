@@ -3,7 +3,8 @@ package co.edu.unicesar.reda.model;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +34,8 @@ public class Incidente {
     @JoinColumn(name = "id_entidad")
     private EntidadPublica entidad;
 
-    @Column(name = "fecha_hora_hecho", nullable = false)
-    private OffsetDateTime fechaHoraHecho;
+    @Column(name = "fecha_hecho", nullable = false)
+    private LocalDate fechaHecho;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_dano", nullable = false, length = 15)
@@ -71,9 +72,10 @@ public class Incidente {
         return t;
     }
 
-    static Incidente de(Reporte reporte, TipoDano tipoDano, String descripcionDano, OffsetDateTime fechaHoraHecho,
+    static Incidente de(Reporte reporte, TipoDano tipoDano, String descripcionDano, LocalDate fechaHecho,
                         boolean huboAtencionMedica, EntidadPublica entidad) {
-        if (fechaHoraHecho.isAfter(reporte.getFechaReporte())) {
+        if (fechaHecho.isAfter(reporte.getFechaReporte())
+                || fechaHecho.isAfter(LocalDate.now(ZoneId.of("America/Bogota")))) {
             throw new ReglaNegocioException("FECHA_HECHO_FUTURA", "La fecha del hecho no puede ser posterior al reporte");
         }
         if (huboAtencionMedica && !tipoDano.incluyeLesion()) {
@@ -84,7 +86,7 @@ public class Incidente {
         i.reporte = reporte;
         i.tipoDano = tipoDano;
         i.descripcionDano = descripcionDano.trim();
-        i.fechaHoraHecho = fechaHoraHecho;
+        i.fechaHecho = fechaHecho;
         i.huboAtencionMedica = huboAtencionMedica;
         i.entidad = entidad;
         return i;
@@ -93,7 +95,7 @@ public class Incidente {
     public Integer getId() { return id; }
     public Reporte getReporte() { return reporte; }
     public EntidadPublica getEntidad() { return entidad; }
-    public OffsetDateTime getFechaHoraHecho() { return fechaHoraHecho; }
+    public LocalDate getFechaHecho() { return fechaHecho; }
     public TipoDano getTipoDano() { return tipoDano; }
     public String getDescripcionDano() { return descripcionDano; }
     public boolean isHuboAtencionMedica() { return huboAtencionMedica; }

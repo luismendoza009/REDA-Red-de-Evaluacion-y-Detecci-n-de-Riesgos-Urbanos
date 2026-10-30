@@ -2,7 +2,8 @@ package co.edu.unicesar.reda.model;
 
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "notificaciones", uniqueConstraints = {
@@ -24,10 +25,10 @@ public class Notificacion {
     private HistorialEstado historial;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private OffsetDateTime fechaCreacion;
+    private LocalDate fechaCreacion;
 
     @Column(name = "fecha_lectura")
-    private OffsetDateTime fechaLectura;
+    private LocalDate fechaLectura;
 
     protected Notificacion() {
     }
@@ -36,17 +37,17 @@ public class Notificacion {
         Notificacion notificacion = new Notificacion();
         notificacion.destinatario = destinatario;
         notificacion.historial = historial;
-        notificacion.fechaCreacion = OffsetDateTime.now();
+        notificacion.fechaCreacion = LocalDate.now(ZoneId.of("America/Bogota"));
         return notificacion;
     }
 
     public void marcarLeida() {
-        if (fechaLectura == null) fechaLectura = OffsetDateTime.now();
+        if (fechaLectura == null) fechaLectura = LocalDate.now(ZoneId.of("America/Bogota"));
     }
 
     public Integer getId() { return id; }
     public Usuario getDestinatario() { return destinatario; }
     public HistorialEstado getHistorial() { return historial; }
-    public OffsetDateTime getFechaCreacion() { return fechaCreacion; }
-    public OffsetDateTime getFechaLectura() { return fechaLectura; }
+    public LocalDate getFechaCreacion() { return fechaCreacion; }
+    public LocalDate getFechaLectura() { return fechaLectura; }
 }

@@ -4,7 +4,7 @@
 //  - Mis casos: expediente COMPLETO solo de los casos donde el ciudadano lo eligió; cierre del caso.
 // =============================================================================
 import { api, ErrorApi } from "../api.js";
-import { $, $$, escapar, fecha, fechaHora, pesos, plural, avisar, dialogo, cargando, vacio, DANOS } from "../ui.js";
+import { $, $$, escapar, fecha, pesos, plural, avisar, dialogo, cargando, vacio, DANOS } from "../ui.js";
 import { cargarFotos, liberarFotos } from "./mapa.js";
 
 function pendienteDeVerificacion(contenedor, e) {
@@ -161,7 +161,7 @@ function expediente(c) {
           <p><b>${escapar(c.nombreCiudadano)}</b><br><a href="mailto:${escapar(c.correoCiudadano)}">${escapar(c.correoCiudadano)}</a></p>
           <h3>El hecho</h3>
           <dl class="datos">
-            <div><dt>Fecha y hora</dt><dd>${fechaHora(i.fechaHoraHecho)}</dd></div>
+            <div><dt>Fecha del hecho</dt><dd>${fecha(i.fechaHecho)}</dd></div>
             <div><dt>Daño</dt><dd>${escapar(DANOS[i.tipoDano] ?? i.tipoDano)}</dd></div>
             <div><dt>Atención médica</dt><dd>${i.huboAtencionMedica ? "Sí" : "No"}</dd></div>
             <div><dt>Entidad señalada</dt><dd>${escapar(i.entidadResponsable ?? "Sin identificar")}</dd></div>
@@ -181,7 +181,7 @@ function expediente(c) {
           <div id="fotos-caso-${c.id}">${cargando()}</div>
           <h3>Línea de tiempo del reporte</h3>
           <ol class="hitos">${[{ estadoNuevo: "Reportado", fecha: r.fechaReporte }, ...r.historial].map((h) =>
-            `<li><span>${escapar(h.estadoNuevo)}</span><time>${fechaHora(h.fecha)}</time></li>`).join("")}</ol>
+            `<li><span>${escapar(h.estadoNuevo)}</span><time>${fecha(h.fecha)}</time></li>`).join("")}</ol>
         </div>
       </div>
       ${c.observacion ? `<p class="nota">Observación del caso: ${escapar(c.observacion)}</p>` : ""}

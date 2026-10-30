@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.respuesta;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 public record ReporteResumenResponse(Integer id, String tipo, String categoria, String zona, String estado,
-                                     OffsetDateTime fechaReporte, Short nivelGravedad) {
+                                     LocalDate fechaReporte, Short nivelGravedad) {
 }

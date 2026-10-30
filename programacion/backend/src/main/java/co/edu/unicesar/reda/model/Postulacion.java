@@ -2,7 +2,8 @@ package co.edu.unicesar.reda.model;
 
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /** Interés de un abogado en un caso. Solo la crea {@link Caso#postular}. */
 @Entity
@@ -32,10 +33,10 @@ public class Postulacion {
     private Estado estado;
 
     @Column(name = "fecha_postulacion", nullable = false)
-    private OffsetDateTime fechaPostulacion;
+    private LocalDate fechaPostulacion;
 
     @Column(name = "fecha_resolucion")
-    private OffsetDateTime fechaResolucion;
+    private LocalDate fechaResolucion;
 
     protected Postulacion() {
     }
@@ -46,11 +47,11 @@ public class Postulacion {
         p.abogado = abogado;
         p.mensaje = mensaje.trim();
         p.estado = Estado.PENDIENTE;
-        p.fechaPostulacion = OffsetDateTime.now();
+        p.fechaPostulacion = LocalDate.now(ZoneId.of("America/Bogota"));
         return p;
     }
 
-    void resolver(Estado nuevo, OffsetDateTime cuando) {
+    void resolver(Estado nuevo, LocalDate cuando) {
         this.estado = nuevo;
         this.fechaResolucion = cuando;
     }
@@ -64,6 +65,6 @@ public class Postulacion {
     public Abogado getAbogado() { return abogado; }
     public String getMensaje() { return mensaje; }
     public Estado getEstado() { return estado; }
-    public OffsetDateTime getFechaPostulacion() { return fechaPostulacion; }
-    public OffsetDateTime getFechaResolucion() { return fechaResolucion; }
+    public LocalDate getFechaPostulacion() { return fechaPostulacion; }
+    public LocalDate getFechaResolucion() { return fechaResolucion; }
 }

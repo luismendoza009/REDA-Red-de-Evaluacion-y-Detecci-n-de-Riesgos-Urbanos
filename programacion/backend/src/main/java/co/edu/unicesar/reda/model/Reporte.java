@@ -4,7 +4,8 @@ import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,13 +59,13 @@ public class Reporte {
     private BigDecimal longitud;
 
     @Column(name = "fecha_reporte", nullable = false)
-    private OffsetDateTime fechaReporte;
+    private LocalDate fechaReporte;
 
     @Column(name = "nivel_gravedad")
     private Short nivelGravedad;
 
     @OneToMany(mappedBy = "reporte", cascade = CascadeType.PERSIST)
-    @OrderBy("fechaCambio ASC")
+    @OrderBy("id ASC")
     private List<HistorialEstado> historial = new ArrayList<>();
 
     @OneToOne(mappedBy = "reporte", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
@@ -93,7 +94,7 @@ public class Reporte {
         r.latitud = latitud;
         r.longitud = longitud;
         r.nivelGravedad = nivelGravedad;
-        r.fechaReporte = OffsetDateTime.now();
+        r.fechaReporte = LocalDate.now(ZoneId.of("America/Bogota"));
         return r;
     }
 
@@ -101,7 +102,7 @@ public class Reporte {
      * Registra los datos del daño. Solo un reporte de tipo INCIDENTE puede tenerlos
      * (la base también lo garantiza con una FK compuesta; aquí se avisa antes, con un mensaje claro).
      */
-    public Incidente registrarIncidente(TipoDano tipoDano, String descripcionDano, OffsetDateTime fechaHoraHecho,
+    public Incidente registrarIncidente(TipoDano tipoDano, String descripcionDano, LocalDate fechaHecho,
                                         boolean huboAtencionMedica, EntidadPublica entidad) {
         if (tipo != TipoReporte.INCIDENTE) {
             throw new ReglaNegocioException("NO_ES_INCIDENTE", "Solo un reporte de tipo INCIDENTE puede registrar daños");
@@ -109,7 +110,7 @@ public class Reporte {
         if (incidente != null) {
             throw new ReglaNegocioException("INCIDENTE_DUPLICADO", "Este reporte ya tiene registrado su incidente");
         }
-        this.incidente = Incidente.de(this, tipoDano, descripcionDano, fechaHoraHecho, huboAtencionMedica, entidad);
+        this.incidente = Incidente.de(this, tipoDano, descripcionDano, fechaHecho, huboAtencionMedica, entidad);
         return incidente;
     }
 
@@ -184,7 +185,7 @@ public class Reporte {
     public String getDescripcion() { return descripcion; }
     public BigDecimal getLatitud() { return latitud; }
     public BigDecimal getLongitud() { return longitud; }
-    public OffsetDateTime getFechaReporte() { return fechaReporte; }
+    public LocalDate getFechaReporte() { return fechaReporte; }
     public Short getNivelGravedad() { return nivelGravedad; }
     public List<HistorialEstado> getHistorial() { return Collections.unmodifiableList(historial); }
     public Incidente getIncidente() { return incidente; }

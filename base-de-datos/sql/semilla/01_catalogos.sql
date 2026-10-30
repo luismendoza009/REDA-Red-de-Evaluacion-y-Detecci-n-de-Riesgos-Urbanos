@@ -76,11 +76,11 @@ INSERT INTO entidades_publicas (id_entidad, nombre, tipo, ciudad) VALUES
   (7, 'Gobernación del Cesar - Secretaría de Infraestructura', 'GOBERNACION', 'Valledupar');
 
 INSERT INTO versiones_indice (id_version, nombre_indice, numero_version, descripcion, vigente, fecha_creacion) VALUES
-  (1, 'IRU', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con expertos (AHP).', true, '2026-02-01T08:00:00-05:00'),
-  (2, 'IVC', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con abogados (AHP).', true, '2026-02-01T08:00:00-05:00'),
-  (3, 'IRU', 2, 'Propuesta: más peso a la gravedad evaluada por el operador. En estudio.', false, '2026-07-01T08:00:00-05:00'),
-  (4, 'IVC', 2, 'Propuesta: más peso a los antecedentes previos, que prueban que la entidad sabía. En estudio.', false, '2026-07-11T08:00:00-05:00'),
-  (5, 'IRU', 3, 'Propuesta: más peso a los reportes cercanos y menos al tráfico (dato simulado). En estudio.', false, '2026-09-19T08:00:00-05:00');
+  (1, 'IRU', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con expertos (AHP).', true, '2026-02-01'),
+  (2, 'IVC', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con abogados (AHP).', true, '2026-02-01'),
+  (3, 'IRU', 2, 'Propuesta: más peso a la gravedad evaluada por el operador. En estudio.', false, '2026-07-01'),
+  (4, 'IVC', 2, 'Propuesta: más peso a los antecedentes previos, que prueban que la entidad sabía. En estudio.', false, '2026-07-11'),
+  (5, 'IRU', 3, 'Propuesta: más peso a los reportes cercanos y menos al tráfico (dato simulado). En estudio.', false, '2026-09-19');
 
 INSERT INTO parametros_indice (id_version, variable, peso, descripcion) VALUES
   (1, 'gravedad_evaluada', 0.25, 'Promedio de gravedad e impacto de la última evaluación del operador (0-100).'),

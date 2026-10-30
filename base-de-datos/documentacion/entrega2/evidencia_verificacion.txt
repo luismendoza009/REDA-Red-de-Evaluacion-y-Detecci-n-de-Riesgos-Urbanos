@@ -1,4 +1,15 @@
 
+=== Validación de la migración 018_fechas_date (2026-10-30) ===
+Base de validación: reda_fecha_date_validation (aislada; no se modificó reda).
+Migraciones 001 a 018 y semilla: ejecutadas sin errores.
+Pruebas negativas: 40/40 restricciones rechazaron las operaciones inválidas.
+Coherencia de semilla: 19/19 comprobaciones devolvieron 0.
+Consultas cruzadas: 10/10 verificaciones devolvieron t.
+Esquema: 26 columnas persistidas de tipo DATE; el nombre antiguo
+incidentes.fecha_hora_hecho ya no existe. Las vistas exponen también columnas DATE.
+La base aislada permaneció disponible para las pruebas de integración.
+Backend: 108 pruebas unitarias y de integración, sin fallos ni errores.
+
 === 1. Base vacia + migraciones + semilla (reda_rubrica_check_20261030)
 Recreando la base 'reda_rubrica_check_20261030' desde cero...
   + 001_catalogos.sql

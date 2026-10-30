@@ -3,7 +3,8 @@ package co.edu.unicesar.reda.model;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Objects;
 
 /** Vínculo entre dos reportes: SIMILAR o ANTECEDENTE (incidente -> condición previa en el mismo punto). */
@@ -59,7 +60,7 @@ public class ReporteRelacionado {
     private Origen origen;
 
     @Column(name = "fecha_vinculo", nullable = false)
-    private OffsetDateTime fechaVinculo;
+    private LocalDate fechaVinculo;
 
     protected ReporteRelacionado() {
     }
@@ -69,7 +70,7 @@ public class ReporteRelacionado {
         r.clave = new Clave(idIncidente, idCondicion);
         r.tipo = Tipo.ANTECEDENTE;
         r.origen = Origen.AUTOMATICO;
-        r.fechaVinculo = OffsetDateTime.now();
+        r.fechaVinculo = LocalDate.now(ZoneId.of("America/Bogota"));
         return r;
     }
 

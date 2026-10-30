@@ -10,12 +10,10 @@ export const escapar = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&":
 
 const fmtFecha = new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", year: "numeric" });
 const fmtFechaUtc = new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-const fmtFechaHora = new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const fmtPesos = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
 /** "2026-05-19" (solo fecha) se formatea en UTC para no correr el día por la zona horaria. */
 export const fecha = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v) ? fmtFechaUtc : fmtFecha).format(new Date(v));
-export const fechaHora = (v) => fmtFechaHora.format(new Date(v));
 export const pesos = (v) => fmtPesos.format(Number(v));
 export const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 

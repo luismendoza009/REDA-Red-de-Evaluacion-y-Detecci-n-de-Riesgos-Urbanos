@@ -131,7 +131,7 @@
     "PK id_incidente",
     "FK id_reporte, tipo_reporte (UQ)",
     "FK id_entidad",
-    "fecha_hora_hecho",
+    "fecha_hecho",
     "tipo_dano",
     "descripcion_dano",
     "hubo_atencion_medica",

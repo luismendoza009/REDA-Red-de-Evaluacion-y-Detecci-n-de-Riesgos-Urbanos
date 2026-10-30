@@ -1,7 +1,7 @@
 // =============================================================================
 // Reportar una falla: CONDICIÓN (antecedente, sin daño) o INCIDENTE (hubo un daño).
 // Ubicación en un mini-mapa (clic o GPS del celular), fotos con vista previa, y para incidentes:
-// fecha y hora del hecho, tipo de daño, atención médica, entidad y testigos.
+// fecha del hecho, tipo de daño, atención médica, entidad y testigos.
 // Al crear un incidente, el sistema muestra cuántos reportes previos había en ese punto.
 // =============================================================================
 import { api, sesion } from "../api.js";
@@ -22,7 +22,9 @@ export async function mostrar(contenedor) {
     contenedor.innerHTML = `<div class="contenido"><p class="error">${escapar(e.message)}</p></div>`;
     return;
   }
-  const ahora = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const hoy = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Bogota",
+  }).format(new Date());
   contenedor.innerHTML = `
     <div class="contenido vista">
       <header class="encabezado">
@@ -103,7 +105,7 @@ export async function mostrar(contenedor) {
           <h2>Lo que te pasó</h2>
           <p class="texto-2">Estos datos son privados. Solo los ven el equipo de revisión y el abogado que tú elijas.</p>
           <div class="fila-2">
-            <label>Fecha y hora del hecho<input type="datetime-local" name="fechaHoraHecho" max="${ahora}"></label>
+            <label>Fecha del hecho<input type="date" name="fechaHecho" max="${hoy}"></label>
             <label>Entidad que crees responsable<select name="idEntidad"><option value="">No sé</option>
               ${entidades.map((e) => `<option value="${e.id}">${escapar(e.nombre)}</option>`).join("")}</select></label>
           </div>
@@ -434,7 +436,7 @@ function conectarTipo(form) {
   const actualizar = () => {
     const incidente = form.tipo.value === "INCIDENTE";
     $("#datos-incidente").hidden = !incidente;
-    form.fechaHoraHecho.required = incidente;
+    form.fechaHecho.required = incidente;
     form.descripcionDano.required = incidente;
   };
   $$("input[name=tipo]", form).forEach((r) => r.addEventListener("change", actualizar));
@@ -518,7 +520,7 @@ async function enviar(form, fotos, actualizarProgreso) {
       falla,
       tipoDano: d.get("tipoDano"),
       descripcionDano: d.get("descripcionDano"),
-      fechaHoraHecho: d.get("fechaHoraHecho") ? new Date(d.get("fechaHoraHecho")).toISOString() : null,
+      fechaHecho: d.get("fechaHecho") || null,
       huboAtencionMedica: d.get("huboAtencionMedica") === "on",
       idEntidad: Number(d.get("idEntidad")) || null,
       testigos,

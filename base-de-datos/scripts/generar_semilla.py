@@ -41,7 +41,7 @@ def q(v):
     if isinstance(v, (int, float)):
         return str(v)
     if isinstance(v, datetime):
-        return "'" + v.isoformat(timespec="seconds") + "'"
+        return "'" + v.date().isoformat() + "'"
     return "'" + str(v).replace("'", "''") + "'"
 
 
@@ -430,7 +430,7 @@ def main():
         for rc in reportes:
             if rc[5] != "CONDICION" or rc[2] != ri[2] or rc[4] == RECH:
                 continue  # solo condiciones de la misma categoría y NO rechazadas
-            if rc[9] >= inc[4]:
+            if rc[9].date() >= inc[4].date():
                 continue
             if haversine_m(float(ri[7]), float(ri[8]), float(rc[7]), float(rc[8])) <= RADIO_ANTECEDENTE_M:
                 relacionados.append((ri[0], rc[0], "ANTECEDENTE", "AUTOMATICO", ri[9] + timedelta(minutes=1)))
@@ -589,13 +589,13 @@ def main():
                          t + timedelta(minutes=1)))
 
     # --------------------------------------------------------------- tokens de recuperación
-    # Solo se guarda el SHA-256 del token. Todos están vencidos (duran 30 min); unos se usaron y otros no.
+    # Solo se guarda el SHA-256 del token. Todos están vencidos; unos se usaron y otros no.
     tokens = []
     for k, (dias, usado) in enumerate([(95, True), (110, False), (130, True), (150, True), (171, False), (198, True)], 1):
         uid = ciudadanos[k * 6]
         creado = INICIO + timedelta(days=dias, hours=k)
         tokens.append((k, uid, hashlib.sha256(f"token-demo-{k}".encode()).hexdigest(), creado,
-                       creado + timedelta(minutes=30), creado + timedelta(minutes=4 + k) if usado else None))
+                       creado + timedelta(days=1), creado + timedelta(minutes=4 + k) if usado else None))
 
     # --------------------------------------------------------------- archivos
     cab = ("-- DATOS SIMULADOS generados por scripts/generar_semilla.py (no editar a mano).\n"
@@ -681,7 +681,7 @@ def main():
 
     with open(os.path.join(SALIDA, "04_incidentes.sql"), "w", encoding="utf-8") as f:
         f.write(cab)
-        f.write(inserts("incidentes", ["id_incidente", "id_reporte", "tipo_reporte", "id_entidad", "fecha_hora_hecho", "tipo_dano",
+        f.write(inserts("incidentes", ["id_incidente", "id_reporte", "tipo_reporte", "id_entidad", "fecha_hecho", "tipo_dano",
                                        "descripcion_dano", "hubo_atencion_medica"], incidentes))
         f.write(inserts("testigos", ["id_testigo", "id_incidente", "nombre", "contacto"], testigos))
         f.write(inserts("reportes_relacionados", ["id_reporte", "id_reporte_relacionado", "tipo_relacion", "origen", "fecha_vinculo"], relacionados))

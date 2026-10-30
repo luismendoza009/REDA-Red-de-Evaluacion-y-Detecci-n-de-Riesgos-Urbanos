@@ -88,10 +88,10 @@ public class AbogadoCasosService {
         Reporte r = i.getReporte();
         List<BuscadorAntecedentes.Antecedente> antecedentes = antecedentesDe(r, i);
         Long dias = antecedentes.isEmpty() ? null
-                : ChronoUnit.DAYS.between(antecedentes.get(0).fechaReporte(), i.getFechaHoraHecho());
+                : ChronoUnit.DAYS.between(antecedentes.get(0).fechaReporte(), i.getFechaHecho());
         long postulados = c.getPostulaciones().stream().filter(p -> p.getEstado() != Postulacion.Estado.RETIRADA).count();
         return new CasoDisponibleResponse(c.getId(), r.getCategoria().getNombre(), r.getZona().getNombre(),
-                i.getEntidad() == null ? null : i.getEntidad().getNombre(), i.getFechaHoraHecho(), i.getTipoDano().name(),
+                i.getEntidad() == null ? null : i.getEntidad().getNombre(), i.getFechaHecho(), i.getTipoDano().name(),
                 i.isHuboAtencionMedica(), antecedentes.size(), dias, i.getTestigos().size(), r.getEvidencias().size(),
                 TarifaRemision.para(i.getTipoDano()), (int) postulados,
                 c.postulacionDe(yo).map(p -> p.getEstado().name()).orElse(null), c.getFechaCreacion());
@@ -109,6 +109,6 @@ public class AbogadoCasosService {
     }
 
     private List<BuscadorAntecedentes.Antecedente> antecedentesDe(Reporte r, Incidente i) {
-        return buscadorAntecedentes.buscar(r.getCategoria().getId(), r.getLatitud(), r.getLongitud(), i.getFechaHoraHecho());
+        return buscadorAntecedentes.buscar(r.getCategoria().getId(), r.getLatitud(), r.getLongitud(), i.getFechaHecho());
     }
 }

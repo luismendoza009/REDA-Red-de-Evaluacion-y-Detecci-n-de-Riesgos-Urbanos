@@ -2,7 +2,7 @@
 // Mis casos (ciudadano): los abogados que se postularon, compararlos y ELEGIR con quién seguir.
 // =============================================================================
 import { api } from "../api.js";
-import { $$, escapar, fecha, fechaHora, plural, avisar, dialogo, cargando, vacio, chipSituacion, situacionDeCaso, DANOS,
+import { $$, escapar, fecha, plural, avisar, dialogo, cargando, vacio, chipSituacion, situacionDeCaso, DANOS,
          mostrarErrores } from "../ui.js";
 import * as mapa from "./mapa.js";
 import { avatar, insigniaVerificado, cargarAvatares } from "../avatares.js";
@@ -133,7 +133,7 @@ function postulacion(c, p) {
       ${perfil(p.abogado)}
       <blockquote>${escapar(p.mensaje)}</blockquote>
       <div class="fila-acciones">
-        <span class="texto-2 pequeno">Se postuló el ${fechaHora(p.fecha)}</span>
+        <span class="texto-2 pequeno">Se postuló el ${fecha(p.fecha)}</span>
         <button class="boton boton-claro" data-caso="${c.id}" data-elegir="${p.id}" data-nombre="${escapar(p.abogado.nombre)}">
           Elegir a ${escapar(p.abogado.nombre.split(" ")[0])}</button>
       </div>

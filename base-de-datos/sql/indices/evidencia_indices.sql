@@ -56,14 +56,14 @@ DROP INDEX ix_reportes_antecedentes;
 
 EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
 SELECT rc.id_reporte, rc.fecha_reporte
-FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hora_hecho
+FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hecho
                    FROM incidentes i JOIN reportes r USING (id_reporte)
                    WHERE i.id_incidente = 18) inc
 WHERE rc.id_categoria = inc.id_categoria
   AND rc.tipo_reporte = 'CONDICION'
   AND rc.latitud  BETWEEN inc.latitud  - 0.0009 AND inc.latitud  + 0.0009
   AND rc.longitud BETWEEN inc.longitud - 0.0009 AND inc.longitud + 0.0009
-  AND rc.fecha_reporte < inc.fecha_hora_hecho;
+  AND rc.fecha_reporte < inc.fecha_hecho;
 
 \echo '== EXPERIMENTO 1 · DESPUÉS (con ix_reportes_antecedentes) =='
 CREATE INDEX ix_reportes_antecedentes ON reportes (id_categoria, tipo_reporte, latitud) INCLUDE (longitud, fecha_reporte);
@@ -71,14 +71,14 @@ ANALYZE reportes;
 
 EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, SUMMARY ON)
 SELECT rc.id_reporte, rc.fecha_reporte
-FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hora_hecho
+FROM reportes rc, (SELECT r.id_categoria, r.latitud, r.longitud, i.fecha_hecho
                    FROM incidentes i JOIN reportes r USING (id_reporte)
                    WHERE i.id_incidente = 18) inc
 WHERE rc.id_categoria = inc.id_categoria
   AND rc.tipo_reporte = 'CONDICION'
   AND rc.latitud  BETWEEN inc.latitud  - 0.0009 AND inc.latitud  + 0.0009
   AND rc.longitud BETWEEN inc.longitud - 0.0009 AND inc.longitud + 0.0009
-  AND rc.fecha_reporte < inc.fecha_hora_hecho;
+  AND rc.fecha_reporte < inc.fecha_hecho;
 
 -- =============================================================================
 -- EXPERIMENTO 2 — Índice de clave foránea evidencias(id_reporte).

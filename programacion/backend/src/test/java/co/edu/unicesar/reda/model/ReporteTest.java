@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -112,12 +112,12 @@ class ReporteTest {
     @Nested
     class Incidentes {
 
-        private final OffsetDateTime haceUnaHora = OffsetDateTime.now().minusHours(1);
+        private final LocalDate ayer = LocalDate.now(java.time.ZoneId.of("America/Bogota")).minusDays(1);
 
         @Test
         void unIncidenteRegistraSusDatosDeDano() {
             Reporte r = reporte(TipoReporte.INCIDENTE);
-            Incidente i = r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", haceUnaHora, true, null);
+            Incidente i = r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", ayer, true, null);
             assertSame(i, r.getIncidente());
             assertTrue(i.isHuboAtencionMedica());
         }
@@ -126,7 +126,7 @@ class ReporteTest {
         void unaCondicionNoPuedeTenerDatosDeDano() {
             Reporte r = reporte(TipoReporte.CONDICION);
             var e = assertThrows(ReglaNegocioException.class,
-                    () -> r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", haceUnaHora, true, null));
+                    () -> r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", ayer, true, null));
             assertEquals("NO_ES_INCIDENTE", e.getCodigo());
         }
 
@@ -134,7 +134,7 @@ class ReporteTest {
         void noHayAtencionMedicaSinLesion() {
             Reporte r = reporte(TipoReporte.INCIDENTE);
             var e = assertThrows(ReglaNegocioException.class,
-                    () -> r.registrarIncidente(TipoDano.DANO_MATERIAL, "Llanta destruida", haceUnaHora, true, null));
+                    () -> r.registrarIncidente(TipoDano.DANO_MATERIAL, "Llanta destruida", ayer, true, null));
             assertEquals("ATENCION_SIN_LESION", e.getCodigo());
         }
 
@@ -142,16 +142,16 @@ class ReporteTest {
         void elHechoNoPuedeSerPosteriorAlReporte() {
             Reporte r = reporte(TipoReporte.INCIDENTE);
             var e = assertThrows(ReglaNegocioException.class, () -> r.registrarIncidente(TipoDano.LESION,
-                    "Fractura de muñeca", OffsetDateTime.now().plusDays(1), false, null));
+                    "Fractura de muñeca", LocalDate.now(java.time.ZoneId.of("America/Bogota")).plusDays(1), false, null));
             assertEquals("FECHA_HECHO_FUTURA", e.getCodigo());
         }
 
         @Test
         void soloSeRegistraUnIncidentePorReporte() {
             Reporte r = reporte(TipoReporte.INCIDENTE);
-            r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", haceUnaHora, false, null);
+            r.registrarIncidente(TipoDano.LESION, "Fractura de muñeca", ayer, false, null);
             var e = assertThrows(ReglaNegocioException.class,
-                    () -> r.registrarIncidente(TipoDano.LESION, "Otra lesión", haceUnaHora, false, null));
+                    () -> r.registrarIncidente(TipoDano.LESION, "Otra lesión", ayer, false, null));
             assertEquals("INCIDENTE_DUPLICADO", e.getCodigo());
         }
     }

@@ -50,7 +50,7 @@ SELECT 'C05 Haversine = reportes_relacionados (por incidente)',
        (SELECT bool_and(por_haversine = guardados) FROM (
               SELECT (SELECT count(*) FROM reportes rc
                       WHERE rc.id_categoria = r.id_categoria AND rc.tipo_reporte = 'CONDICION'
-                        AND rc.fecha_reporte < i.fecha_hora_hecho
+                        AND rc.fecha_reporte < i.fecha_hecho
                         AND rc.id_estado <> (SELECT id_estado FROM estados WHERE nombre = 'Rechazado')
                         AND 2 * 6371000 * asin(sqrt(power(sin(radians(rc.latitud - r.latitud) / 2), 2) +
                             cos(radians(r.latitud)) * cos(radians(rc.latitud)) *

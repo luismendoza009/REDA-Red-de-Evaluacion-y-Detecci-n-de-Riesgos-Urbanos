@@ -2,7 +2,8 @@ package co.edu.unicesar.reda.model;
 
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -29,13 +30,13 @@ public class Usuario {
     private Rol rol;
 
     @Column(name = "fecha_registro", nullable = false)
-    private OffsetDateTime fechaRegistro;
+    private LocalDate fechaRegistro;
 
     @Column(name = "activo", nullable = false)
     private boolean activo;
 
     @Column(name = "fecha_consentimiento", nullable = false)
-    private OffsetDateTime fechaConsentimiento;
+    private LocalDate fechaConsentimiento;
 
     /** Foto de perfil (migración 013): ruta generada en el almacenamiento y formato real. */
     @Column(name = "foto_perfil", length = 255)
@@ -45,7 +46,7 @@ public class Usuario {
     private String fotoPerfilMime;
 
     @Column(name = "fecha_foto_perfil")
-    private OffsetDateTime fechaFotoPerfil;
+    private LocalDate fechaFotoPerfil;
 
     protected Usuario() {
     }
@@ -57,7 +58,7 @@ public class Usuario {
      */
     public static Usuario registrar(String nombre, String correo, String passwordHash, Rol rol) {
         Usuario u = new Usuario();
-        OffsetDateTime ahora = OffsetDateTime.now();
+        LocalDate ahora = LocalDate.now(ZoneId.of("America/Bogota"));
         u.nombre = nombre.trim();
         u.correo = normalizarCorreo(correo);
         u.passwordHash = passwordHash;
@@ -90,7 +91,7 @@ public class Usuario {
         Optional<String> anterior = Optional.ofNullable(fotoPerfil);
         this.fotoPerfil = ruta;
         this.fotoPerfilMime = formato.mime();
-        this.fechaFotoPerfil = OffsetDateTime.now();
+        this.fechaFotoPerfil = LocalDate.now(ZoneId.of("America/Bogota"));
         return anterior;
     }
 
@@ -126,9 +127,9 @@ public class Usuario {
     public String getCorreo() { return correo; }
     public String getPasswordHash() { return passwordHash; }
     public Rol getRol() { return rol; }
-    public OffsetDateTime getFechaRegistro() { return fechaRegistro; }
+    public LocalDate getFechaRegistro() { return fechaRegistro; }
     public boolean isActivo() { return activo; }
     public String getFotoPerfil() { return fotoPerfil; }
     public String getFotoPerfilMime() { return fotoPerfilMime; }
-    public OffsetDateTime getFechaFotoPerfil() { return fechaFotoPerfil; }
+    public LocalDate getFechaFotoPerfil() { return fechaFotoPerfil; }
 }

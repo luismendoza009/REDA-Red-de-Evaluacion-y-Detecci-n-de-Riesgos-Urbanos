@@ -4,7 +4,7 @@
 //  - Abogados (administrador): verificar la tarjeta profesional para activar la cuenta.
 // =============================================================================
 import { api } from "../api.js";
-import { $$, escapar, fecha, fechaHora, plural, avisar, dialogo, cargando, vacio, ESTADOS } from "../ui.js";
+import { $$, escapar, fecha, plural, avisar, dialogo, cargando, vacio, ESTADOS } from "../ui.js";
 import * as mapa from "./mapa.js";
 
 const ACCIONES = {
@@ -45,7 +45,7 @@ function itemRevision(r) {
     <li class="tarjeta-pagina ${r.tipo === "INCIDENTE" ? "prioritaria" : ""}">
       <div class="tarjeta-cabeza">
         <span class="tarjeta-titulo">${r.tipo === "INCIDENTE" ? '<span class="tipo-incidente">⚠ Incidente</span> · ' : ""}${escapar(r.categoria)}</span>
-        <time class="tarjeta-fecha">${fechaHora(r.fechaReporte)}</time>
+        <time class="tarjeta-fecha">${fecha(r.fechaReporte)}</time>
       </div>
       <p class="texto-2">${escapar(r.zona)} · Reporte #${r.id} · ${escapar(r.estado)} · ${plural(r.numFotos, "foto", "fotos")}
         ${r.nivelGravedad ? ` · gravedad percibida ${r.nivelGravedad}/5` : ""}</p>

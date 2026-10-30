@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.respuesta;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
-public record IncidenteResponse(Integer id, String tipoDano, String descripcionDano, OffsetDateTime fechaHoraHecho,
+public record IncidenteResponse(Integer id, String tipoDano, String descripcionDano, LocalDate fechaHecho,
                                 boolean huboAtencionMedica, String entidadResponsable) {
 }
