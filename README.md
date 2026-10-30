@@ -25,13 +25,13 @@ base-de-datos/            BASE DE DATOS I
 └─ documentacion/         entregas, diccionario, decisiones, datos simulados, uso de IA
 
 programacion/             PROGRAMACIÓN 3
-├─ backend/               API REST en Java 17 + Spring Boot (capas) e interfaz web en src/main/resources/static
+├─ backend/               API REST en Java 25 + Spring Boot (capas) e interfaz web en src/main/resources/static
 └─ documentacion/         mapa de temas, auditorías GRASP y SOLID, decisiones, entorno
 ```
 
 ## Cómo correrlo (Windows, PowerShell)
 
-Requisitos: PostgreSQL 16+, Java 17, Maven. La primera vez Maven descarga dependencias.
+Requisitos: PostgreSQL 16+, Java 25 (LTS), Maven. La primera vez Maven descarga dependencias.
 
 **Atajo (un solo comando):** pide la clave de PostgreSQL la primera vez, aplica las migraciones pendientes y arranca
 el servidor. Con `-Recrear` reconstruye la base desde cero con los datos de demostración.
@@ -58,6 +58,11 @@ mvn spring-boot:run
 ```
 Abrir **http://localhost:8080** (desde el celular en la misma red: `http://IP-del-PC:8080`).
 Documentación de la API: http://localhost:8080/swagger-ui.html
+
+El inicio de sesión aplica pausas progresivas: después de 5 fallos, 3 minutos; después de otros 5,
+10 minutos; y al completar 15 fallos, el acceso queda bloqueado hasta que un administrador lo habilite.
+La pantalla muestra el tiempo restante. El administrador puede desbloquearlo desde Swagger con
+`POST /api/admin/accesos/desbloqueo?correo=...` usando una sesión de administrador.
 
 Para no escribir las variables cada vez: copiar `programacion/backend/application-example.properties` como
 `application-local.properties` (está en `.gitignore`).

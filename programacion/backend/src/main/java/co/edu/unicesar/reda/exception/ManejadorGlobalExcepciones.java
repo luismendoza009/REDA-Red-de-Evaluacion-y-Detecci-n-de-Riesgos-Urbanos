@@ -37,6 +37,11 @@ public class ManejadorGlobalExcepciones {
      */
     @ExceptionHandler(RedaException.class)
     ResponseEntity<ErrorRespuesta> propia(RedaException e, HttpServletRequest p) {
+        if (e instanceof DemasiadosIntentosException d && d.getSegundosRestantes() != null) {
+            HttpStatus estado = estadoHttp(e.getCategoria());
+            return ResponseEntity.status(estado).body(new ErrorRespuesta(OffsetDateTime.now(), estado.value(),
+                    e.getCodigo(), e.getMessage(), p.getRequestURI(), null, d.getSegundosRestantes()));
+        }
         return responder(estadoHttp(e.getCategoria()), e.getCodigo(), e.getMessage(), p);
     }
 

@@ -59,16 +59,20 @@ public class AuthService {
         return emitirToken(usuario);
     }
 
-    /** Hasta {@link LimitadorIntentos#MAXIMO} intentos por correo cada 15 minutos. */
-    @Transactional(readOnly = true)
+    /** Tras 5 y 10 fallos aplica pausas; tras 15, el administrador debe habilitar el correo. */
+    @Transactional
     public TokenResponse iniciarSesion(LoginRequest datos) {
         String correo = Usuario.normalizarCorreo(datos.correo());
         String clave = "login:" + correo;
-        limitador.registrar(clave);
+        limitador.comprobarLoginPermitido(clave);
         Usuario usuario = usuarios.findByCorreo(correo)
                 .filter(Usuario::isActivo)
                 .filter(u -> codificador.matches(datos.password(), u.getPasswordHash()))
-                .orElseThrow(CredencialesInvalidasException::new);
+                .orElse(null);
+        if (usuario == null) {
+            limitador.registrarFalloLogin(clave);
+            throw new CredencialesInvalidasException();
+        }
         limitador.reiniciar(clave);
         return emitirToken(usuario);
     }

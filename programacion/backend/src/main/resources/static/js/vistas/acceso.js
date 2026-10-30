@@ -12,6 +12,7 @@ function pintar(contenedor, html) {
 }
 
 function enviarCon(form, accion) {
+  let intervaloCuenta = null;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const boton = form.querySelector("button[type=submit]");
@@ -19,7 +20,27 @@ function enviarCon(form, accion) {
       try {
         await accion(Object.fromEntries(new FormData(form)));
       } catch (error) {
+        clearInterval(intervaloCuenta);
         mostrarErrores(form, error);
+        if (Number.isInteger(error.segundosRestantes) && error.segundosRestantes > 0) {
+          let restantes = error.segundosRestantes;
+          const mensaje = form.querySelector(".error");
+          const actualizar = () => {
+            if (!form.isConnected) {
+              clearInterval(intervaloCuenta);
+              return;
+            }
+            const minutos = String(Math.floor(restantes / 60)).padStart(2, "0");
+            const segundos = String(restantes % 60).padStart(2, "0");
+            mensaje.textContent = restantes > 0
+              ? `Demasiados intentos. Intenta de nuevo en ${minutos}:${segundos}.`
+              : "Ya puedes intentar iniciar sesión de nuevo.";
+            restantes--;
+            if (restantes < 0) clearInterval(intervaloCuenta);
+          };
+          actualizar();
+          intervaloCuenta = setInterval(actualizar, 1000);
+        }
       }
     });
   });
@@ -38,14 +59,35 @@ export function entrar(contenedor, _params, { mensaje } = {}) {
     ${mensaje ? `<p class="nota">${escapar(mensaje)}</p>` : ""}
     <form id="f-entrar" class="formulario" novalidate>
       <label>Correo<input type="email" name="correo" autocomplete="username" required></label>
-      <label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <div class="campo-con-etiqueta">
+        <label for="password-login">Contraseña</label>
+        <span class="campo-password">
+        <input id="password-login" type="password" name="password" autocomplete="current-password" required>
+        <button class="alternar-password" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-alternar-password>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m3 3 18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a14.8 14.8 0 0 1-3.1 3.8M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 3.2-.5"/></svg>
+        </button>
+        </span>
+      </div>
       <p class="error" role="alert"></p>
       <button class="boton boton-claro boton-ancho" type="submit">Entrar</button>
     </form>
     <p class="enlaces"><a href="#/recuperar">¿Olvidaste tu contraseña?</a></p>
     <hr>
     <p class="enlaces">¿No tienes cuenta? <a href="#/registro">Crear cuenta</a> · <a href="#/registro-abogado">Soy abogado</a></p>`);
-  enviarCon($("#f-entrar"), async (d) => entrarCon(await api.iniciarSesion(d.correo, d.password)));
+  const form = $("#f-entrar");
+  const password = form.querySelector('input[name="password"]');
+  const alternar = form.querySelector("[data-alternar-password]");
+  alternar.addEventListener("click", () => {
+    const mostrar = password.type === "password";
+    password.type = mostrar ? "text" : "password";
+    alternar.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+    alternar.setAttribute("aria-pressed", String(mostrar));
+    alternar.querySelectorAll("svg").forEach((icono, indice) => {
+      icono.hidden = indice === (mostrar ? 0 : 1);
+    });
+  });
+  enviarCon(form, async (d) => entrarCon(await api.iniciarSesion(d.correo, d.password)));
 }
 
 export function registro(contenedor) {

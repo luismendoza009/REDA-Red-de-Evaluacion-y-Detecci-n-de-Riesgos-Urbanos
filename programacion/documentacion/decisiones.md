@@ -2,7 +2,7 @@
 
 | # | Decisión | Por qué | Alternativa descartada |
 |---|---|---|---|
-| P01 | Java 17 + Spring Boot 3.5 + Maven | Java 17 es la versión LTS instalada en el equipo; Spring Boot da inyección de dependencias, web, seguridad y JPA integrados | Java EE "a mano"; Spring Boot 4 (más reciente, menos material de referencia) |
+| P01 | Java 25 + Spring Boot 3.5 + Maven | Java 25 es la versión LTS objetivo; Spring Boot da inyección de dependencias, web, seguridad y JPA integrados | Java EE "a mano"; Spring Boot 4 (más reciente, menos material de referencia) |
 | P02 | Arquitectura en capas `controller / service / model / repository` + `peticion / respuesta / exception / security / config` | Tema del curso; cada capa con un motivo de cambio | MVC con lógica en controladores |
 | P03 | Nombres del dominio en **español** (`Reporte`, `cambiarEstado`), sufijos técnicos de Spring en inglés (`Controller`, `Service`, `Repository`) **(supuesto)** | Coincide con las tablas y el diccionario de datos; los sufijos son la convención del framework | Todo en inglés (rompe la correspondencia con la base) |
 | P04 | JPA para el CRUD + **SQL explícito con JdbcTemplate** para el buscador de antecedentes y el mapa | Las consultas importantes del curso de BD se ven tal cual, parametrizadas | Todo con JPQL |

@@ -462,6 +462,16 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
 .formulario input:focus, .formulario select:focus, .formulario textarea:focus { outline: 2px solid var(--texto); outline-offset: 0; border-color: transparent; }
 .formulario input:disabled { opacity: .6; }
 .formulario small { color: var(--texto-tenue); font-size: 12px; }
+.campo-con-etiqueta { display: grid; gap: 6px; align-content: start; font-size: 13.5px; color: var(--texto-2); }
+.campo-password { position: relative; display: block; }
+.campo-password input { padding-right: 44px !important; }
+.alternar-password {
+  position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+  display: grid; place-items: center; width: 34px; height: 34px;
+  padding: 6px; border: 0; border-radius: 7px; background: transparent; color: var(--texto-2); cursor: pointer;
+}
+.alternar-password:hover { background: var(--superficie-2); color: var(--texto); }
+.alternar-password svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 [aria-invalid="true"] { border-color: #e66767 !important; }
 .error-campo { margin: 0; color: #e66767; font-size: 12.5px; }
 .fila-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

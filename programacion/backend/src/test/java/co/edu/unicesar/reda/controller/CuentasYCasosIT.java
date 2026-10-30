@@ -1,6 +1,7 @@
 package co.edu.unicesar.reda.controller;
 
 import co.edu.unicesar.reda.service.EnvioCorreo;
+import co.edu.unicesar.reda.security.LimitadorIntentos;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
@@ -70,6 +72,7 @@ class CuentasYCasosIT {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired JdbcTemplate jdbc;
+    @Autowired LimitadorIntentos limitador;
 
     @Test
     void sinSesionNoSeVeElMapaNiLosCatalogos() throws Exception {
@@ -106,14 +109,23 @@ class CuentasYCasosIT {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void demasiadosIntentosDeLoginSeBloquean() throws Exception {
         String correo = "it-" + UUID.randomUUID() + "@correo.test";
-        for (int i = 0; i < 8; i++) {
+        try {
+            for (int i = 0; i < 4; i++) {
+                enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                        .andExpect(status().isUnauthorized());
+            }
             enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"))
+                    .andExpect(jsonPath("$.segundosRestantes").value(180));
+            assertEquals(1, jdbc.queryForObject(
+                    "SELECT count(*) FROM bloqueos_login WHERE correo = ?", Integer.class, correo));
+        } finally {
+            limitador.desbloquearLogin("login:" + correo);
         }
-        enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
-                .andExpect(status().isTooManyRequests()).andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"));
     }
 
     @Test

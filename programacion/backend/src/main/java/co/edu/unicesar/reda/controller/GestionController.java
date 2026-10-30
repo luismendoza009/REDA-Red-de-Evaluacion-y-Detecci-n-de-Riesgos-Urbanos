@@ -1,9 +1,12 @@
 package co.edu.unicesar.reda.controller;
 
 import co.edu.unicesar.reda.respuesta.AbogadoAdminResponse;
+import co.edu.unicesar.reda.respuesta.MensajeResponse;
 import co.edu.unicesar.reda.respuesta.ReporteEnRevision;
+import co.edu.unicesar.reda.security.LimitadorIntentos;
 import co.edu.unicesar.reda.service.AdminService;
 import co.edu.unicesar.reda.service.RevisionReporteService;
+import co.edu.unicesar.reda.model.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,10 +23,12 @@ public class GestionController {
 
     private final RevisionReporteService revision;
     private final AdminService admin;
+    private final LimitadorIntentos limitador;
 
-    public GestionController(RevisionReporteService revision, AdminService admin) {
+    public GestionController(RevisionReporteService revision, AdminService admin, LimitadorIntentos limitador) {
         this.revision = revision;
         this.admin = admin;
+        this.limitador = limitador;
     }
 
     @GetMapping("/api/revision/bandeja")
@@ -45,5 +50,13 @@ public class GestionController {
     @Operation(summary = "Marcar como verificada la tarjeta profesional de un abogado (lo activa)")
     public AbogadoAdminResponse verificar(@PathVariable Integer id) {
         return admin.activar(id);
+    }
+
+    @PostMapping("/api/admin/accesos/desbloqueo")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Desbloquear el acceso de un correo tras verificar la identidad de su titular")
+    public MensajeResponse desbloquearAcceso(@RequestParam String correo) {
+        limitador.desbloquearLogin("login:" + Usuario.normalizarCorreo(correo));
+        return new MensajeResponse("El bloqueo de acceso fue retirado si existía para ese correo.");
     }
 }

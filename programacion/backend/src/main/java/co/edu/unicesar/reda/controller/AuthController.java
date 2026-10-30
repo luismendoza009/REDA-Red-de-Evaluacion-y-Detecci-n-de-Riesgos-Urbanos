@@ -44,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión; devuelve el token JWT (máx. 8 intentos cada 15 min por correo)")
+    @Operation(summary = "Iniciar sesión; pausas progresivas tras 5 y 10 fallos y bloqueo administrativo tras 15")
     public TokenResponse iniciarSesion(@Valid @RequestBody LoginRequest datos) {
         return authService.iniciarSesion(datos);
     }

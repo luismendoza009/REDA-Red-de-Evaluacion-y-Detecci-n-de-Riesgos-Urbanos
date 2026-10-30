@@ -184,7 +184,7 @@ derechos de datos), **Ayuda** (preguntas frecuentes), **Términos** y **Privacid
 ```
 Navegador (HTML + CSS + JavaScript con módulos, sin framework; Leaflet 1.9.4 + leaflet.heat)
         │  HTTP/JSON, token JWT en la cabecera
-API REST: Java 17 + Spring Boot 3.5 (Spring Web, Data JPA, Security, Validation, springdoc/Swagger)
+API REST: Java 25 + Spring Boot 3.5 (Spring Web, Data JPA, Security, Validation, springdoc/Swagger)
         │  JPA para el CRUD + SQL explícito (JdbcTemplate) para mapa y búsqueda de antecedentes
 PostgreSQL 18 (migraciones SQL numeradas 001–014, sin Flyway)
 ```

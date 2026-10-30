@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LimitadorIntentosTest {
 
@@ -43,4 +44,40 @@ class LimitadorIntentosTest {
         limitador.reiniciar("login:ana@correo.test");
         assertDoesNotThrow(() -> limitador.registrar("login:ana@correo.test"));
     }
+
+    @Test
+    void aplicaPausasProgresivasYBloqueoAdministrativo() {
+        RelojManual reloj = new RelojManual();
+        LimitadorIntentos limitador = new LimitadorIntentos(reloj);
+        String clave = "login:ana@correo.test";
+
+        for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
+            assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
+        }
+        var primerBloqueo = assertThrows(DemasiadosIntentosException.class,
+                () -> limitador.registrarFalloLogin(clave));
+        assertEquals(180L, primerBloqueo.getSegundosRestantes());
+        assertThrows(DemasiadosIntentosException.class, () -> limitador.comprobarLoginPermitido(clave));
+
+        reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_INICIAL);
+        for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
+            assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
+        }
+        var segundoBloqueo = assertThrows(DemasiadosIntentosException.class,
+                () -> limitador.registrarFalloLogin(clave));
+        assertEquals(600L, segundoBloqueo.getSegundosRestantes());
+
+        reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_SEGUNDO);
+        for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
+            assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
+        }
+        var bloqueoPermanente = assertThrows(DemasiadosIntentosException.class,
+                () -> limitador.registrarFalloLogin(clave));
+        assertEquals("CUENTA_BLOQUEADA", bloqueoPermanente.getCodigo());
+        assertThrows(DemasiadosIntentosException.class, () -> limitador.comprobarLoginPermitido(clave));
+
+        limitador.desbloquearLogin(clave);
+        assertDoesNotThrow(() -> limitador.comprobarLoginPermitido(clave));
+    }
+
 }
