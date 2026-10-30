@@ -386,6 +386,92 @@ body.modo-acceso { overflow: auto; }
 .enlaces a { color: var(--texto); }
 hr { border: 0; border-top: 1px solid var(--borde); margin: 20px 0; }
 
+/* ---------------------------------------------------------------- acceso a REDA */
+.acceso--login {
+  min-height: 100svh; grid-template-columns: minmax(0, 1.08fr) minmax(400px, .92fr);
+  background:
+    radial-gradient(ellipse at 86% 12%, rgba(57, 135, 229, .08), transparent 34%),
+    #0d0e0e;
+}
+.acceso--login .acceso-portada {
+  min-height: 100svh; padding: clamp(32px, 5vw, 76px);
+  background:
+    radial-gradient(ellipse at 22% 78%, rgba(25, 158, 112, .13), transparent 42%),
+    radial-gradient(ellipse at 85% 22%, rgba(57, 135, 229, .18), transparent 45%),
+    linear-gradient(145deg, #121817, #0d1010 72%);
+}
+.acceso--login .acceso-portada::before {
+  opacity: .12; transform: rotate(-18deg); background-size: 88px 88px;
+}
+.acceso--login .acceso-marca { font-size: 17px; letter-spacing: .2em; }
+.acceso--login .acceso-logo { width: 38px; height: 38px; }
+.acceso-presentacion { position: relative; z-index: 1; width: min(100%, 590px); }
+.acceso-etiqueta {
+  display: inline-flex; align-items: center; gap: 9px; margin-bottom: 20px;
+  color: #b8d7ce; font-size: 12px; font-weight: 650; letter-spacing: .04em;
+}
+.acceso-etiqueta span, .acceso-mapa-leyenda span {
+  width: 8px; height: 8px; border-radius: 50%; background: #54c79a;
+  box-shadow: 0 0 0 4px rgba(84, 199, 154, .12);
+}
+.acceso--login .acceso-portada h1 {
+  max-width: 13em; font-size: clamp(34px, 4vw, 58px); line-height: 1.08; letter-spacing: -.045em;
+}
+.acceso--login .acceso-portada h1 em { color: #7bcaa9; }
+.acceso-presentacion > p { max-width: 39em; margin: 18px 0 0; color: #b7c0bd; font-size: 16px; line-height: 1.65; }
+.acceso--login .acceso-puntos { max-width: 39em; margin-top: 30px; gap: 17px; color: #d3d9d6; font-size: 14px; }
+.acceso--login .acceso-puntos li { display: flex; align-items: center; gap: 12px; padding: 0; }
+.acceso--login .acceso-puntos li::before { content: none; }
+.acceso-punto-icono {
+  display: grid; width: 34px; height: 34px; flex: none; place-items: center;
+  border: 1px solid rgba(123, 202, 169, .28); border-radius: 11px;
+  color: #7bcaa9; background: rgba(25, 158, 112, .08); font-size: 10px; font-weight: 750;
+}
+.acceso--login .acceso-puntos b { color: #fff; }
+.acceso-mapa {
+  position: absolute; z-index: 0; right: 3%; bottom: 3%; width: min(62%, 520px);
+  aspect-ratio: 560 / 250; opacity: .76; pointer-events: none;
+}
+.acceso-mapa > svg { width: 100%; height: 100%; overflow: visible; }
+.mapa-calle { stroke: rgba(184, 203, 195, .13); stroke-width: 8; stroke-linecap: round; }
+.mapa-calle-principal { stroke: rgba(123, 202, 169, .24); stroke-width: 13; }
+.mapa-calle-secundaria { stroke: rgba(57, 135, 229, .2); stroke-width: 5; }
+.mapa-zona { fill: rgba(25, 158, 112, .12); stroke: rgba(84, 199, 154, .22); stroke-width: 1.5; }
+.mapa-punto { fill: #72d6aa; }
+.mapa-punto-2 { fill: #79b4ff; }
+.mapa-punto-anillo { fill: rgba(84, 199, 154, .08); stroke: rgba(84, 199, 154, .62); stroke-width: 1.5; }
+.acceso-mapa-leyenda, .acceso-mapa-resumen {
+  position: absolute; display: flex; align-items: center; gap: 9px; padding: 10px 13px;
+  border: 1px solid rgba(255, 255, 255, .1); border-radius: 12px;
+  background: rgba(17, 24, 22, .82); color: #dce5e0; font-size: 11px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .2); backdrop-filter: blur(12px);
+}
+.acceso-mapa-leyenda { top: 17%; right: 4%; }
+.acceso-mapa-leyenda span { width: 7px; height: 7px; }
+.acceso-mapa-resumen { left: 10%; bottom: 2%; flex-direction: column; align-items: flex-start; gap: 2px; }
+.acceso-mapa-resumen b { color: #fff; font-size: 12px; }
+.acceso-mapa-resumen span { color: #aebbb4; }
+.acceso--login .acceso-tarjeta { align-items: center; padding: clamp(24px, 5vw, 68px); }
+.acceso--login #acceso-contenido { max-width: 440px; }
+.acceso--login #acceso-contenido > .vista { padding: clamp(24px, 3.2vw, 38px); border: 1px solid var(--borde); border-radius: 22px; background: rgba(24, 26, 25, .92); box-shadow: 0 24px 80px rgba(0, 0, 0, .32); }
+.acceso--login #acceso-contenido h2 { font-size: 29px; letter-spacing: -.035em; }
+.acceso--login #acceso-contenido .texto-2 { margin: 7px 0 23px; line-height: 1.6; }
+.acceso--login .formulario { gap: 17px; }
+.acceso--login .formulario label, .acceso--login .campo-con-etiqueta { color: #dcdfdb; font-size: 13px; font-weight: 560; }
+.acceso--login .formulario input:not([type=checkbox]):not([type=radio]):not([type=file]) {
+  min-height: 48px; border-color: rgba(255, 255, 255, .14); border-radius: 11px; background: #111413;
+}
+.acceso--login .formulario input:focus { border-color: #59b98e; outline-color: rgba(89, 185, 142, .65); }
+.acceso--login .boton-ancho { min-height: 49px; border-radius: 11px; background: #62c79b; border-color: #62c79b; color: #092016; font-size: 14px; }
+.acceso--login .boton-ancho:hover { background: #7ad8ad; }
+.acceso--login .alternar-password { color: #b5c3bb; }
+.acceso--login .enlaces { line-height: 1.7; }
+.acceso--login .enlaces a { color: #a9d8c2; text-underline-offset: 3px; }
+.acceso--login .enlaces a:hover, .acceso--login .acceso-legal a:hover { color: #d1f1df; }
+.acceso--login hr { margin: 18px 0; border-color: rgba(255, 255, 255, .1); }
+.acceso--login .acceso-legal { color: #8d9992; }
+.acceso--login .acceso-legal a { color: #b9c5be; }
+
 /* ---------------------------------------------------------------- menú lateral */
 .lateral {
   position: fixed; z-index: 1200; top: 0; bottom: 0; left: 0; width: var(--lateral);
@@ -587,6 +673,19 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
   .acceso { grid-template-columns: 1fr; }
   .acceso-portada { padding: 32px 24px; border-right: 0; border-bottom: 1px solid var(--borde); }
   .acceso-puntos { font-size: 14px; }
+  .acceso--login { min-height: 100svh; grid-template-columns: minmax(0, 1fr) minmax(350px, .88fr); align-items: stretch; }
+  .acceso--login .acceso-portada { min-height: 100svh; padding: clamp(24px, 3.4vw, 38px); }
+  .acceso--login .acceso-presentacion { max-width: 700px; }
+  .acceso--login .acceso-portada h1 { max-width: 15em; font-size: clamp(29px, 3.7vw, 38px); }
+  .acceso--login .acceso-presentacion > p { max-width: 55em; }
+  .acceso--login .acceso-puntos { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+  .acceso--login .acceso-puntos li { align-items: center; font-size: 12px; }
+  .acceso--login .acceso-punto-icono { width: 30px; height: 30px; border-radius: 9px; }
+  .acceso--login .acceso-mapa { right: -5%; bottom: 1%; width: 72%; opacity: .30; }
+  .acceso--login .acceso-mapa-leyenda { display: none; }
+  .acceso--login .acceso-mapa-resumen { display: none; }
+  .acceso--login .acceso-tarjeta { padding: 28px clamp(20px, 3vw, 36px); }
+  .acceso--login .acceso-legal { margin-top: 14px; }
   /* el menú lateral se vuelve un cajón que se abre con ☰ */
   :root { --lateral: 0px; }
   .lateral { width: 280px; max-width: 86vw; transform: translateX(-100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1); box-shadow: var(--sombra); }
@@ -607,6 +706,8 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
   .datos-3 { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 760px) {
+  .acceso--login { grid-template-columns: 1fr; }
+  .acceso--login .acceso-portada { min-height: auto; }
   .en-mapa .pagina { display: none; }
   .pagina { padding-left: 16px; padding-right: 16px; }
   .panel { top: auto; } /* en celular el panel sigue siendo hoja inferior */
@@ -616,6 +717,21 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
   .boton-flotante { right: var(--margen); bottom: calc(var(--margen) + 84px + env(safe-area-inset-bottom, 0px)); }
   .acceso-portada h1 { font-size: 24px; }
   .acceso-puntitos { display: none; }
+  .acceso--login .acceso-portada { padding: 25px 22px 22px; gap: 20px; }
+  .acceso--login .acceso-marca { font-size: 15px; }
+  .acceso--login .acceso-logo { width: 32px; height: 32px; }
+  .acceso--login .acceso-etiqueta { margin-bottom: 12px; font-size: 10px; }
+  .acceso--login .acceso-portada h1 { max-width: 17em; font-size: clamp(27px, 7vw, 36px); }
+  .acceso--login .acceso-presentacion > p { margin-top: 11px; font-size: 13px; }
+  .acceso--login .acceso-puntos { grid-template-columns: 1fr; gap: 9px; margin-top: 16px; }
+  .acceso--login .acceso-puntos li { align-items: center; font-size: 12px; }
+  .acceso--login .acceso-punto-icono { width: 26px; height: 26px; font-size: 9px; }
+  .acceso--login .acceso-mapa { display: none; }
+  .acceso--login .acceso-tarjeta { padding: 22px 18px 14px; }
+  .acceso--login #acceso-contenido > .vista { padding: 24px 20px; border-radius: 18px; }
+  .acceso--login #acceso-contenido h2 { font-size: 25px; }
+  .acceso--login #acceso-contenido .texto-2 { margin-bottom: 19px; font-size: 13px; }
+  .acceso--login .acceso-legal { margin: 12px 0 0; font-size: 11px; }
 }
 
 /* ---------------------------------------------------------------- calificaciones de abogados */

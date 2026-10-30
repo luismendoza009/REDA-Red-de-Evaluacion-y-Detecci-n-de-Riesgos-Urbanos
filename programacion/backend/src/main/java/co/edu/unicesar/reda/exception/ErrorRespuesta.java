@@ -11,14 +11,19 @@ import java.util.Map;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorRespuesta(OffsetDateTime fecha, int estado, String codigo, String mensaje, String ruta,
-                             Map<String, String> campos, Long segundosRestantes) {
+                             Map<String, String> campos, Long segundosRestantes, Integer intentosRestantes) {
 
     public ErrorRespuesta(OffsetDateTime fecha, int estado, String codigo, String mensaje, String ruta,
                           Map<String, String> campos) {
-        this(fecha, estado, codigo, mensaje, ruta, campos, null);
+        this(fecha, estado, codigo, mensaje, ruta, campos, null, null);
+    }
+
+    public ErrorRespuesta(OffsetDateTime fecha, int estado, String codigo, String mensaje, String ruta,
+                          Map<String, String> campos, Long segundosRestantes) {
+        this(fecha, estado, codigo, mensaje, ruta, campos, segundosRestantes, null);
     }
 
     public static ErrorRespuesta de(int estado, String codigo, String mensaje, String ruta) {
-        return new ErrorRespuesta(OffsetDateTime.now(), estado, codigo, mensaje, ruta, null, null);
+        return new ErrorRespuesta(OffsetDateTime.now(), estado, codigo, mensaje, ruta, null, null, null);
     }
 }

@@ -60,7 +60,7 @@ public class LimitadorIntentos {
 
     /** Registra solo credenciales incorrectas y activa una pausa al completar cada etapa. */
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = DemasiadosIntentosException.class)
-    public void registrarFalloLogin(String clave) {
+    public int registrarFalloLogin(String clave) {
         ProgresoLogin progreso = intentosLogin.computeIfAbsent(clave, k -> new ProgresoLogin());
         synchronized (progreso) {
             comprobarBloqueo(progreso);
@@ -73,14 +73,17 @@ public class LimitadorIntentos {
             if (progreso.fallos == INTENTOS_POR_ETAPA_LOGIN) {
                 progreso.bloqueadoHasta = reloj.instant().plus(BLOQUEO_LOGIN_INICIAL);
                 persistir(clave, progreso);
-                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_INICIAL.toSeconds());
+                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_INICIAL.toSeconds(),
+                        intentosHastaSiguienteEtapa(progreso));
             }
             if (progreso.fallos == INTENTOS_POR_ETAPA_LOGIN * 2) {
                 progreso.bloqueadoHasta = reloj.instant().plus(BLOQUEO_LOGIN_SEGUNDO);
                 persistir(clave, progreso);
-                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_SEGUNDO.toSeconds());
+                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_SEGUNDO.toSeconds(),
+                        intentosHastaSiguienteEtapa(progreso));
             }
             persistir(clave, progreso);
+            return intentosHastaSiguienteEtapa(progreso);
         }
     }
 
@@ -98,8 +101,13 @@ public class LimitadorIntentos {
         }
         if (progreso.bloqueadoHasta != null && reloj.instant().isBefore(progreso.bloqueadoHasta)) {
             long segundos = Math.max(1, Duration.between(reloj.instant(), progreso.bloqueadoHasta).toSeconds());
-            throw DemasiadosIntentosException.temporal(segundos);
+            throw DemasiadosIntentosException.temporal(segundos, intentosHastaSiguienteEtapa(progreso));
         }
+    }
+
+    private static int intentosHastaSiguienteEtapa(ProgresoLogin progreso) {
+        if (progreso.bloqueadoPermanentemente) return 0;
+        return INTENTOS_POR_ETAPA_LOGIN - progreso.fallos % INTENTOS_POR_ETAPA_LOGIN;
     }
 
     private ProgresoLogin cargarProgreso(String clave) {

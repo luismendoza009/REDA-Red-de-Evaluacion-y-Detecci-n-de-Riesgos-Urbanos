@@ -6,9 +6,10 @@ import { $, escapar, mostrarErrores, conBotonOcupado } from "../ui.js";
 
 const AYUDA_PASSWORD = "Mínimo 8 caracteres, con al menos una letra y un número.";
 
-function pintar(contenedor, html) {
+function pintar(contenedor, html, enfocar = true) {
+  contenedor.closest(".acceso")?.classList.remove("acceso--login");
   contenedor.innerHTML = `<div class="vista">${html}</div>`;
-  contenedor.querySelector("input")?.focus();
+  if (enfocar) contenedor.querySelector("input")?.focus();
 }
 
 function enviarCon(form, accion) {
@@ -22,9 +23,17 @@ function enviarCon(form, accion) {
       } catch (error) {
         clearInterval(intervaloCuenta);
         mostrarErrores(form, error);
+        const mensaje = form.querySelector(".error");
+        if (Number.isInteger(error.intentosRestantes)) {
+          mensaje.textContent = error.intentosRestantes > 0
+            ? `${error.message}. Te quedan ${error.intentosRestantes} ${error.intentosRestantes === 1 ? "intento" : "intentos"} antes del siguiente bloqueo.`
+            : error.message;
+        }
         if (Number.isInteger(error.segundosRestantes) && error.segundosRestantes > 0) {
           let restantes = error.segundosRestantes;
-          const mensaje = form.querySelector(".error");
+          const detalleIntentos = Number.isInteger(error.intentosRestantes)
+            ? ` Te quedan ${error.intentosRestantes} intentos antes del siguiente bloqueo.`
+            : "";
           const actualizar = () => {
             if (!form.isConnected) {
               clearInterval(intervaloCuenta);
@@ -33,8 +42,8 @@ function enviarCon(form, accion) {
             const minutos = String(Math.floor(restantes / 60)).padStart(2, "0");
             const segundos = String(restantes % 60).padStart(2, "0");
             mensaje.textContent = restantes > 0
-              ? `Demasiados intentos. Intenta de nuevo en ${minutos}:${segundos}.`
-              : "Ya puedes intentar iniciar sesión de nuevo.";
+              ? `Demasiados intentos. Intenta de nuevo en ${minutos}:${segundos}.${detalleIntentos}`
+              : `Ya puedes intentar iniciar sesión de nuevo.${detalleIntentos}`;
             restantes--;
             if (restantes < 0) clearInterval(intervaloCuenta);
           };
@@ -74,7 +83,9 @@ export function entrar(contenedor, _params, { mensaje } = {}) {
     </form>
     <p class="enlaces"><a href="#/recuperar">¿Olvidaste tu contraseña?</a></p>
     <hr>
-    <p class="enlaces">¿No tienes cuenta? <a href="#/registro">Crear cuenta</a> · <a href="#/registro-abogado">Soy abogado</a></p>`);
+    <p class="enlaces">¿No tienes cuenta? <a href="#/registro">Crear cuenta</a> · <a href="#/registro-abogado">Soy abogado</a></p>`,
+  !window.matchMedia("(max-width: 760px)").matches);
+  contenedor.closest(".acceso")?.classList.add("acceso--login");
   const form = $("#f-entrar");
   const password = form.querySelector('input[name="password"]');
   const alternar = form.querySelector("[data-alternar-password]");

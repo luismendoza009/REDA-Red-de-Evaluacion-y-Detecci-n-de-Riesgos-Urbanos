@@ -115,12 +115,17 @@ class CuentasYCasosIT {
         try {
             for (int i = 0; i < 4; i++) {
                 enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
-                        .andExpect(status().isUnauthorized());
+                        .andExpect(status().isUnauthorized())
+                        .andExpect(jsonPath("$.intentosRestantes").value(4 - i));
             }
             enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
                     .andExpect(status().isTooManyRequests())
                     .andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"))
-                    .andExpect(jsonPath("$.segundosRestantes").value(180));
+                    .andExpect(jsonPath("$.segundosRestantes").value(180))
+                    .andExpect(jsonPath("$.intentosRestantes").value(5));
+            enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.intentosRestantes").value(5));
             assertEquals(1, jdbc.queryForObject(
                     "SELECT count(*) FROM bloqueos_login WHERE correo = ?", Integer.class, correo));
         } finally {

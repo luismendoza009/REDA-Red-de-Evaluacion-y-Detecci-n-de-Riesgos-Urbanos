@@ -37,10 +37,17 @@ public class ManejadorGlobalExcepciones {
      */
     @ExceptionHandler(RedaException.class)
     ResponseEntity<ErrorRespuesta> propia(RedaException e, HttpServletRequest p) {
-        if (e instanceof DemasiadosIntentosException d && d.getSegundosRestantes() != null) {
+        if (e instanceof DemasiadosIntentosException d
+                && (d.getSegundosRestantes() != null || d.getIntentosRestantes() != null)) {
             HttpStatus estado = estadoHttp(e.getCategoria());
             return ResponseEntity.status(estado).body(new ErrorRespuesta(OffsetDateTime.now(), estado.value(),
-                    e.getCodigo(), e.getMessage(), p.getRequestURI(), null, d.getSegundosRestantes()));
+                    e.getCodigo(), e.getMessage(), p.getRequestURI(), null, d.getSegundosRestantes(),
+                    d.getIntentosRestantes()));
+        }
+        if (e instanceof CredencialesInvalidasException c && c.getIntentosRestantes() != null) {
+            HttpStatus estado = estadoHttp(e.getCategoria());
+            return ResponseEntity.status(estado).body(new ErrorRespuesta(OffsetDateTime.now(), estado.value(),
+                    e.getCodigo(), e.getMessage(), p.getRequestURI(), null, null, c.getIntentosRestantes()));
         }
         return responder(estadoHttp(e.getCategoria()), e.getCodigo(), e.getMessage(), p);
     }

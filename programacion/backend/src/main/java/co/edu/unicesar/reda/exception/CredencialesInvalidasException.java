@@ -6,7 +6,22 @@ package co.edu.unicesar.reda.exception;
  */
 public class CredencialesInvalidasException extends RedaException {
 
+    private final Integer intentosRestantes;
+
     public CredencialesInvalidasException() {
+        this(null);
+    }
+
+    public CredencialesInvalidasException(int intentosRestantes) {
+        this(Integer.valueOf(intentosRestantes));
+    }
+
+    private CredencialesInvalidasException(Integer intentosRestantes) {
         super(CategoriaError.NO_AUTENTICADO, "CREDENCIALES_INVALIDAS", "Correo o contraseña incorrectos");
+        this.intentosRestantes = intentosRestantes;
+    }
+
+    public Integer getIntentosRestantes() {
+        return intentosRestantes;
     }
 }

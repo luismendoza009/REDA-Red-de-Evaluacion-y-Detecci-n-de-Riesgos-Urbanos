@@ -39,6 +39,7 @@ export class ErrorApi extends Error {
     this.codigo = cuerpo?.codigo ?? "DESCONOCIDO";
     this.campos = cuerpo?.campos ?? {};
     this.segundosRestantes = cuerpo?.segundosRestantes ?? null;
+    this.intentosRestantes = cuerpo?.intentosRestantes ?? null;
   }
 }
 

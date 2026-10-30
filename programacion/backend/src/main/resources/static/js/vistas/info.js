@@ -83,6 +83,7 @@ const PAGINAS = {
 export function mostrar(contenedor, [pagina]) {
   // sin sesión la página se muestra en la pantalla de acceso; con sesión, como página de la aplicación
   const conSesion = !!sesion.actual();
+  if (!conSesion) contenedor.closest(".acceso")?.classList.remove("acceso--login");
   contenedor.innerHTML = `
     <div class="${conSesion ? "contenido contenido-estrecho" : ""} vista texto-largo">
       ${PAGINAS[pagina]()}

@@ -70,8 +70,7 @@ public class AuthService {
                 .filter(u -> codificador.matches(datos.password(), u.getPasswordHash()))
                 .orElse(null);
         if (usuario == null) {
-            limitador.registrarFalloLogin(clave);
-            throw new CredencialesInvalidasException();
+            throw new CredencialesInvalidasException(limitador.registrarFalloLogin(clave));
         }
         limitador.reiniciar(clave);
         return emitirToken(usuario);

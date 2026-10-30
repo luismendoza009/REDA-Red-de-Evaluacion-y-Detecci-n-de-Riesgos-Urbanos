@@ -52,11 +52,13 @@ class LimitadorIntentosTest {
         String clave = "login:ana@correo.test";
 
         for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
-            assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
+            int restantes = limitador.registrarFalloLogin(clave);
+            assertEquals(LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - i - 1, restantes);
         }
         var primerBloqueo = assertThrows(DemasiadosIntentosException.class,
                 () -> limitador.registrarFalloLogin(clave));
         assertEquals(180L, primerBloqueo.getSegundosRestantes());
+        assertEquals(5, primerBloqueo.getIntentosRestantes());
         assertThrows(DemasiadosIntentosException.class, () -> limitador.comprobarLoginPermitido(clave));
 
         reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_INICIAL);
@@ -66,6 +68,7 @@ class LimitadorIntentosTest {
         var segundoBloqueo = assertThrows(DemasiadosIntentosException.class,
                 () -> limitador.registrarFalloLogin(clave));
         assertEquals(600L, segundoBloqueo.getSegundosRestantes());
+        assertEquals(5, segundoBloqueo.getIntentosRestantes());
 
         reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_SEGUNDO);
         for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
@@ -74,6 +77,7 @@ class LimitadorIntentosTest {
         var bloqueoPermanente = assertThrows(DemasiadosIntentosException.class,
                 () -> limitador.registrarFalloLogin(clave));
         assertEquals("CUENTA_BLOQUEADA", bloqueoPermanente.getCodigo());
+        assertEquals(0, bloqueoPermanente.getIntentosRestantes());
         assertThrows(DemasiadosIntentosException.class, () -> limitador.comprobarLoginPermitido(clave));
 
         limitador.desbloquearLogin(clave);
