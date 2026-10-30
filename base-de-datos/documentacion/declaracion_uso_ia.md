@@ -46,7 +46,7 @@ que cada uno leyó y verificó lo que firma.
 
 | Integrante | Partes que revisó y verificó | Qué corrigió o reescribió a mano | Conforme |
 |---|---|---|---|
-| Rafael Alfonso Rivera Restrepo | | | |
+| Rafael Alfonso Rivera Restrepo | Ejecutó `scripts/verificar_desde_cero.ps1` en su equipo (PostgreSQL 18) sobre una base vacía: las 14 migraciones y la semilla corren sin errores, 35 de 35 pruebas negativas rechazadas por la restricción esperada, 17 de 17 comprobaciones de la semilla en 0 y 10 de 10 consultas verificadas. Salida en `documentacion/entrega2/evidencia_verificacion.txt` | — | Sí |
 | Ivan Andrés Rodriguez Rodriguez | | | |
 | Luis Eliecer Mendoza Perpiñán | | | |
 | Carlos Eduardo Camelo Montaño | | | |
