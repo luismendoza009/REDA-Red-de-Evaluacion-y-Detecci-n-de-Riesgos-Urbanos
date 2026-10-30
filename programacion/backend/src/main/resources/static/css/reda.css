@@ -115,15 +115,51 @@ button, input, select { font: inherit; color: inherit; }
 .interruptor { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-2); cursor: pointer; white-space: nowrap; }
 .interruptor input { accent-color: var(--texto); width: 15px; height: 15px; }
 
+.mapa-superior { display: grid; grid-template-columns: 1fr; justify-items: start; gap: 9px; }
+.mapa-superior .cifras {
+  gap: 7px; padding: 0; border: 0; background: transparent; box-shadow: none;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.mapa-superior .cifra {
+  min-width: 82px; gap: 3px; padding: 8px 13px; border: 1px solid var(--borde);
+  border-radius: 12px; background: rgba(18, 19, 18, .88);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.mapa-superior .cifra:first-child { border-left: 1px solid var(--borde); }
+.mapa-superior .cifra-valor { font-size: 20px; }
+.mapa-superior .cifra-nombre { font-size: 11px; color: var(--texto-2); }
+.mapa-superior .filtros {
+  gap: 8px; padding: 7px; border-radius: 14px;
+  background: rgba(18, 19, 18, .9); border-color: rgba(255, 255, 255, .13);
+}
+.mapa-superior .chip {
+  min-height: 40px; gap: 7px; padding: 6px 12px; font-size: 12px;
+  border-color: rgba(255, 255, 255, .12); color: var(--texto-2);
+}
+.mapa-superior .chip[aria-pressed="true"] {
+  background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .24); color: var(--texto);
+}
+.mapa-superior .chip[aria-pressed="false"] { opacity: .7; }
+.mapa-superior .chip b { font-variant-numeric: tabular-nums; }
+.mapa-superior .selector select { min-height: 40px; border-color: rgba(255, 255, 255, .16); }
+.mapa-superior .interruptor {
+  min-height: 40px; gap: 8px; padding: 5px 9px; border-radius: 9px; font-size: 12px;
+  transition: background .15s, color .15s;
+}
+.mapa-superior .interruptor:hover { background: rgba(255, 255, 255, .07); color: var(--texto); }
+.mapa-superior .interruptor input { width: 17px; height: 17px; }
+.boton-flotante { min-height: 48px; display: inline-flex; align-items: center; gap: 7px; padding: 12px 20px; }
+.boton-flotante:hover { background: #d9f3e5; box-shadow: 0 10px 32px rgba(0, 0, 0, .56); transform: translateY(-2px); }
+
 /* ---------------------------------------------------------------- leyenda */
 .leyenda {
   position: fixed; z-index: 900; left: calc(var(--lateral) + var(--margen));
   bottom: calc(var(--margen) + 30px + env(safe-area-inset-bottom, 0px));
-  padding: 12px 14px; border-radius: 12px; width: 270px;
+  padding: 15px 16px; border-radius: 15px; width: 290px; background: rgba(18, 19, 18, .9);
 }
-.leyenda h2 { margin: 0 0 8px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-tenue); font-weight: 600; }
-.leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
-.leyenda li { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--texto-2); }
+.leyenda h2 { margin: 0 0 10px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); font-weight: 600; }
+.leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.leyenda li { display: flex; align-items: center; gap: 11px; font-size: 12px; line-height: 1.4; color: var(--texto-2); }
 .leyenda li > span:first-child { flex: none; width: 34px; display: inline-flex; align-items: center; justify-content: center; }
 .ley-tamano { gap: 3px; }
 .ley-tamano i { display: block; border-radius: 50%; background: var(--texto-2); }
@@ -296,9 +332,10 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------- celular y tableta */
 @media (max-width: 760px) {
   :root { --margen: 10px; }
-  .cifras { width: 100%; justify-content: space-between; }
-  .cifra { padding: 0 8px; }
-  .cifra-valor { font-size: 18px; }
+  .mapa-superior { left: var(--margen); right: var(--margen); gap: 7px; }
+  .mapa-superior .cifras { width: 100%; justify-content: flex-start; }
+  .mapa-superior .cifra { min-width: 0; flex: 1; padding: 7px 9px; }
+  .mapa-superior .cifra-valor { font-size: 18px; }
   .filtros {
     position: fixed; left: var(--margen); right: var(--margen);
     bottom: calc(var(--margen) + 28px + env(safe-area-inset-bottom, 0px));
@@ -319,6 +356,13 @@ button, input, select { font: inherit; color: inherit; }
   .segmentos button { flex: none; padding: 7px 10px; }
   .datos { grid-template-columns: 1fr 1fr; gap: 8px; }
   .aviso { display: none; }
+}
+@media (max-width: 420px) {
+  .mapa-superior .cifra-nombre { font-size: 10px; }
+  .mapa-superior .cifra { padding: 7px 6px; }
+  .mapa-superior .filtros { gap: 5px; padding: 6px; }
+  .mapa-superior .chip { min-height: 44px; padding: 6px 10px; }
+  .mapa-superior .selector select, .mapa-superior .interruptor { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
