@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // la interfaz web (archivos estáticos); los datos que pide pasan por las reglas de arriba
                         .requestMatchers(HttpMethod.GET, "/", "/index.html", "/css/**", "/js/**", "/img/**",
-                                "/favicon.svg", "/manifest.webmanifest").permitAll()
+                                "/icons/**", "/favicon.svg", "/manifest.json").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint((peticion, respuesta, ex) -> {
                     // 401 con el mismo formato de error que el resto de la API

@@ -183,6 +183,48 @@ $("#btn-salir").addEventListener("click", () => {
   sesion.cerrar("Cerraste sesión.");
 });
 
+let instalacionPendiente = null;
+const botonesInstalar = $$(".btn-instalar");
+const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const estaInstalada = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+botonesInstalar.forEach((boton) => {
+  boton.insertAdjacentHTML("afterbegin", icono("instalar"));
+  boton.addEventListener("click", async () => {
+    if (!instalacionPendiente) {
+      avisar("En Safari, toca Compartir y elige «Añadir a pantalla de inicio».", "info");
+      return;
+    }
+    try {
+      await instalacionPendiente.prompt();
+      const { outcome } = await instalacionPendiente.userChoice;
+      if (outcome === "accepted") botonesInstalar.forEach((elemento) => { elemento.hidden = true; });
+      instalacionPendiente = null;
+    } catch (error) {
+      avisar("No fue posible iniciar la instalación. Inténtalo desde el menú del navegador.", "error");
+      console.error("No se pudo mostrar el diálogo de instalación de REDA.", error);
+    }
+  });
+});
+
+function actualizarBotonesInstalar() {
+  const mostrar = !estaInstalada() && (Boolean(instalacionPendiente) || esIOS);
+  botonesInstalar.forEach((boton) => { boton.hidden = !mostrar; });
+}
+
+window.addEventListener("beforeinstallprompt", (evento) => {
+  evento.preventDefault();
+  instalacionPendiente = evento;
+  actualizarBotonesInstalar();
+});
+window.addEventListener("appinstalled", () => {
+  instalacionPendiente = null;
+  actualizarBotonesInstalar();
+  avisar("REDA quedó instalada en este dispositivo.", "exito");
+});
+actualizarBotonesInstalar();
+
 // visor de fotos (lo usan el mapa y el expediente del abogado)
 $("#visor-cerrar").addEventListener("click", () => $("#visor").close());
 $("#visor").addEventListener("click", (e) => { if (e.target === $("#visor")) $("#visor").close(); });

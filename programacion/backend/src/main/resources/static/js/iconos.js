@@ -16,6 +16,7 @@ const TRAZOS = {
   cuenta: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
   ayuda: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14"/><path d="M12 17.5v.01"/>',
   salir: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
+  instalar: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/>',
   alerta: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/>',
   flecha: '<path d="M5 12h14M13 6l6 6-6 6"/>',
 };

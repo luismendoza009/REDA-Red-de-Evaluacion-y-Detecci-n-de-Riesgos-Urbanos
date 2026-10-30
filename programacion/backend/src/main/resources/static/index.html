@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d0d0d">
   <meta name="description" content="REDA documenta fallas en la infraestructura pública de Valledupar y conecta a quienes sufrieron un daño con abogados.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="REDA">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>REDA · Red de Evaluación y Detección de Riesgos Urbanos</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/reda.css">
 </head>
@@ -56,6 +60,7 @@
     <section class="acceso-tarjeta">
       <div id="acceso-contenido"></div>
       <p class="acceso-legal"><a href="#/terminos">Términos</a> · <a href="#/privacidad">Privacidad</a> · <a href="#/ayuda">Ayuda</a></p>
+      <button class="boton btn-instalar acceso-instalar" type="button" hidden>Instalar REDA</button>
     </section>
   </div>
 
@@ -84,6 +89,7 @@
       <nav class="menu" id="menu" aria-label="Secciones"></nav>
 
       <div class="lateral-pie">
+        <button type="button" class="btn-instalar" hidden>Instalar REDA</button>
         <a href="#/cuenta" data-icono="cuenta">Mi cuenta</a>
         <a href="#/ayuda" data-icono="ayuda">Ayuda</a>
         <button type="button" id="btn-salir" data-icono="salir">Cerrar sesión</button>
@@ -95,6 +101,7 @@
     <header class="cabecera-movil">
       <button class="boton boton-icono" id="btn-menu" type="button" aria-expanded="false" aria-controls="lateral" aria-label="Abrir menú">☰</button>
       <span class="cabecera-titulo" id="titulo-movil">REDA</span>
+      <button class="boton btn-instalar cabecera-instalar" type="button" hidden>Instalar</button>
       <a href="#/cuenta" aria-label="Mi cuenta"><span class="avatar" id="avatar-movil" aria-hidden="true"></span></a>
     </header>
 

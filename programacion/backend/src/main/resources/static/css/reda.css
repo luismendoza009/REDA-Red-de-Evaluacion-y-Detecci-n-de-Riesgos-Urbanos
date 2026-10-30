@@ -515,6 +515,8 @@ hr { border: 0; border-top: 1px solid var(--borde); margin: 20px 0; }
 .acceso--login hr { margin: 18px 0; border-color: rgba(255, 255, 255, .1); }
 .acceso--login .acceso-legal { color: #8d9992; }
 .acceso--login .acceso-legal a { color: #b9c5be; }
+.acceso-instalar { align-self: center; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; color: #b9e8d0; border-color: rgba(25, 158, 112, .35); }
+.acceso-instalar:hover { color: #d7f6e5; background: rgba(25, 158, 112, .1); }
 
 /* ---------------------------------------------------------------- menú lateral */
 .lateral {
@@ -545,6 +547,8 @@ hr { border: 0; border-top: 1px solid var(--borde); margin: 20px 0; }
 .menu a small { margin-left: auto; color: var(--texto-tenue); }
 .icono { width: 19px; height: 19px; flex: none; }
 .lateral-pie { display: grid; gap: 2px; padding-top: 10px; border-top: 1px solid var(--borde); }
+.lateral-pie .btn-instalar { color: #b9e8d0; background: rgba(25, 158, 112, .1); }
+.lateral-pie .btn-instalar:hover { color: #d7f6e5; background: rgba(25, 158, 112, .18); }
 .cabecera-movil { display: none; }
 .velo { position: fixed; inset: 0; z-index: 1150; background: rgba(0, 0, 0, .55); }
 .avatar {
@@ -742,6 +746,9 @@ a.boton { text-decoration: none; display: inline-flex; align-items: center; }
   }
   .cabecera-titulo { flex: 1; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cabecera-movil .boton-icono { font-size: 18px; padding: 4px 11px; }
+  .cabecera-movil .btn-instalar { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 6px 9px; font-size: 12px; white-space: nowrap; }
+  .cabecera-movil .btn-instalar .icono { width: 16px; height: 16px; }
+  .lateral-pie .btn-instalar { display: none; }
   #mapa { top: calc(56px + env(safe-area-inset-top, 0px)); }
   .mapa-superior { top: calc(56px + var(--margen) + env(safe-area-inset-top, 0px)); }
   .panel { top: calc(56px + var(--margen) + env(safe-area-inset-top, 0px)); }
