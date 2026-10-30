@@ -1,17 +1,13 @@
+=== Verificación desde cero (2026-10-30) ===
+Migraciones 001 a 017 y semilla sobre una base vacía (reda_verificacion; la base de trabajo reda no se toca).
+Las 26 fechas se declaran como DATE en la migración que crea cada tabla. Antes estaban en una migración aparte (018);
+al integrarla se comparó pg_dump --schema-only antes y después: el esquema resultante es el mismo.
+Backend (mvn verify -Pintegracion, contra una base construida con estas migraciones): 92 pruebas unitarias y
+19 de integración, sin fallos ni errores.
 
-=== Validación de la migración 018_fechas_date (2026-10-30) ===
-Base de validación: reda_fecha_date_validation (aislada; no se modificó reda).
-Migraciones 001 a 018 y semilla: ejecutadas sin errores.
-Pruebas negativas: 40/40 restricciones rechazaron las operaciones inválidas.
-Coherencia de semilla: 19/19 comprobaciones devolvieron 0.
-Consultas cruzadas: 10/10 verificaciones devolvieron t.
-Esquema: 26 columnas persistidas de tipo DATE; el nombre antiguo
-incidentes.fecha_hora_hecho ya no existe. Las vistas exponen también columnas DATE.
-La base aislada permaneció disponible para las pruebas de integración.
-Backend: 108 pruebas unitarias y de integración, sin fallos ni errores.
 
-=== 1. Base vacia + migraciones + semilla (reda_rubrica_check_20261030)
-Recreando la base 'reda_rubrica_check_20261030' desde cero...
+=== 1. Base vacia + migraciones + semilla (reda_verificacion)
+Recreando la base 'reda_verificacion' desde cero...
   + 001_catalogos.sql
   + 002_usuarios.sql
   + 003_reportes.sql
@@ -38,7 +34,7 @@ Cargando datos semilla...
   + 06_notificaciones.sql
   + 07_bloqueos_login.sql
   + 99_secuencias.sql
-Listo. Base 'reda_rubrica_check_20261030' en localhost:5432
+Listo. Base 'reda_verificacion' en localhost:5432
 
 === 2. Pruebas negativas de restricciones
 Rechazadas por la restriccion esperada: 40
@@ -117,47 +113,6 @@ usuarios                55
 versiones_indice        5
 zonas                   30
 
-Base reda_rubrica_check_20261030 eliminada.
+Base reda_verificacion eliminada.
 
 RESULTADO: la base se reconstruye desde cero y pasa todas las verificaciones
-
-=== 6. Base activa reda (actualizacion no destructiva, 2026-10-30) ===
-Migraciones registradas: 001 a 017 (17 en total)
-Se conservaron los datos existentes; no se recreo ni se volvio a sembrar la base.
-Todas las tablas del esquema tienen al menos cinco registros: 25/25.
-
-Filas por tabla:
-abogados                5
-bloqueos_login          5
-calculos_indice         5
-calificaciones          5
-casos                   11
-categorias              8
-entidades_publicas      7
-estados                 6
-estados_caso            6
-evaluaciones            96
-evidencias              214
-historial_estados       311
-incidentes              18
-notificaciones          5
-parametros_indice       32
-postulaciones           22
-remisiones              7
-reportes                137
-reportes_relacionados   45
-roles                   5
-testigos                13
-tokens_recuperacion     5
-usuarios                57
-versiones_indice        5
-zonas                   30
-
-Integridad de los datos agregados:
-- Pesos de todas las versiones de indice: suma 1.
-- Los cinco calculos suman exactamente sus aportes del desglose.
-- Los casos nuevos tienen postulación elegida, remision aceptada y calificacion del mismo abogado.
-- Los tokens de demostracion estan vencidos y no pueden usarse para recuperar cuentas.
-- Las 40 operaciones invalidas fueron rechazadas por su restriccion esperada; la transaccion se revirtio.
-- Las 19 comprobaciones de coherencia devolvieron 0.
-- Las 10 verificaciones cruzadas del banco de consultas devolvieron t.

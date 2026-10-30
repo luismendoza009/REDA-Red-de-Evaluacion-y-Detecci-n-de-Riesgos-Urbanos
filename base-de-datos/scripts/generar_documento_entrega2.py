@@ -136,9 +136,9 @@ parrafo(REPO, alinear=False)
 titulo("2. Dónde encontrar cada requisito")
 tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resumen"], [
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
-    ("2. DDL como migraciones numeradas", "migraciones/001_ … 018_*.sql", "18 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices, vistas y fechas DATE"),
+    ("2. DDL como migraciones numeradas", "migraciones/001_ … 017_*.sql", "17 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices, vistas y fechas DATE"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
-    ("   Evidencia de verificación", "documentacion/entrega2/evidencia_verificacion.txt", "Salida real: 18 migraciones, semilla y verificaciones completas"),
+    ("   Evidencia de verificación", "documentacion/entrega2/evidencia_verificacion.txt", "Salida real: 17 migraciones, semilla y verificaciones completas"),
     ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 10 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
     ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 25 tablas, con 6 observaciones justificadas (E1–E6)"),
@@ -178,7 +178,7 @@ vineta("**Tres casos de la rúbrica:** la demostración muestra registros relaci
        "y cuatro operaciones rechazadas por restricciones. La salida está en documentacion/entrega2/evidencia_tres_casos.txt.")
 vineta("**Totales no inflados:** las vistas y consultas que combinan varias relaciones 1:N agregan en subconsultas "
        "antes de unir (ver v_resumen_casos y el comentario de C02).")
-vineta("**Fechas:** la migración 018 convierte las 26 fechas persistidas a DATE en la zona America/Bogota. "
+vineta("**Fechas:** las 26 fechas persistidas se declaran como DATE en la migración que crea cada tabla. "
        "Los antecedentes requieren un día previo y los cambios del historial se ordenan por id_historial (D34).")
 
 titulo("5. Índices: resultados")
