@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_textos_acotados.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -35,6 +35,7 @@ Tipos de falla de infraestructura que puede clasificar un reporte (hueco, alcant
 
 **Restricciones:**
 
+- `ck_categorias_descripcion`: `CHECK ((length(descripcion) <= 300))`
 - `uq_categorias_nombre`: `UNIQUE (nombre)`
 
 ## zonas
@@ -158,6 +159,7 @@ Abogados o firmas aliadas que reciben casos remitidos (especialización 1:1 de u
 **Restricciones:**
 
 - `ck_abogados_experiencia`: `CHECK (((anios_experiencia >= 0) AND (anios_experiencia <= 70)))`
+- `ck_abogados_presentacion`: `CHECK ((length(presentacion) <= 600))`
 - `ck_abogados_tarjeta`: `CHECK (((tarjeta_profesional)::text ~ '^[0-9]{4,10}$'::text))`
 - `fk_abogados_usuario`: `FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT`
 - `uq_abogados_tarjeta`: `UNIQUE (tarjeta_profesional)`
@@ -184,6 +186,7 @@ Entidad central: cada falla de infraestructura reportada. CONDICION = antecedent
 **Restricciones:**
 
 - `ck_reportes_descripcion`: `CHECK ((length(TRIM(BOTH FROM descripcion)) >= 10))`
+- `ck_reportes_descripcion_max`: `CHECK ((length(descripcion) <= 2000))`
 - `ck_reportes_gravedad`: `CHECK (((nivel_gravedad >= 1) AND (nivel_gravedad <= 5)))`
 - `ck_reportes_latitud`: `CHECK (((latitud >= ('-90'::integer)::numeric) AND (latitud <= (90)::numeric)))`
 - `ck_reportes_longitud`: `CHECK (((longitud >= ('-180'::integer)::numeric) AND (longitud <= (180)::numeric)))`
@@ -276,6 +279,7 @@ Bitácora de cada cambio de estado de un reporte: quién, cuándo, de qué estad
 **Restricciones:**
 
 - `ck_historial_distintos`: `CHECK ((id_estado_anterior <> id_estado_nuevo))`
+- `ck_historial_observacion`: `CHECK ((length(observacion) <= 1000))`
 - `fk_historial_anterior`: `FOREIGN KEY (id_estado_anterior) REFERENCES estados(id_estado) ON DELETE RESTRICT`
 - `fk_historial_nuevo`: `FOREIGN KEY (id_estado_nuevo) REFERENCES estados(id_estado) ON DELETE RESTRICT`
 - `fk_historial_reporte`: `FOREIGN KEY (id_reporte) REFERENCES reportes(id_reporte) ON DELETE CASCADE`
@@ -331,6 +335,7 @@ Daño sufrido por una persona o bien a causa de una falla (especialización 1:1 
 
 - `ck_incidentes_atencion`: `CHECK (((NOT hubo_atencion_medica) OR ((tipo_dano)::text = ANY ((ARRAY['LESION'::character varying, 'AMBOS'::character varying])::text[]))))`
 - `ck_incidentes_descripcion`: `CHECK ((length(TRIM(BOTH FROM descripcion_dano)) >= 10))`
+- `ck_incidentes_descripcion_max`: `CHECK ((length(descripcion_dano) <= 2000))`
 - `ck_incidentes_tipo_dano`: `CHECK (((tipo_dano)::text = ANY ((ARRAY['LESION'::character varying, 'DANO_MATERIAL'::character varying, 'AMBOS'::character varying])::text[])))`
 - `ck_incidentes_tipo_reporte`: `CHECK (((tipo_reporte)::text = 'INCIDENTE'::text))`
 - `fk_incidentes_entidad`: `FOREIGN KEY (id_entidad) REFERENCES entidades_publicas(id_entidad) ON DELETE RESTRICT`
@@ -375,6 +380,7 @@ Expediente legal creado a partir de un incidente viable (1:1 con incidentes).
 **Restricciones:**
 
 - `ck_casos_fechas`: `CHECK (((fecha_cierre IS NULL) OR (fecha_cierre >= fecha_creacion)))`
+- `ck_casos_observacion`: `CHECK ((length(observacion) <= 1000))`
 - `fk_casos_estado`: `FOREIGN KEY (id_estado_caso) REFERENCES estados_caso(id_estado_caso) ON DELETE RESTRICT`
 - `fk_casos_incidente`: `FOREIGN KEY (id_incidente) REFERENCES incidentes(id_incidente) ON DELETE RESTRICT`
 - `fk_casos_operador`: `FOREIGN KEY (id_operador) REFERENCES usuarios(id_usuario) ON DELETE RESTRICT`
@@ -404,6 +410,7 @@ Envío de un caso a un abogado; unidad de facturación del negocio (cuota fija p
 
 - `ck_remisiones_estado`: `CHECK (((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'ACEPTADA'::character varying, 'RECHAZADA'::character varying, 'VENCIDA'::character varying])::text[])))`
 - `ck_remisiones_motivo`: `CHECK (((motivo_rechazo IS NULL) OR ((estado_remision)::text = 'RECHAZADA'::text)))`
+- `ck_remisiones_motivo_max`: `CHECK ((length(motivo_rechazo) <= 1000))`
 - `ck_remisiones_respuesta`: `CHECK (((((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'VENCIDA'::character varying])::text[])) AND (fecha_respuesta IS NULL)) OR (((estado_remision)::text = ANY ((ARRAY['ACEPTADA'::character varying, 'RECHAZADA'::character varying])::text[])) AND (fecha_respuesta IS NOT NULL) AND (fecha_respuesta >= fecha_envio))))`
 - `ck_remisiones_valor`: `CHECK ((valor_cobrado >= (0)::numeric))`
 - `fk_remisiones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
@@ -433,6 +440,7 @@ Versiones de configuración de cada índice (IRU o IVC): umbrales de nivel y cu�
 
 **Restricciones:**
 
+- `ck_versiones_descripcion`: `CHECK (((length(descripcion) >= 10) AND (length(descripcion) <= 500)))`
 - `ck_versiones_nombre`: `CHECK (((nombre_indice)::text = ANY ((ARRAY['IRU'::character varying, 'IVC'::character varying])::text[])))`
 - `ck_versiones_numero`: `CHECK ((numero_version >= 1))`
 - `ck_versiones_umbrales`: `CHECK ((((0)::numeric < umbral_medio) AND (umbral_medio < umbral_alto) AND (umbral_alto < umbral_critico) AND (umbral_critico <= (100)::numeric)))`
@@ -455,6 +463,7 @@ Peso de cada variable en una versión de índice (configurable y versionado).
 
 **Restricciones:**
 
+- `ck_parametros_descripcion`: `CHECK (((length(descripcion) >= 10) AND (length(descripcion) <= 300)))`
 - `ck_parametros_peso`: `CHECK (((peso > (0)::numeric) AND (peso <= (1)::numeric)))`
 - `ck_parametros_variable`: `CHECK (((variable)::text ~ '^[a-z_]+$'::text))`
 - `fk_parametros_version`: `FOREIGN KEY (id_version) REFERENCES versiones_indice(id_version) ON DELETE CASCADE`
@@ -502,6 +511,7 @@ Interés de un abogado en tomar un caso. El ciudadano compara las postulaciones 
 
 - `ck_postulaciones_estado`: `CHECK (((estado)::text = ANY ((ARRAY['PENDIENTE'::character varying, 'ELEGIDA'::character varying, 'NO_ELEGIDA'::character varying, 'RETIRADA'::character varying])::text[])))`
 - `ck_postulaciones_mensaje`: `CHECK ((length(TRIM(BOTH FROM mensaje)) >= 20))`
+- `ck_postulaciones_mensaje_max`: `CHECK ((length(mensaje) <= 1500))`
 - `ck_postulaciones_resolucion`: `CHECK (((((estado)::text = 'PENDIENTE'::text) AND (fecha_resolucion IS NULL)) OR (((estado)::text <> 'PENDIENTE'::text) AND (fecha_resolucion IS NOT NULL) AND (fecha_resolucion >= fecha_postulacion))))`
 - `fk_postulaciones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
 - `fk_postulaciones_caso`: `FOREIGN KEY (id_caso) REFERENCES casos(id_caso) ON DELETE CASCADE`
