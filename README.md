@@ -19,6 +19,7 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 ```
 base-de-datos/            BASE DE DATOS I
 ├─ migraciones/           DDL numerado (001_ … 014_) ejecutable en orden sobre base vacía
+├─ migraciones/           DDL numerado (001_ … 013_) ejecutable en orden sobre base vacía
 ├─ sql/                   semilla, consultas, índices, pruebas, herramientas
 ├─ scripts/               migrar.ps1 y generadores (semilla, diccionario, diagrama, documento)
 ├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
