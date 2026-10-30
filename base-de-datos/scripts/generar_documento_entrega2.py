@@ -129,19 +129,19 @@ parrafo("Esta entrega implementa en PostgreSQL 18 el diseño de la Entrega 1, am
         "negocio: REDA pasa a ser un **sistema de documentación probatoria de fallas en infraestructura pública**. "
         "El ciudadano reporta condiciones (antecedentes) e incidentes (daños sufridos); el sistema vincula cada "
         "incidente con los reportes previos del mismo punto (\"la entidad ya sabía\") y, si el caso es viable, lo "
-        "remite a un abogado. El esquema pasa de 10 a 23 tablas, y se conservan las 10 originales con sus políticas de borrado.")
+        "remite a un abogado. El esquema pasa de 10 a 25 tablas, y se conservan las 10 originales con sus políticas de borrado.")
 parrafo("Los archivos de esta entrega se encuentran en la carpeta **base-de-datos/** del repositorio. La etiqueta **entrega-2** se creará después de revisar y aprobar la versión final. Las rutas de este documento son relativas a dicha carpeta:")
 parrafo(REPO, alinear=False)
 
 titulo("2. Dónde encontrar cada requisito")
 tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resumen"], [
     ("1. Correcciones de la Entrega 1", "documentacion/entrega2/correcciones_entrega1.md", "Qué cambió en cada tabla y por qué"),
-    ("2. DDL como migraciones numeradas", "migraciones/001_ … 014_*.sql", "14 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices y vistas"),
+    ("2. DDL como migraciones numeradas", "migraciones/001_ … 018_*.sql", "18 migraciones: PK, FK con política, NOT NULL, UNIQUE, CHECK, índices, vistas y fechas DATE"),
     ("   Script de construcción", "scripts/migrar.ps1", "Base vacía → migraciones en orden (cada una en su transacción)"),
-    ("   Evidencia de verificación", "documentacion/entrega2/evidencia_verificacion.txt", "Salida real: 14 migraciones, semilla y verificaciones completas"),
+    ("   Evidencia de verificación", "documentacion/entrega2/evidencia_verificacion.txt", "Salida real: 18 migraciones, semilla y verificaciones completas"),
     ("3. Datos semilla", "sql/semilla/*.sql", "137 reportes de Valledupar, 18 incidentes, 10 casos; simulados y coherentes"),
     ("   Generador de la semilla", "scripts/generar_semilla.py", "Determinista; documentado en documentacion/datos_simulados.md"),
-    ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 23 tablas, con 6 observaciones justificadas (E1–E6)"),
+    ("4. Auditoría de normalización", "documentacion/entrega2/auditoria_normalizacion.md", "DF y forma normal de las 25 tablas, con 6 observaciones justificadas (E1–E6)"),
     ("5. Banco de consultas", "sql/consultas/banco_consultas.sql", "10 consultas comentadas con la pregunta de negocio"),
     ("   Verificación de consultas", "sql/consultas/verificacion_consultas.sql", "10 consultas verificadas por caminos independientes"),
     ("   Demostración de tres casos", "sql/pruebas/demostracion_tres_casos.sql", "Guion de sustentación: relaciones múltiples, ausencia de relación y rechazos"),
@@ -149,10 +149,10 @@ tabla(["Requisito de la guía", "Ubicación (dentro de base-de-datos/)", "Resume
     ("6. Índices con evidencia", "documentacion/entrega2/evidencia_indices.md", "2 experimentos EXPLAIN ANALYZE antes/después"),
     ("   Salida de los planes", "documentacion/entrega2/evidencia_indices.txt", "Planes reales de PostgreSQL 18.6"),
     ("7. Diccionario de datos", "documentacion/diccionario_datos.md", "Generado del esquema real con scripts/generar_diccionario.ps1"),
-    ("Diagrama EER actualizado", "diagramas/reda_eer.drawio y .png", "23 tablas, 31 relaciones, notación pata de gallo"),
+    ("Diagrama EER actualizado", "diagramas/reda_eer.drawio y .png", "25 tablas, 33 relaciones, notación pata de gallo"),
     ("Diagrama en notación de Chen", "diagramas/reda_eer_chen.drawio y .png", "Aporte de Rafael Rivera"),
-    ("Decisiones técnicas", "documentacion/decisiones.md", "Decisiones D01–D33 y supuestos pendientes"),
-    ("Pruebas de restricciones", "sql/pruebas/probar_restricciones.sql", "35 operaciones inválidas que la base debe rechazar"),
+    ("Decisiones técnicas", "documentacion/decisiones.md", "Decisiones D01–D34 y supuestos pendientes"),
+    ("Pruebas de restricciones", "sql/pruebas/probar_restricciones.sql", "40 operaciones inválidas que la base debe rechazar"),
     ("Verificación desde cero", "scripts/verificar_desde_cero.ps1", "Base aparte: migraciones + semilla + todas las pruebas"),
 ], [4.6, 7.0, 4.4])
 
@@ -166,11 +166,11 @@ tabla(["Exigencia de la guía", "Consultas"], [
 ], [7, 9])
 
 titulo("4. Cómo se verificó")
-vineta("**Migraciones sobre base vacía:** la evidencia de verificación registra la aplicación de las 14 "
+vineta("**Migraciones sobre base vacía:** la evidencia de verificación registra la aplicación de las 17 "
        "migraciones sin errores. scripts/verificar_desde_cero.ps1 permite repetir el proceso en una base aparte.")
-vineta("**Integridad declarativa:** las 35 pruebas negativas de sql/pruebas/probar_restricciones.sql son rechazadas, cada una "
+vineta("**Integridad declarativa:** las 40 pruebas negativas de sql/pruebas/probar_restricciones.sql son rechazadas, cada una "
        "por la restricción exacta que se esperaba (la prueba compara el nombre de la restricción).")
-vineta("**Coherencia de la semilla:** las 17 comprobaciones de sql/pruebas/verificar_semilla.sql devuelven 0 "
+vineta("**Coherencia de la semilla:** las 19 comprobaciones de sql/pruebas/verificar_semilla.sql devuelven 0 "
        "(estado actual = último cambio del historial, hecho antes que el reporte, antecedentes dentro de 100 m, etc.).")
 vineta("**Consultas:** las 10 verificaciones cruzadas coinciden (por ejemplo, LEFT JOIN … IS NULL = NOT EXISTS = EXCEPT; "
        "el total facturado por abogado = el total cobrado por caso). C02 y C07 se comprobaron además a mano.")
@@ -178,6 +178,8 @@ vineta("**Tres casos de la rúbrica:** la demostración muestra registros relaci
        "y cuatro operaciones rechazadas por restricciones. La salida está en documentacion/entrega2/evidencia_tres_casos.txt.")
 vineta("**Totales no inflados:** las vistas y consultas que combinan varias relaciones 1:N agregan en subconsultas "
        "antes de unir (ver v_resumen_casos y el comentario de C02).")
+vineta("**Fechas:** la migración 018 convierte las 26 fechas persistidas a DATE en la zona America/Bogota. "
+       "Los antecedentes requieren un día previo y los cambios del historial se ordenan por id_historial (D34).")
 
 titulo("5. Índices: resultados")
 tabla(["Experimento", "Antes", "Después", "Mejora"], [

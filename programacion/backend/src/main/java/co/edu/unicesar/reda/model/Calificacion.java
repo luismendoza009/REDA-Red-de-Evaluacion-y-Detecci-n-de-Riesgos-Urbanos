@@ -2,7 +2,8 @@ package co.edu.unicesar.reda.model;
 
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /** Calificación del ciudadano al abogado que llevó su caso. Solo la crea {@link Caso#calificar}. */
 @Entity
@@ -29,7 +30,7 @@ public class Calificacion {
     private String comentario;
 
     @Column(name = "fecha", nullable = false)
-    private OffsetDateTime fecha;
+    private LocalDate fecha;
 
     protected Calificacion() {
     }
@@ -40,7 +41,7 @@ public class Calificacion {
         c.abogado = abogado;
         c.puntaje = puntaje;
         c.comentario = comentario == null || comentario.isBlank() ? null : comentario.trim();
-        c.fecha = OffsetDateTime.now();
+        c.fecha = LocalDate.now(ZoneId.of("America/Bogota"));
         return c;
     }
 
@@ -49,5 +50,5 @@ public class Calificacion {
     public Abogado getAbogado() { return abogado; }
     public Short getPuntaje() { return puntaje; }
     public String getComentario() { return comentario; }
-    public OffsetDateTime getFecha() { return fecha; }
+    public LocalDate getFecha() { return fecha; }
 }

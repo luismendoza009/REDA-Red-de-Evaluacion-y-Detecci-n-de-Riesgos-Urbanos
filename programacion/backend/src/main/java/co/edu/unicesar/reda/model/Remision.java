@@ -3,7 +3,7 @@ package co.edu.unicesar.reda.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 /**
  * Asignación facturable de un caso a un abogado. Con el flujo de postulaciones, una remisión se crea
@@ -28,13 +28,13 @@ public class Remision {
     private Abogado abogado;
 
     @Column(name = "fecha_envio", nullable = false)
-    private OffsetDateTime fechaEnvio;
+    private LocalDate fechaEnvio;
 
     @Column(name = "estado_remision", nullable = false, length = 10)
     private String estadoRemision;
 
     @Column(name = "fecha_respuesta")
-    private OffsetDateTime fechaRespuesta;
+    private LocalDate fechaRespuesta;
 
     @Column(name = "motivo_rechazo", columnDefinition = "text")
     private String motivoRechazo;
@@ -45,7 +45,7 @@ public class Remision {
     protected Remision() {
     }
 
-    static Remision aceptada(Caso caso, Abogado abogado, BigDecimal valor, OffsetDateTime cuando) {
+    static Remision aceptada(Caso caso, Abogado abogado, BigDecimal valor, LocalDate cuando) {
         Remision r = new Remision();
         r.caso = caso;
         r.abogado = abogado;
@@ -62,7 +62,7 @@ public class Remision {
 
     public Integer getId() { return id; }
     public Abogado getAbogado() { return abogado; }
-    public OffsetDateTime getFechaEnvio() { return fechaEnvio; }
+    public LocalDate getFechaEnvio() { return fechaEnvio; }
     public String getEstadoRemision() { return estadoRemision; }
     public BigDecimal getValorCobrado() { return valorCobrado; }
 }

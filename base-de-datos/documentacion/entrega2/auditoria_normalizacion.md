@@ -1,7 +1,7 @@
 # Auditoría de normalización — REDA (Entrega 2)
 
-> Actualizada al esquema real: migraciones 001 a 014 (23 tablas).
-> La migración 014 añade CHECK de longitud máxima a textos libres; no agrega tablas ni modifica las dependencias funcionales aquí analizadas.
+> Actualizada al esquema real: migraciones 001 a 017 (25 tablas).
+> La migración 016 añade CHECK de longitud máxima a textos libres, y la 017 nombra explícitamente el CHECK de intentos fallidos. La migración 015 agrega notificaciones privadas para el autor del reporte.
 
 Método: para cada tabla se listan las dependencias funcionales (DF) no triviales, las claves
 candidatas y la verificación de forma normal. Recordatorio de criterios:
@@ -43,6 +43,8 @@ guarda y se muestra entero, nunca se consulta ni se actualiza por partes (ver ex
 | 21 | postulaciones | {id_postulacion}, {id_caso, id_abogado} | FNBC | E5: la postulación elegida y la remisión guardan el mismo par caso-abogado |
 | 22 | tokens_recuperacion | {id_token}, {hash_token} | FNBC | |
 | 23 | calificaciones | {id_calificacion}, {id_caso} | FNBC | E6: id_abogado también se deduce del caso |
+| 24 | notificaciones | {id_notificacion}, {id_usuario, id_historial} | FNBC | Un cambio puede avisarse una vez a su ciudadano destinatario |
+| 25 | bloqueos_login | {correo} | FNBC | Estado aislado para evitar revelar si una cuenta existe |
 
 ## Detalle por tabla
 
@@ -176,6 +178,14 @@ token, igual que `valor_cobrado` en remisiones.
 id_caso → (todo) (UNIQUE: una calificación por caso). FNBC. El promedio de cada abogado **no** se guarda
 (sería un dato derivado): lo calcula la vista `v_reputacion_abogados` con AVG.
 
+**24. notificaciones** — id_notificacion → id_usuario, id_historial, fecha_creacion, fecha_lectura;
+{id_usuario, id_historial} → (resto), por la restricción única que evita duplicar el mismo aviso al ciudadano.
+FNBC.
+
+**25. bloqueos_login** — correo → intentos_fallidos, bloqueado_hasta, bloqueado_permanente. `correo` es la
+clave primaria y no se referencia a `usuarios` deliberadamente: el control de intentos debe comportarse igual
+para cuentas existentes e inexistentes, sin permitir enumerarlas. FNBC.
+
 - **E6 — id_abogado.** El abogado calificado también se puede deducir del caso (es el de su remisión
   aceptada). Se guarda para tener la FK a abogados y el índice `ix_calificaciones_abogado`, que hace
   rápida la consulta de reputación. Que coincida con el abogado del caso lo valida hoy la aplicación;
@@ -183,7 +193,7 @@ id_caso → (todo) (UNIQUE: una calificación por caso). FNBC. El promedio de ca
 
 ## Conclusión
 
-22 de 23 tablas están en FNBC. `reportes` está en FNBC, con una dependencia del mundo real que no es
+24 de 25 tablas están en FNBC. `reportes` está en FNBC, con una dependencia del mundo real que no es
 verificable con los datos actuales (E1) y una redundancia controlada entre tablas (E2). `incidentes` está
 en 3FN por una columna constante que existe para ganar integridad declarativa (E3). E5 y E6 no son
 violaciones de forma normal sino redundancias controladas entre tablas (la elección se guarda en una sola

@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.respuesta;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 public record PostulacionResponse(Integer id, PerfilPublicoAbogado abogado, String mensaje, String estado,
-                                  OffsetDateTime fecha) {
+                                  LocalDate fecha) {
 }

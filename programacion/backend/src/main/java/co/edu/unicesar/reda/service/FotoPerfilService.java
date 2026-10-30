@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -39,7 +41,8 @@ public class FotoPerfilService {
 
     /** Ruta para descargar la foto (la versión cambia con cada foto nueva, así el navegador no muestra la vieja). */
     public static String ruta(Usuario u) {
-        return u.tieneFoto() ? "/api/usuarios/" + u.getId() + "/foto?v=" + u.getFechaFotoPerfil().toEpochSecond() : null;
+        return u.tieneFoto() ? "/api/usuarios/" + u.getId() + "/foto?v="
+                + new BigInteger(1, u.getFotoPerfil().getBytes(StandardCharsets.UTF_8)) : null;
     }
 
     @Transactional

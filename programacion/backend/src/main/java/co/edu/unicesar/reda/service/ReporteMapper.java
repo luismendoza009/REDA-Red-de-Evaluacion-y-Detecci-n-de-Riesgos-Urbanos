@@ -41,7 +41,7 @@ final class ReporteMapper {
     }
 
     static IncidenteResponse incidente(Incidente i) {
-        return new IncidenteResponse(i.getId(), i.getTipoDano().name(), i.getDescripcionDano(), i.getFechaHoraHecho(),
+        return new IncidenteResponse(i.getId(), i.getTipoDano().name(), i.getDescripcionDano(), i.getFechaHecho(),
                 i.isHuboAtencionMedica(), i.getEntidad() == null ? null : i.getEntidad().getNombre());
     }
 

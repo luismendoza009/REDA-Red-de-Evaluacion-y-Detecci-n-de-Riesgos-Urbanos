@@ -1,5 +1,5 @@
 import { api } from "../api.js";
-import { $, $$, escapar, fechaHora, avisar, cargando, vacio } from "../ui.js";
+import { $, $$, escapar, fecha, avisar, cargando, vacio } from "../ui.js";
 
 export async function mostrar(contenedor) {
   contenedor.innerHTML = cargando();
@@ -46,7 +46,7 @@ function tarjeta(notificacion) {
         <span class="notificacion-punto" aria-hidden="true"></span>
         <span class="notificacion-contenido">
           <strong>${escapar(resumen)}</strong>
-          <small>${escapar(fechaHora(notificacion.fechaCreacion))} · Abrir la línea de tiempo del reporte</small>
+          <small>${escapar(fecha(notificacion.fechaCreacion))} · Abrir la línea de tiempo del reporte</small>
         </span>
       </button>
     </li>`;

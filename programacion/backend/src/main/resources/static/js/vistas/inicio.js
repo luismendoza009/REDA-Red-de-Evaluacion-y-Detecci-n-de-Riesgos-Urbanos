@@ -5,7 +5,7 @@
 //  - accesos directos ("¿Qué quieres hacer?") y cómo funciona el proceso para ese rol.
 // =============================================================================
 import { api, sesion, ErrorApi } from "../api.js";
-import { escapar, fechaHora, plural, cargando } from "../ui.js";
+import { escapar, fecha, plural, cargando } from "../ui.js";
 import { icono } from "../iconos.js";
 
 const DESCRIPCION_ROL = {
@@ -148,7 +148,7 @@ async function gestion(rol) {
       ${urgentes.length ? `<ul class="lista-inicio">${urgentes.map((r) => `
         <li>
           <span class="lista-marca ${r.tipo === "INCIDENTE" ? "es-incidente" : ""}">${r.tipo === "INCIDENTE" ? icono("alerta") : icono("reportes")}</span>
-          <span><b>${escapar(r.categoria)}</b> · ${escapar(r.zona)}<small>Reporte #${r.id} · ${escapar(r.estado)} · ${fechaHora(r.fechaReporte)}</small></span>
+          <span><b>${escapar(r.categoria)}</b> · ${escapar(r.zona)}<small>Reporte #${r.id} · ${escapar(r.estado)} · ${fecha(r.fechaReporte)}</small></span>
           <a class="boton" href="#/mapa/reporte/${r.id}">Ver</a>
         </li>`).join("")}</ul>` : `<p class="texto-2">No hay reportes pendientes. ¡Bandeja al día!</p>`}
     </section>`;

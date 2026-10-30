@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class BuscadorAntecedentesHaversine implements BuscadorAntecedentes {
 
     @Override
     public List<Antecedente> buscar(Integer idCategoria, BigDecimal latitud, BigDecimal longitud,
-                                    OffsetDateTime anterioresA) {
+                                    LocalDate anterioresA) {
         double lat = latitud.doubleValue();
         double lon = longitud.doubleValue();
         double deltaLat = radioMetros / METROS_POR_GRADO;
@@ -74,7 +74,7 @@ public class BuscadorAntecedentesHaversine implements BuscadorAntecedentes {
 
         return jdbc.query(SQL, p, (rs, i) -> new Antecedente(
                 rs.getInt("id_reporte"),
-                rs.getObject("fecha_reporte", OffsetDateTime.class),
+                rs.getObject("fecha_reporte", LocalDate.class),
                 rs.getString("estado"),
                 rs.getString("descripcion"),
                 rs.getDouble("distancia")));

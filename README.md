@@ -18,7 +18,7 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 
 ```
 base-de-datos/            BASE DE DATOS I
-├─ migraciones/           DDL numerado (001_ … 015_) ejecutable en orden sobre base vacía
+├─ migraciones/           DDL numerado (001_ … 017_) ejecutable en orden sobre base vacía
 ├─ sql/                   semilla, consultas, índices, pruebas, herramientas
 ├─ scripts/               migrar.ps1 y generadores (semilla, diccionario, diagrama, documento)
 ├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
@@ -111,8 +111,8 @@ Las fotos de perfil no vienen en la semilla (no se usan fotos de personas): se s
 
 ```powershell
 cd base-de-datos            # con PGPASSWORD definido
-psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql        # 17 comprobaciones de coherencia
-psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 35 pruebas negativas
+psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql        # 19 comprobaciones de coherencia
+psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 40 pruebas negativas
 psql -U postgres -d reda -f sql\pruebas\demostracion_tres_casos.sql  # guion de la sustentación: relación con varias, con ninguna y rechazos
 psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificación cruzada del banco
 .\scripts\verificar_desde_cero.ps1   # todo lo anterior sobre una base aparte creada desde cero (no toca 'reda')

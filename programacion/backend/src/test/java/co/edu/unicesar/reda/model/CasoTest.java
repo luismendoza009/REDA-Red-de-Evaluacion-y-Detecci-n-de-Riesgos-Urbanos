@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -48,7 +48,8 @@ class CasoTest {
     void incidenteValidado() {
         Reporte r = Reporte.nuevo(TipoReporte.INCIDENTE, ciudadana, null, null, Estado.de(1, NombreEstado.PENDIENTE),
                 "Peatón cayó en la alcantarilla sin tapa", BigDecimal.ONE, BigDecimal.ONE, (short) 5);
-        incidente = r.registrarIncidente(TipoDano.LESION, "Fractura de tibia", OffsetDateTime.now().minusHours(2), true, null);
+        incidente = r.registrarIncidente(TipoDano.LESION, "Fractura de tibia",
+                LocalDate.now(java.time.ZoneId.of("America/Bogota")).minusDays(1), true, null);
         r.cambiarEstado(Estado.de(2, NombreEstado.EN_REVISION), operador, null);
         r.cambiarEstado(Estado.de(3, NombreEstado.VALIDADO), operador, "Verificado");
     }
@@ -72,7 +73,8 @@ class CasoTest {
     void unIncidenteSinValidarNoPuedeBuscarAbogado() {
         Reporte r = Reporte.nuevo(TipoReporte.INCIDENTE, ciudadana, null, null, Estado.de(1, NombreEstado.PENDIENTE),
                 "Hueco que dañó la llanta del carro", BigDecimal.ONE, BigDecimal.ONE, null);
-        Incidente sinValidar = r.registrarIncidente(TipoDano.DANO_MATERIAL, "Llanta destruida", OffsetDateTime.now().minusHours(1), false, null);
+        Incidente sinValidar = r.registrarIncidente(TipoDano.DANO_MATERIAL, "Llanta destruida",
+                LocalDate.now(java.time.ZoneId.of("America/Bogota")).minusDays(1), false, null);
         assertEquals("INCIDENTE_NO_VALIDADO", assertThrows(ReglaNegocioException.class,
                 () -> sinValidar.solicitarAbogado(ciudadana, operador, remitido, true)).getCodigo());
     }
@@ -186,9 +188,9 @@ class CasoTest {
     void elTokenDeRecuperacionSirveUnaSolaVezYVence() {
         Usuario u = usuario(30, NombreRol.CIUDADANO);
         TokenRecuperacion t = TokenRecuperacion.para(u, "a".repeat(64));
-        OffsetDateTime ahora = OffsetDateTime.now();
+        LocalDate ahora = LocalDate.now(java.time.ZoneId.of("America/Bogota"));
         assertTrue(t.sirveEn(ahora));
-        assertFalse(t.sirveEn(ahora.plus(TokenRecuperacion.VIGENCIA).plusSeconds(1)), "vence a los 30 minutos");
+        assertFalse(t.sirveEn(ahora.plusDays(TokenRecuperacion.VIGENCIA_DIAS)), "vence al comenzar el día siguiente");
         t.usar(ahora);
         assertFalse(t.sirveEn(ahora), "un token usado no vuelve a servir");
         assertThrows(IllegalStateException.class, () -> t.usar(ahora));

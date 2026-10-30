@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,8 +60,8 @@ class RegistroReporteServiceTest {
     @Test
     void crearIncidenteVinculaLosAntecedentesQueEncuentraElBuscador() {
         datosBasicos();
-        OffsetDateTime hecho = OffsetDateTime.now().minusHours(2);
-        OffsetDateTime primerReporte = hecho.minusDays(150);
+        LocalDate hecho = LocalDate.now(java.time.ZoneId.of("America/Bogota")).minusDays(1);
+        LocalDate primerReporte = hecho.minusDays(150);
         when(buscador.buscar(eq(2), any(), any(), eq(hecho))).thenReturn(List.of(
                 new BuscadorAntecedentes.Antecedente(11, primerReporte, "Validado", "Alcantarilla sin tapa", 12.3),
                 new BuscadorAntecedentes.Antecedente(15, hecho.minusDays(40), "En revisión", "Sigue sin tapa", 30.0)));
@@ -92,7 +92,7 @@ class RegistroReporteServiceTest {
         var falla = new FallaRequest(2, 1, "Peatón cayó en la alcantarilla", BigDecimal.ONE, BigDecimal.ONE, null);
 
         var respuesta = servicio.crearIncidente(new CrearIncidenteRequest(falla, TipoDano.LESION, "Fractura de tibia",
-                OffsetDateTime.now().minusHours(1), false, null, null), 7);
+                LocalDate.now(java.time.ZoneId.of("America/Bogota")).minusDays(1), false, null, null), 7);
 
         assertTrue(respuesta.antecedentes().isEmpty());
         assertNull(respuesta.diasConocimientoPrevio());

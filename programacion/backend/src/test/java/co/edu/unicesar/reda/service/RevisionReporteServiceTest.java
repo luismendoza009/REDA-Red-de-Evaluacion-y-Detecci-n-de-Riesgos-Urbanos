@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,7 +56,7 @@ class RevisionReporteServiceTest {
         when(reporte.cambiarEstado(nuevo, responsable, null)).thenReturn(cambio);
         when(cambio.getEstadoAnterior()).thenReturn(anterior);
         when(cambio.getEstadoNuevo()).thenReturn(nuevo);
-        when(cambio.getFechaCambio()).thenReturn(OffsetDateTime.now());
+        when(cambio.getFechaCambio()).thenReturn(LocalDate.now(java.time.ZoneId.of("America/Bogota")));
         when(cambio.getResponsable()).thenReturn(responsable);
         when(anterior.getNombre()).thenReturn("En revisión");
         when(nuevo.getNombre()).thenReturn("Validado");

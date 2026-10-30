@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "bloqueos_login")
@@ -19,7 +19,7 @@ public class BloqueoLogin {
     private int intentosFallidos;
 
     @Column(name = "bloqueado_hasta")
-    private Instant bloqueadoHasta;
+    private LocalDate bloqueadoHasta;
 
     @Column(name = "bloqueado_permanente", nullable = false)
     private boolean bloqueadoPermanente;
@@ -27,7 +27,7 @@ public class BloqueoLogin {
     protected BloqueoLogin() {
     }
 
-    public BloqueoLogin(String correo, int intentosFallidos, Instant bloqueadoHasta, boolean bloqueadoPermanente) {
+    public BloqueoLogin(String correo, int intentosFallidos, LocalDate bloqueadoHasta, boolean bloqueadoPermanente) {
         this.correo = correo;
         this.intentosFallidos = intentosFallidos;
         this.bloqueadoHasta = bloqueadoHasta;
@@ -36,6 +36,6 @@ public class BloqueoLogin {
 
     public String getCorreo() { return correo; }
     public int getIntentosFallidos() { return intentosFallidos; }
-    public Instant getBloqueadoHasta() { return bloqueadoHasta; }
+    public LocalDate getBloqueadoHasta() { return bloqueadoHasta; }
     public boolean isBloqueadoPermanente() { return bloqueadoPermanente; }
 }

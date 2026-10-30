@@ -1,7 +1,7 @@
 package co.edu.unicesar.reda.service;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -18,10 +18,10 @@ import java.util.List;
  */
 public interface BuscadorAntecedentes {
 
-    List<Antecedente> buscar(Integer idCategoria, BigDecimal latitud, BigDecimal longitud, OffsetDateTime anterioresA);
+    List<Antecedente> buscar(Integer idCategoria, BigDecimal latitud, BigDecimal longitud, LocalDate anterioresA);
 
     /** Un reporte de condición encontrado como antecedente. */
-    record Antecedente(Integer idReporte, OffsetDateTime fechaReporte, String estado,
+    record Antecedente(Integer idReporte, LocalDate fechaReporte, String estado,
                        String descripcion, double distanciaMetros) {
     }
 }

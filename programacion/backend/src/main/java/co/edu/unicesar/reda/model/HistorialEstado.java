@@ -2,7 +2,8 @@ package co.edu.unicesar.reda.model;
 
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /** Registro inmutable de un cambio de estado (bitácora). Solo lo crea {@link Reporte#cambiarEstado}. */
 @Entity
@@ -31,7 +32,7 @@ public class HistorialEstado {
     private Usuario responsable;
 
     @Column(name = "fecha_cambio", nullable = false)
-    private OffsetDateTime fechaCambio;
+    private LocalDate fechaCambio;
 
     @Column(name = "observacion", columnDefinition = "text")
     private String observacion;
@@ -45,7 +46,7 @@ public class HistorialEstado {
         h.estadoAnterior = anterior;
         h.estadoNuevo = nuevo;
         h.responsable = responsable;
-        h.fechaCambio = OffsetDateTime.now();
+        h.fechaCambio = LocalDate.now(ZoneId.of("America/Bogota"));
         h.observacion = (observacion == null || observacion.isBlank()) ? null : observacion.trim();
         return h;
     }
@@ -55,6 +56,6 @@ public class HistorialEstado {
     public Estado getEstadoAnterior() { return estadoAnterior; }
     public Estado getEstadoNuevo() { return estadoNuevo; }
     public Usuario getResponsable() { return responsable; }
-    public OffsetDateTime getFechaCambio() { return fechaCambio; }
+    public LocalDate getFechaCambio() { return fechaCambio; }
     public String getObservacion() { return observacion; }
 }

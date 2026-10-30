@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +39,7 @@ class NotificacionServiceTest {
         Reporte reporte = mock(Reporte.class);
         Estado anterior = mock(Estado.class);
         Estado nuevo = mock(Estado.class);
-        OffsetDateTime fecha = OffsetDateTime.now();
+        LocalDate fecha = LocalDate.now(java.time.ZoneId.of("America/Bogota"));
         when(notificaciones.findByDestinatario_IdOrderByFechaCreacionDesc(eq(42), any(Pageable.class)))
                 .thenReturn(List.of(notificacion));
         when(notificaciones.countByDestinatario_IdAndFechaLecturaIsNull(42)).thenReturn(1L);

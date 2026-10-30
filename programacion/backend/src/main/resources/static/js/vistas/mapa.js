@@ -8,7 +8,7 @@
 // El mapa de Leaflet se crea UNA vez y se conserva al cambiar de sección.
 // =============================================================================
 import { api, sesion, ErrorApi } from "../api.js";
-import { $, escapar, fecha, fechaHora, plural, chipSituacion, SITUACIONES, ORDEN_SITUACIONES, avisar } from "../ui.js";
+import { $, escapar, fecha, plural, chipSituacion, SITUACIONES, ORDEN_SITUACIONES, avisar } from "../ui.js";
 
 const FRECUENCIA = { UNICA: "Reporte único", MEDIA: "Frecuencia media", ALTA: "Alta frecuencia", CRITICA: "Frecuencia crítica" };
 const VALLEDUPAR = [10.4735, -73.2505];
@@ -314,7 +314,7 @@ async function abrirReporte(idReporte, idPunto) {
         <div><dt>Gravedad percibida</dt><dd class="gravedad" aria-label="${d.nivelGravedad ?? "sin dato"} de 5">${d.nivelGravedad ? "●".repeat(d.nivelGravedad) + "○".repeat(5 - d.nivelGravedad) : "—"}</dd></div>
       </dl>
       <div class="seccion">Línea de tiempo</div>
-      <ol class="hitos">${hitos.map((h) => `<li><span>${escapar(h.estado)}</span><time>${h.estado === "Reportado" ? fecha(h.fecha) : fechaHora(h.fecha)}</time></li>`).join("")}</ol>
+      <ol class="hitos">${hitos.map((h) => `<li><span>${escapar(h.estado)}</span><time>${fecha(h.fecha)}</time></li>`).join("")}</ol>
       <div class="seccion">Fotos de evidencia ${d.numFotos ? `(${d.numFotos})` : ""}</div>
       <div id="zona-fotos"></div>
     </div>`;
@@ -339,7 +339,7 @@ export async function cargarFotos(zona, idReporte, numFotos, esAutor, alSubir) {
       const boton = zona.querySelector(`[data-foto="${i}"]`);
       if (!boton) return;
       boton.querySelector("img").src = url;
-      boton.addEventListener("click", () => verFoto(url, `Cargada el ${fechaHora(f.fechaCarga)} · huella SHA-256 ${f.hashSha256.slice(0, 12)}…`));
+      boton.addEventListener("click", () => verFoto(url, `Cargada el ${fecha(f.fechaCarga)} · huella SHA-256 ${f.hashSha256.slice(0, 12)}…`));
     });
     if (esAutor) {
       zona.insertAdjacentHTML("beforeend", `

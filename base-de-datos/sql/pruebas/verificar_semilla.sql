@@ -10,7 +10,7 @@ SELECT count(*) AS inconsistentes
 FROM reportes r
 LEFT JOIN LATERAL (
     SELECT h.id_estado_nuevo FROM historial_estados h
-    WHERE h.id_reporte = r.id_reporte ORDER BY h.fecha_cambio DESC LIMIT 1
+    WHERE h.id_reporte = r.id_reporte ORDER BY h.fecha_cambio DESC, h.id_historial DESC LIMIT 1
 ) ult ON true
 WHERE r.id_estado <> coalesce(ult.id_estado_nuevo, (SELECT id_estado FROM estados WHERE nombre = 'Pendiente'));
 
@@ -18,7 +18,7 @@ WHERE r.id_estado <> coalesce(ult.id_estado_nuevo, (SELECT id_estado FROM estado
 SELECT count(*) AS saltos
 FROM (
     SELECT id_estado_anterior,
-           lag(id_estado_nuevo) OVER (PARTITION BY id_reporte ORDER BY fecha_cambio) AS previo
+           lag(id_estado_nuevo) OVER (PARTITION BY id_reporte ORDER BY id_historial) AS previo
     FROM historial_estados
 ) t
 WHERE previo IS NOT NULL AND previo <> id_estado_anterior;
@@ -31,7 +31,7 @@ SELECT count(*) FROM reportes r
 WHERE r.tipo_reporte = 'INCIDENTE' AND NOT EXISTS (SELECT 1 FROM incidentes i WHERE i.id_reporte = r.id_reporte);
 
 \echo '5. El hecho ocurre antes de reportarlo. Esperado: 0'
-SELECT count(*) FROM incidentes i JOIN reportes r USING (id_reporte) WHERE i.fecha_hora_hecho > r.fecha_reporte;
+SELECT count(*) FROM incidentes i JOIN reportes r USING (id_reporte) WHERE i.fecha_hecho > r.fecha_reporte;
 
 \echo '6. Los ANTECEDENTE son condiciones NO rechazadas de la misma categoría, a <= 100 m y anteriores al hecho. Esperado: 0'
 SELECT count(*)
@@ -43,7 +43,7 @@ WHERE rr.tipo_relacion = 'ANTECEDENTE'
   AND NOT (rc.tipo_reporte = 'CONDICION'
            AND rc.id_estado <> (SELECT id_estado FROM estados WHERE nombre = 'Rechazado')
            AND rc.id_categoria = ri.id_categoria
-           AND rc.fecha_reporte < i.fecha_hora_hecho
+           AND rc.fecha_reporte < i.fecha_hecho
            AND 2 * 6371000 * asin(sqrt(
                  power(sin(radians(rc.latitud - ri.latitud) / 2), 2) +
                  cos(radians(ri.latitud)) * cos(radians(rc.latitud)) *
@@ -95,11 +95,27 @@ WHERE ec.nombre <> 'Cerrado'
 
 \echo '16. Cada cálculo de índice es posterior a su reporte y su valor es la suma de los aportes del desglose. Esperado: 0'
 SELECT count(*) FROM calculos_indice ci JOIN reportes r USING (id_reporte)
-WHERE ci.fecha_calculo < r.fecha_reporte
+WHERE ci.fecha_calculo <= r.fecha_reporte
    OR abs(ci.valor - (SELECT sum((d.value ->> 'aporte')::numeric) FROM jsonb_each(ci.desglose) d)) > 0.01;
 
 \echo '17. Ningún token de recuperación es anterior al registro de su usuario. Esperado: 0'
 SELECT count(*) FROM tokens_recuperacion t JOIN usuarios u USING (id_usuario) WHERE t.fecha_creacion < u.fecha_registro;
+
+\echo '18. La semilla incluye notificaciones leídas y pendientes de sus autores. Esperado: 0'
+SELECT CASE WHEN count(*) >= 5
+                  AND count(*) FILTER (WHERE n.fecha_lectura IS NULL) > 0
+                  AND count(*) FILTER (WHERE n.fecha_lectura IS NOT NULL) > 0
+                  AND count(*) FILTER (WHERE n.id_usuario <> r.id_usuario) = 0
+            THEN 0 ELSE 1 END
+FROM notificaciones n
+JOIN historial_estados h USING (id_historial)
+JOIN reportes r USING (id_reporte);
+
+\echo '19. La semilla tiene bloqueos de prueba sin asociarlos a cuentas reales. Esperado: 0'
+SELECT CASE WHEN count(*) >= 5 AND count(*) FILTER (WHERE u.id_usuario IS NOT NULL) = 0
+            THEN 0 ELSE 1 END
+FROM bloqueos_login b
+LEFT JOIN usuarios u ON u.correo = b.correo;
 
 \echo 'Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)'
 SELECT i.id_incidente, count(rr.*) AS antecedentes, min(rc.fecha_reporte)::date AS primero

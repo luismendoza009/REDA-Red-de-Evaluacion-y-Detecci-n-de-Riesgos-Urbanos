@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,9 @@ class CuentasYCasosIT {
             enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
                     .andExpect(status().isTooManyRequests())
                     .andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"))
-                    .andExpect(jsonPath("$.segundosRestantes").value(180))
+                    .andExpect(jsonPath("$.segundosRestantes").value(
+                            org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.greaterThanOrEqualTo(86_400),
+                                    org.hamcrest.Matchers.lessThanOrEqualTo(172_800))))
                     .andExpect(jsonPath("$.intentosRestantes").value(5));
             enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
                     .andExpect(status().isTooManyRequests())
@@ -135,7 +138,7 @@ class CuentasYCasosIT {
 
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void segundaEtapaPersisteLaPausaDeDiezMinutos() throws Exception {
+    void segundaEtapaPersisteLaPausaDeDosDias() throws Exception {
         String correo = "it-" + UUID.randomUUID() + "@correo.test";
         jdbc.update("""
                 INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_hasta, bloqueado_permanente)
@@ -145,13 +148,15 @@ class CuentasYCasosIT {
             enviar(HttpMethod.POST, "/api/auth/login", Map.of("correo", correo, "password", "mala"), null)
                     .andExpect(status().isTooManyRequests())
                     .andExpect(jsonPath("$.codigo").value("DEMASIADOS_INTENTOS"))
-                    .andExpect(jsonPath("$.segundosRestantes").value(600))
+                    .andExpect(jsonPath("$.segundosRestantes").value(
+                            org.hamcrest.Matchers.allOf(org.hamcrest.Matchers.greaterThanOrEqualTo(172_800),
+                                    org.hamcrest.Matchers.lessThanOrEqualTo(259_200))))
                     .andExpect(jsonPath("$.intentosRestantes").value(5));
 
             assertEquals(10, jdbc.queryForObject(
                     "SELECT intentos_fallidos FROM bloqueos_login WHERE correo = ?", Integer.class, correo));
             assertTrue(jdbc.queryForObject("""
-                    SELECT bloqueado_hasta > CURRENT_TIMESTAMP
+                    SELECT bloqueado_hasta >= CURRENT_DATE
                     FROM bloqueos_login WHERE correo = ?
                     """, Boolean.class, correo));
 
@@ -225,7 +230,7 @@ class CuentasYCasosIT {
                 "falla", Map.of("idCategoria", 1, "idZona", 3, "descripcion", "Hueco enorme frente a la tienda de la esquina",
                         "latitud", 10.4805, "longitud", -73.2420, "nivelGravedad", 4),
                 "tipoDano", "AMBOS", "descripcionDano", "Caída en moto: rodilla lesionada y moto con daños",
-                "fechaHoraHecho", OffsetDateTime.now().minusHours(5).toString(), "huboAtencionMedica", true,
+                "fechaHecho", LocalDate.now(ZoneId.of("America/Bogota")).minusDays(1).toString(), "huboAtencionMedica", true,
                 "testigos", List.of(Map.of("nombre", "Testigo Uno", "contacto", "3000000001"))), ciudadana)
                 .andExpect(status().isCreated()))).path("reporte").path("id").asInt();
 

@@ -1,5 +1,5 @@
 -- =============================================================================
--- 014_textos_acotados.sql
+-- 016_textos_acotados.sql
 -- Los textos libres quedan acotados. Las columnas siguen siendo TEXT (las entidades JPA las
 -- declaran así y ddl-auto=validate lo comprueba), pero cada una tiene un tope con nombre propio.
 -- Los topes son los mismos que valida la API (@Size en programacion/backend/.../peticion), así

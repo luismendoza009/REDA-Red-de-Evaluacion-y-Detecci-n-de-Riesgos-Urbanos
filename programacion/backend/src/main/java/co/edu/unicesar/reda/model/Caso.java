@@ -3,7 +3,8 @@ package co.edu.unicesar.reda.model;
 import co.edu.unicesar.reda.exception.ReglaNegocioException;
 import jakarta.persistence.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,19 +40,19 @@ public class Caso {
     private Usuario operador;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private OffsetDateTime fechaCreacion;
+    private LocalDate fechaCreacion;
 
     @Column(name = "fecha_cierre")
-    private OffsetDateTime fechaCierre;
+    private LocalDate fechaCierre;
 
     @Column(name = "observacion", columnDefinition = "text")
     private String observacion;
 
     @Column(name = "fecha_consentimiento")
-    private OffsetDateTime fechaConsentimiento;
+    private LocalDate fechaConsentimiento;
 
     @OneToMany(mappedBy = "caso", cascade = CascadeType.PERSIST)
-    @OrderBy("fechaPostulacion ASC")
+    @OrderBy("fechaPostulacion ASC, id ASC")
     private List<Postulacion> postulaciones = new ArrayList<>();
 
     @OneToMany(mappedBy = "caso", cascade = CascadeType.PERSIST)
@@ -84,7 +85,7 @@ public class Caso {
         c.incidente = incidente;
         c.operador = operadorQueValido;
         c.estado = remitido;
-        c.fechaCreacion = OffsetDateTime.now();
+        c.fechaCreacion = LocalDate.now(ZoneId.of("America/Bogota"));
         c.fechaConsentimiento = c.fechaCreacion;
         c.observacion = "Caso abierto a solicitud del ciudadano.";
         return c;
@@ -110,7 +111,7 @@ public class Caso {
     public void retirarPostulacion(Abogado abogado) {
         Postulacion p = postulacionDe(abogado).filter(Postulacion::estaPendiente).orElseThrow(() ->
                 new ReglaNegocioException("SIN_POSTULACION", "No tiene una postulación pendiente en este caso"));
-        p.resolver(Postulacion.Estado.RETIRADA, OffsetDateTime.now());
+        p.resolver(Postulacion.Estado.RETIRADA, LocalDate.now(ZoneId.of("America/Bogota")));
     }
 
     /**
@@ -128,7 +129,7 @@ public class Caso {
                 .filter(p -> p.getId().equals(idPostulacion) && p.estaPendiente())
                 .findFirst()
                 .orElseThrow(() -> new ReglaNegocioException("POSTULACION_INVALIDA", "Esa postulación no está disponible"));
-        OffsetDateTime ahora = OffsetDateTime.now();
+        LocalDate ahora = LocalDate.now(ZoneId.of("America/Bogota"));
         for (Postulacion p : postulaciones) {
             if (p.estaPendiente()) {
                 p.resolver(p == elegida ? Postulacion.Estado.ELEGIDA : Postulacion.Estado.NO_ELEGIDA, ahora);
@@ -149,7 +150,7 @@ public class Caso {
             throw new ReglaNegocioException("CASO_NO_ACTIVO", "Solo se puede cerrar un caso en curso");
         }
         this.estado = cerrado;
-        this.fechaCierre = OffsetDateTime.now();
+        this.fechaCierre = LocalDate.now(ZoneId.of("America/Bogota"));
         this.observacion = observacion.trim();
     }
 
@@ -207,8 +208,8 @@ public class Caso {
     public Integer getId() { return id; }
     public Incidente getIncidente() { return incidente; }
     public EstadoCaso getEstado() { return estado; }
-    public OffsetDateTime getFechaCreacion() { return fechaCreacion; }
-    public OffsetDateTime getFechaCierre() { return fechaCierre; }
+    public LocalDate getFechaCreacion() { return fechaCreacion; }
+    public LocalDate getFechaCierre() { return fechaCierre; }
     public String getObservacion() { return observacion; }
     public List<Postulacion> getPostulaciones() { return Collections.unmodifiableList(postulaciones); }
 }

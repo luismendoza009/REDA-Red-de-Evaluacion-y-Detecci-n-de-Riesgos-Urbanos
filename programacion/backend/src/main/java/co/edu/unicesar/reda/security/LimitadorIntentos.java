@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -27,9 +29,10 @@ public class LimitadorIntentos {
     public static final int MAXIMO = 8;
     public static final Duration VENTANA = Duration.ofMinutes(15);
     public static final int INTENTOS_POR_ETAPA_LOGIN = 5;
-    public static final Duration BLOQUEO_LOGIN_INICIAL = Duration.ofMinutes(3);
-    public static final Duration BLOQUEO_LOGIN_SEGUNDO = Duration.ofMinutes(10);
+    public static final long BLOQUEO_LOGIN_INICIAL_DIAS = 1;
+    public static final long BLOQUEO_LOGIN_SEGUNDO_DIAS = 2;
     public static final int MAXIMO_INTENTOS_LOGIN = INTENTOS_POR_ETAPA_LOGIN * 3;
+    private static final ZoneId ZONA_REDA = ZoneId.of("America/Bogota");
 
     private final Map<String, Deque<Instant>> intentos = new ConcurrentHashMap<>();
     private final Map<String, ProgresoLogin> intentosLogin = new ConcurrentHashMap<>();
@@ -71,15 +74,15 @@ public class LimitadorIntentos {
                 throw DemasiadosIntentosException.permanente();
             }
             if (progreso.fallos == INTENTOS_POR_ETAPA_LOGIN) {
-                progreso.bloqueadoHasta = reloj.instant().plus(BLOQUEO_LOGIN_INICIAL);
+                progreso.bloqueadoHasta = fechaHoy().plusDays(BLOQUEO_LOGIN_INICIAL_DIAS);
                 persistir(clave, progreso);
-                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_INICIAL.toSeconds(),
+                throw DemasiadosIntentosException.temporal(segundosRestantes(progreso.bloqueadoHasta),
                         intentosHastaSiguienteEtapa(progreso));
             }
             if (progreso.fallos == INTENTOS_POR_ETAPA_LOGIN * 2) {
-                progreso.bloqueadoHasta = reloj.instant().plus(BLOQUEO_LOGIN_SEGUNDO);
+                progreso.bloqueadoHasta = fechaHoy().plusDays(BLOQUEO_LOGIN_SEGUNDO_DIAS);
                 persistir(clave, progreso);
-                throw DemasiadosIntentosException.temporal(BLOQUEO_LOGIN_SEGUNDO.toSeconds(),
+                throw DemasiadosIntentosException.temporal(segundosRestantes(progreso.bloqueadoHasta),
                         intentosHastaSiguienteEtapa(progreso));
             }
             persistir(clave, progreso);
@@ -99,10 +102,19 @@ public class LimitadorIntentos {
         if (progreso.bloqueadoPermanentemente) {
             throw DemasiadosIntentosException.permanente();
         }
-        if (progreso.bloqueadoHasta != null && reloj.instant().isBefore(progreso.bloqueadoHasta)) {
-            long segundos = Math.max(1, Duration.between(reloj.instant(), progreso.bloqueadoHasta).toSeconds());
-            throw DemasiadosIntentosException.temporal(segundos, intentosHastaSiguienteEtapa(progreso));
+        if (progreso.bloqueadoHasta != null && !fechaHoy().isAfter(progreso.bloqueadoHasta)) {
+            throw DemasiadosIntentosException.temporal(segundosRestantes(progreso.bloqueadoHasta),
+                    intentosHastaSiguienteEtapa(progreso));
         }
+    }
+
+    private LocalDate fechaHoy() {
+        return LocalDate.ofInstant(reloj.instant(), ZONA_REDA);
+    }
+
+    private long segundosRestantes(LocalDate ultimoDiaBloqueado) {
+        Instant finBloqueo = ultimoDiaBloqueado.plusDays(1).atStartOfDay(ZONA_REDA).toInstant();
+        return Math.max(1, Duration.between(reloj.instant(), finBloqueo).toSeconds());
     }
 
     private static int intentosHastaSiguienteEtapa(ProgresoLogin progreso) {
@@ -154,14 +166,14 @@ public class LimitadorIntentos {
 
     private static final class ProgresoLogin {
         private int fallos;
-        private Instant bloqueadoHasta;
+        private LocalDate bloqueadoHasta;
         private boolean bloqueadoPermanentemente;
 
         private ProgresoLogin() {
             this(0, null, false);
         }
 
-        private ProgresoLogin(int fallos, Instant bloqueadoHasta, boolean bloqueadoPermanentemente) {
+        private ProgresoLogin(int fallos, LocalDate bloqueadoHasta, boolean bloqueadoPermanentemente) {
             this.fallos = fallos;
             this.bloqueadoHasta = bloqueadoHasta;
             this.bloqueadoPermanentemente = bloqueadoPermanentemente;

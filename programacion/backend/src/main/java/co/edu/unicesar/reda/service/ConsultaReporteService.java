@@ -60,7 +60,7 @@ public class ConsultaReporteService {
             throw new ReglaNegocioException("NO_ES_INCIDENTE", "Solo los incidentes tienen antecedentes");
         }
         return buscadorAntecedentes.buscar(reporte.getCategoria().getId(), reporte.getLatitud(), reporte.getLongitud(),
-                        reporte.getIncidente().getFechaHoraHecho())
+                        reporte.getIncidente().getFechaHecho())
                 .stream().map(ReporteMapper::antecedente).toList();
     }
 

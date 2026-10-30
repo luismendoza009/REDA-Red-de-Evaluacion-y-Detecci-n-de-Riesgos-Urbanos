@@ -19,7 +19,7 @@
 -- -----------------------------------------------------------------------------
 \echo 'C01. Expediente básico de incidentes'
 SELECT i.id_incidente,
-       i.fecha_hora_hecho::date            AS fecha_hecho,
+       i.fecha_hecho                       AS fecha_hecho,
        c.nombre                            AS categoria,
        z.nombre                            AS zona,
        i.tipo_dano,
@@ -32,7 +32,7 @@ JOIN categorias c  ON c.id_categoria = r.id_categoria
 JOIN zonas      z  ON z.id_zona      = r.id_zona
 JOIN estados    e  ON e.id_estado    = r.id_estado
 LEFT JOIN entidades_publicas ep ON ep.id_entidad = i.id_entidad
-ORDER BY i.fecha_hora_hecho;
+ORDER BY i.fecha_hecho;
 
 -- -----------------------------------------------------------------------------
 -- C02. ¿A cuántos casos se postuló cada abogado, en cuántos lo eligió el ciudadano y
@@ -111,7 +111,7 @@ ORDER BY r.fecha_reporte;
 -- -----------------------------------------------------------------------------
 \echo 'C05. Antecedentes por incidente (Haversine, radio 100 m)'
 WITH incidente AS (
-    SELECT i.id_incidente, i.fecha_hora_hecho, r.id_categoria, r.latitud, r.longitud
+    SELECT i.id_incidente, i.fecha_hecho, r.id_categoria, r.latitud, r.longitud
     FROM incidentes i
     JOIN reportes r ON r.id_reporte = i.id_reporte
 ),
@@ -124,7 +124,7 @@ cercanos AS (
     FROM incidente inc
     JOIN reportes rc ON rc.id_categoria  = inc.id_categoria
                     AND rc.tipo_reporte  = 'CONDICION'
-                    AND rc.fecha_reporte < inc.fecha_hora_hecho
+                    AND rc.fecha_reporte < inc.fecha_hecho
     -- un reporte rechazado (duplicado, foto falsa...) no prueba que la entidad supiera
     JOIN estados ec  ON ec.id_estado = rc.id_estado AND ec.nombre <> 'Rechazado'
 )
@@ -132,12 +132,12 @@ SELECT inc.id_incidente,
        c.nombre                                            AS categoria,
        count(ce.id_reporte)                                AS antecedentes,
        min(ce.fecha_reporte)::date                         AS primer_antecedente,
-       (inc.fecha_hora_hecho::date - min(ce.fecha_reporte)::date) AS dias_conociendo_la_falla,
+       (inc.fecha_hecho - min(ce.fecha_reporte)) AS dias_conociendo_la_falla,
        round(min(ce.distancia_m)::numeric, 1)              AS distancia_minima_m
 FROM incidente inc
 JOIN categorias c ON c.id_categoria = inc.id_categoria
 LEFT JOIN cercanos ce ON ce.id_incidente = inc.id_incidente AND ce.distancia_m <= 100
-GROUP BY inc.id_incidente, c.nombre, inc.fecha_hora_hecho
+GROUP BY inc.id_incidente, c.nombre, inc.fecha_hecho
 ORDER BY antecedentes DESC, dias_conociendo_la_falla DESC NULLS LAST;
 
 -- -----------------------------------------------------------------------------

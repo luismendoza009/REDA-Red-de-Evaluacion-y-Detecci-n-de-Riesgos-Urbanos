@@ -14,20 +14,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Base64;
 
 /**
  * Recuperación de contraseña con enlace de un solo uso.
  * Medidas: el token es aleatorio criptográfico (256 bits), en la base solo se guarda su hash, vence a los
- * 30 minutos, sirve una sola vez, pedir uno nuevo anula los anteriores y la respuesta es SIEMPRE la misma
+ * hasta el día siguiente, sirve una sola vez, pedir uno nuevo anula los anteriores y la respuesta es SIEMPRE la misma
  * (exista o no el correo), para no revelar quién tiene cuenta.
  */
 @Service
 public class RecuperacionService {
 
     static final MensajeResponse RESPUESTA_GENERICA = new MensajeResponse(
-            "Si el correo está registrado, te enviamos un enlace para restablecer la contraseña. Vence en 30 minutos.");
+            "Si el correo está registrado, te enviamos un enlace para restablecer la contraseña. Vence al día siguiente.");
 
     private final UsuarioRepository usuarios;
     private final TokenRecuperacionRepository tokens;
@@ -58,7 +59,7 @@ public class RecuperacionService {
 
     @Transactional
     public MensajeResponse restablecer(String token, String nuevaPassword) {
-        OffsetDateTime ahora = OffsetDateTime.now();
+        LocalDate ahora = LocalDate.now(ZoneId.of("America/Bogota"));
         TokenRecuperacion registro = tokens.findByHashToken(EvidenciaService.sha256(token.getBytes(StandardCharsets.UTF_8)))
                 .filter(t -> t.sirveEn(ahora))
                 .orElseThrow(() -> new ReglaNegocioException("ENLACE_INVALIDO",
@@ -77,7 +78,7 @@ public class RecuperacionService {
         correo.enviar(usuario.getCorreo(), "REDA · Restablecer contraseña", """
                 Hola, %s:
 
-                Recibimos una solicitud para restablecer tu contraseña. Abre este enlace (vence en 30 minutos):
+                Recibimos una solicitud para restablecer tu contraseña. Abre este enlace antes del día siguiente:
                 %s/#/restablecer/%s
 
                 Si no fuiste tú, ignora este mensaje: tu contraseña no cambiará.

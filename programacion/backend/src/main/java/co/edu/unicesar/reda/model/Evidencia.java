@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /**
  * Foto de soporte de un reporte. Es EVIDENCIA PRIVADA: solo la ven el autor del reporte y el
@@ -41,10 +42,10 @@ public class Evidencia {
     private String hashSha256;
 
     @Column(name = "fecha_captura")
-    private OffsetDateTime fechaCaptura;
+    private LocalDate fechaCaptura;
 
     @Column(name = "fecha_carga", nullable = false)
-    private OffsetDateTime fechaCarga;
+    private LocalDate fechaCarga;
 
     protected Evidencia() {
     }
@@ -56,7 +57,7 @@ public class Evidencia {
         e.tipoMime = formato.mime();
         e.tamanoBytes = tamanoBytes;
         e.hashSha256 = hashSha256;
-        e.fechaCarga = OffsetDateTime.now();
+        e.fechaCarga = LocalDate.now(ZoneId.of("America/Bogota"));
         return e;
     }
 
@@ -66,6 +67,6 @@ public class Evidencia {
     public String getTipoMime() { return tipoMime; }
     public Integer getTamanoBytes() { return tamanoBytes; }
     public String getHashSha256() { return hashSha256; }
-    public OffsetDateTime getFechaCaptura() { return fechaCaptura; }
-    public OffsetDateTime getFechaCarga() { return fechaCarga; }
+    public LocalDate getFechaCaptura() { return fechaCaptura; }
+    public LocalDate getFechaCarga() { return fechaCarga; }
 }

@@ -4,7 +4,10 @@ import co.edu.unicesar.reda.exception.DemasiadosIntentosException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -12,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LimitadorIntentosTest {
+    private static final ZoneId ZONA_REDA = ZoneId.of("America/Bogota");
 
     /** Reloj que se puede adelantar a mano, para probar la ventana de tiempo sin esperar 15 minutos. */
     static class RelojManual extends Clock {
@@ -57,20 +61,26 @@ class LimitadorIntentosTest {
         }
         var primerBloqueo = assertThrows(DemasiadosIntentosException.class,
                 () -> limitador.registrarFalloLogin(clave));
-        assertEquals(180L, primerBloqueo.getSegundosRestantes());
+        Instant finPrimerBloqueo = LocalDate.ofInstant(reloj.ahora, ZONA_REDA)
+                .plusDays(LimitadorIntentos.BLOQUEO_LOGIN_INICIAL_DIAS + 1)
+                .atStartOfDay(ZONA_REDA).toInstant();
+        assertEquals(Duration.between(reloj.ahora, finPrimerBloqueo).toSeconds(), primerBloqueo.getSegundosRestantes());
         assertEquals(5, primerBloqueo.getIntentosRestantes());
         assertThrows(DemasiadosIntentosException.class, () -> limitador.comprobarLoginPermitido(clave));
 
-        reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_INICIAL);
+        reloj.ahora = finPrimerBloqueo;
         for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
             assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
         }
         var segundoBloqueo = assertThrows(DemasiadosIntentosException.class,
                 () -> limitador.registrarFalloLogin(clave));
-        assertEquals(600L, segundoBloqueo.getSegundosRestantes());
+        Instant finSegundoBloqueo = LocalDate.ofInstant(reloj.ahora, ZONA_REDA)
+                .plusDays(LimitadorIntentos.BLOQUEO_LOGIN_SEGUNDO_DIAS + 1)
+                .atStartOfDay(ZONA_REDA).toInstant();
+        assertEquals(Duration.between(reloj.ahora, finSegundoBloqueo).toSeconds(), segundoBloqueo.getSegundosRestantes());
         assertEquals(5, segundoBloqueo.getIntentosRestantes());
 
-        reloj.ahora = reloj.ahora.plus(LimitadorIntentos.BLOQUEO_LOGIN_SEGUNDO);
+        reloj.ahora = finSegundoBloqueo;
         for (int i = 0; i < LimitadorIntentos.INTENTOS_POR_ETAPA_LOGIN - 1; i++) {
             assertDoesNotThrow(() -> limitador.registrarFalloLogin(clave));
         }

@@ -17,7 +17,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.UUID;
 
@@ -154,7 +155,7 @@ class FlujoReporteIT {
                         "latitud", LAT_DEMO, "longitud", LON_DEMO, "nivelGravedad", 5),
                 "tipoDano", "LESION",
                 "descripcionDano", "Esguince y herida en la pierna, atendido en urgencias",
-                "fechaHoraHecho", OffsetDateTime.now().minusHours(3).toString(),
+                "fechaHecho", LocalDate.now(ZoneId.of("America/Bogota")).minusDays(1).toString(),
                 "huboAtencionMedica", true,
                 "idEntidad", 5);
     }

@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS control_migraciones (
 $aplicadas = & $psql @conexion -d $BaseDatos -At -c "SELECT version FROM control_migraciones;"
 $migraciones = Get-ChildItem (Join-Path $raiz "migraciones") -Filter "*.sql" |
                Where-Object { $_.Name -match '^\d{3}_' } | Sort-Object Name
+$duplicadas = $migraciones | Group-Object { $_.Name.Substring(0, 3) } | Where-Object Count -gt 1
+if ($duplicadas) {
+    $detalle = ($duplicadas | ForEach-Object { "$($_.Name): $($_.Group.Name -join ', ')" }) -join '; '
+    throw "Hay versiones de migración duplicadas. Cada prefijo de tres dígitos debe ser único: $detalle"
+}
 
 foreach ($m in $migraciones) {
     $version = $m.Name.Substring(0, 3)

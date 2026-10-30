@@ -1,6 +1,17 @@
-﻿
-=== 1. Base vacia + migraciones + semilla (reda_verificacion)
-Recreando la base 'reda_verificacion' desde cero...
+
+=== Validación de la migración 018_fechas_date (2026-10-30) ===
+Base de validación: reda_fecha_date_validation (aislada; no se modificó reda).
+Migraciones 001 a 018 y semilla: ejecutadas sin errores.
+Pruebas negativas: 40/40 restricciones rechazaron las operaciones inválidas.
+Coherencia de semilla: 19/19 comprobaciones devolvieron 0.
+Consultas cruzadas: 10/10 verificaciones devolvieron t.
+Esquema: 26 columnas persistidas de tipo DATE; el nombre antiguo
+incidentes.fecha_hora_hecho ya no existe. Las vistas exponen también columnas DATE.
+La base aislada permaneció disponible para las pruebas de integración.
+Backend: 108 pruebas unitarias y de integración, sin fallos ni errores.
+
+=== 1. Base vacia + migraciones + semilla (reda_rubrica_check_20261030)
+Recreando la base 'reda_rubrica_check_20261030' desde cero...
   + 001_catalogos.sql
   + 002_usuarios.sql
   + 003_reportes.sql
@@ -14,18 +25,23 @@ Recreando la base 'reda_verificacion' desde cero...
   + 011_calificaciones.sql
   + 012_ubicacion_zonas.sql
   + 013_foto_perfil.sql
-  + 014_textos_acotados.sql
+  + 014_bloqueos_login.sql
+  + 015_notificaciones.sql
+  + 016_textos_acotados.sql
+  + 017_bloqueos_login_nombre_check.sql
 Cargando datos semilla...
   + 01_catalogos.sql
   + 02_usuarios.sql
   + 03_reportes.sql
   + 04_incidentes.sql
   + 05_casos.sql
+  + 06_notificaciones.sql
+  + 07_bloqueos_login.sql
   + 99_secuencias.sql
-Listo. Base 'reda_verificacion' en localhost:5432
+Listo. Base 'reda_rubrica_check_20261030' en localhost:5432
 
 === 2. Pruebas negativas de restricciones
-Rechazadas por la restriccion esperada: 35
+Rechazadas por la restriccion esperada: 40
 
 === 3. Coherencia de la semilla (cada comprobacion debe dar 0)
 1. Estado actual del reporte = último estado del historial (o Pendiente si no tiene historial). Esperado: 0
@@ -62,6 +78,10 @@ Rechazadas por la restriccion esperada: 35
      0
 17. Ningún token de recuperación es anterior al registro de su usuario. Esperado: 0
      0
+18. La semilla incluye notificaciones leídas y pendientes de sus autores. Esperado: 0
+    0
+19. La semilla tiene bloqueos de prueba sin asociarlos a cuentas reales. Esperado: 0
+    0
 Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)
  id_incidente | antecedentes |  primero   
 --------------+--------------+------------
@@ -72,6 +92,7 @@ Verificaciones: 10 - no coinciden: 0
 
 === 5. Filas por tabla
 abogados                5
+bloqueos_login          5
 calculos_indice         96
 calificaciones          5
 casos                   10
@@ -83,6 +104,7 @@ evaluaciones            96
 evidencias              214
 historial_estados       311
 incidentes              18
+notificaciones          5
 parametros_indice       32
 postulaciones           22
 remisiones              6
@@ -95,6 +117,47 @@ usuarios                55
 versiones_indice        5
 zonas                   30
 
-Base reda_verificacion eliminada.
+Base reda_rubrica_check_20261030 eliminada.
 
 RESULTADO: la base se reconstruye desde cero y pasa todas las verificaciones
+
+=== 6. Base activa reda (actualizacion no destructiva, 2026-10-30) ===
+Migraciones registradas: 001 a 017 (17 en total)
+Se conservaron los datos existentes; no se recreo ni se volvio a sembrar la base.
+Todas las tablas del esquema tienen al menos cinco registros: 25/25.
+
+Filas por tabla:
+abogados                5
+bloqueos_login          5
+calculos_indice         5
+calificaciones          5
+casos                   11
+categorias              8
+entidades_publicas      7
+estados                 6
+estados_caso            6
+evaluaciones            96
+evidencias              214
+historial_estados       311
+incidentes              18
+notificaciones          5
+parametros_indice       32
+postulaciones           22
+remisiones              7
+reportes                137
+reportes_relacionados   45
+roles                   5
+testigos                13
+tokens_recuperacion     5
+usuarios                57
+versiones_indice        5
+zonas                   30
+
+Integridad de los datos agregados:
+- Pesos de todas las versiones de indice: suma 1.
+- Los cinco calculos suman exactamente sus aportes del desglose.
+- Los casos nuevos tienen postulación elegida, remision aceptada y calificacion del mismo abogado.
+- Los tokens de demostracion estan vencidos y no pueden usarse para recuperar cuentas.
+- Las 40 operaciones invalidas fueron rechazadas por su restriccion esperada; la transaccion se revirtio.
+- Las 19 comprobaciones de coherencia devolvieron 0.
+- Las 10 verificaciones cruzadas del banco de consultas devolvieron t.

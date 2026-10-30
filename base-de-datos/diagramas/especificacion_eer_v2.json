@@ -1,6 +1,6 @@
 {
  "titulo": "REDA - Modelo EER (Entrega 2)",
- "leyenda": "Notación pata de gallo: || exactamente uno · o< cero o muchos · |< uno o muchos · o| cero o uno (1:1).   Azul: catálogos · Amarillo: núcleo de reportes · Verde: dominio legal · Gris: índices IRU/IVC.   23 tablas, 31 relaciones.",
+ "leyenda": "Notación pata de gallo: || exactamente uno · o< cero o muchos · |< uno o muchos · o| cero o uno (1:1).   Azul: catálogos · Amarillo: núcleo de reportes · Verde: dominio legal · Gris: índices IRU/IVC y soporte.   25 tablas, 33 relaciones.",
  "tablas": [
   {
    "id": "roles",
@@ -131,7 +131,7 @@
     "PK id_incidente",
     "FK id_reporte, tipo_reporte (UQ)",
     "FK id_entidad",
-    "fecha_hora_hecho",
+    "fecha_hecho",
     "tipo_dano",
     "descripcion_dano",
     "hubo_atencion_medica",
@@ -369,6 +369,35 @@
     "fecha_creacion",
     "fecha_expiracion",
     "fecha_uso"
+   ]
+  },
+  {
+   "id": "notificaciones",
+   "nombre": "notificaciones",
+   "x": 300,
+   "y": 1200,
+   "ancho": 300,
+   "color": "soporte",
+   "columnas": [
+    "PK id_notificacion",
+    "FK id_usuario",
+    "FK id_historial (UQ con usuario)",
+    "fecha_creacion",
+    "fecha_lectura"
+   ]
+  },
+  {
+   "id": "bloqueos_login",
+   "nombre": "bloqueos_login",
+   "x": 1900,
+   "y": 40,
+   "ancho": 260,
+   "color": "soporte",
+   "columnas": [
+    "PK correo",
+    "intentos_fallidos",
+    "bloqueado_hasta",
+    "bloqueado_permanente"
    ]
   }
  ],
@@ -903,6 +932,58 @@
     [
      280,
      960
+    ]
+   ]
+  },
+  {
+   "desde": "usuarios",
+   "hacia": "notificaciones",
+   "etiqueta": "recibe",
+   "puntos": [
+    [
+     40,
+     440
+    ],
+    [
+     20,
+     440
+    ],
+    [
+     20,
+     1260
+    ],
+    [
+     300,
+     1260
+    ]
+   ]
+  },
+  {
+   "desde": "historial",
+   "hacia": "notificaciones",
+   "etiqueta": "origina",
+   "origen": "ERzeroToOne",
+   "destino": "ERmandOne",
+   "puntos": [
+    [
+     1210,
+     800
+    ],
+    [
+     1470,
+     800
+    ],
+    [
+     1470,
+     1160
+    ],
+    [
+     450,
+     1160
+    ],
+    [
+     450,
+     1200
     ]
    ]
   }

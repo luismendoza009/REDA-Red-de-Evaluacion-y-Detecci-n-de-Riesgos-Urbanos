@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /**
  * Enlace de un solo uso para restablecer la contraseña. Se guarda el HASH del token (nunca el token):
@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 @Table(name = "tokens_recuperacion")
 public class TokenRecuperacion {
 
-    public static final Duration VIGENCIA = Duration.ofMinutes(30);
+    public static final long VIGENCIA_DIAS = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,13 +31,13 @@ public class TokenRecuperacion {
     private String hashToken;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private OffsetDateTime fechaCreacion;
+    private LocalDate fechaCreacion;
 
     @Column(name = "fecha_expiracion", nullable = false)
-    private OffsetDateTime fechaExpiracion;
+    private LocalDate fechaExpiracion;
 
     @Column(name = "fecha_uso")
-    private OffsetDateTime fechaUso;
+    private LocalDate fechaUso;
 
     protected TokenRecuperacion() {
     }
@@ -46,17 +46,17 @@ public class TokenRecuperacion {
         TokenRecuperacion t = new TokenRecuperacion();
         t.usuario = usuario;
         t.hashToken = hashToken;
-        t.fechaCreacion = OffsetDateTime.now();
-        t.fechaExpiracion = t.fechaCreacion.plus(VIGENCIA);
+        t.fechaCreacion = LocalDate.now(ZoneId.of("America/Bogota"));
+        t.fechaExpiracion = t.fechaCreacion.plusDays(VIGENCIA_DIAS);
         return t;
     }
 
-    public boolean sirveEn(OffsetDateTime momento) {
+    public boolean sirveEn(LocalDate momento) {
         return fechaUso == null && momento.isBefore(fechaExpiracion);
     }
 
     /** Marca el token como usado: un enlace no sirve dos veces. */
-    public void usar(OffsetDateTime momento) {
+    public void usar(LocalDate momento) {
         if (!sirveEn(momento)) {
             throw new IllegalStateException("El token ya no es válido");
         }
@@ -65,5 +65,5 @@ public class TokenRecuperacion {
 
     public Integer getId() { return id; }
     public Usuario getUsuario() { return usuario; }
-    public OffsetDateTime getFechaExpiracion() { return fechaExpiracion; }
+    public LocalDate getFechaExpiracion() { return fechaExpiracion; }
 }

@@ -62,20 +62,20 @@ public class RegistroReporteService {
         EntidadPublica entidad = datos.idEntidad() == null ? null
                 : Busqueda.porId(entidades, datos.idEntidad(), "Entidad");
         Incidente incidente = reporte.registrarIncidente(datos.tipoDano(), datos.descripcionDano(),
-                datos.fechaHoraHecho(), datos.huboAtencionMedica(), entidad);
+                datos.fechaHecho(), datos.huboAtencionMedica(), entidad);
         if (datos.testigos() != null) {
             datos.testigos().forEach(t -> incidente.agregarTestigo(t.nombre(), t.contacto()));
         }
         reportes.save(reporte);
 
         List<BuscadorAntecedentes.Antecedente> antecedentes = buscadorAntecedentes.buscar(
-                reporte.getCategoria().getId(), reporte.getLatitud(), reporte.getLongitud(), incidente.getFechaHoraHecho());
+                reporte.getCategoria().getId(), reporte.getLatitud(), reporte.getLongitud(), incidente.getFechaHecho());
         relaciones.saveAll(antecedentes.stream()
                 .map(a -> ReporteRelacionado.antecedenteAutomatico(reporte.getId(), a.idReporte()))
                 .toList());
 
         Long dias = antecedentes.isEmpty() ? null
-                : ChronoUnit.DAYS.between(antecedentes.get(0).fechaReporte(), incidente.getFechaHoraHecho());
+                : ChronoUnit.DAYS.between(antecedentes.get(0).fechaReporte(), incidente.getFechaHecho());
         return new IncidenteCreadoResponse(ReporteMapper.detalle(reporte),
                 antecedentes.stream().map(ReporteMapper::antecedente).toList(), dias);
     }

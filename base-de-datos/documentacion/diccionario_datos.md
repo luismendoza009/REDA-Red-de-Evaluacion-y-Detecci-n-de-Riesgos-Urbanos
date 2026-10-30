@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_textos_acotados.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_bloqueos_login.sql, 015_notificaciones.sql, 016_textos_acotados.sql, 017_bloqueos_login_nombre_check.sql, 018_fechas_date.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -120,12 +120,12 @@ Personas registradas en la plataforma (ciudadanos, operadores, abogados, adminis
 | correo | VARCHAR(150) | No | UQ |  | [PERSONAL] Correo electrónico en minúsculas, único; usado para autenticación. Protección: oculto en vistas públicas. |
 | password_hash | VARCHAR(255) | No |  |  | Hash BCrypt de la contraseña (nunca texto plano). Protección: ningún rol de lectura tiene acceso. |
 | id_rol | INTEGER | No | FK |  | Rol de la aplicación asignado al usuario. |
-| fecha_registro | TIMESTAMPTZ | No |  | now() | Momento de creación de la cuenta. |
+| fecha_registro | DATE | No |  | CURRENT_DATE | Fecha en que se creó la cuenta. |
 | activo | BOOLEAN | No |  | true | false = cuenta desactivada (no se borra: sus reportes son evidencia histórica). |
-| fecha_consentimiento | TIMESTAMPTZ | No |  | now() | Momento en que el usuario aceptó la política de tratamiento de datos (Ley 1581 de 2012). |
+| fecha_consentimiento | DATE | No |  | CURRENT_DATE | Fecha en que el usuario aceptó la política de tratamiento de datos (Ley 1581 de 2012). |
 | foto_perfil | VARCHAR(255) | Sí | UQ |  | [PERSONAL] Ruta relativa (nombre generado) de la foto de perfil. Solo la ven el propio usuario y el personal; la de un abogado verificado, cualquier usuario con sesión. |
 | foto_perfil_mime | VARCHAR(20) | Sí |  |  | Formato real de la foto de perfil (detectado por sus bytes): image/jpeg, image/png o image/webp. |
-| fecha_foto_perfil | TIMESTAMPTZ | Sí |  |  | Cuándo se cargó la foto de perfil actual. |
+| fecha_foto_perfil | DATE | Sí |  |  | Fecha en que se cargó la foto de perfil actual. |
 
 **Restricciones:**
 
@@ -180,7 +180,7 @@ Entidad central: cada falla de infraestructura reportada. CONDICION = antecedent
 | descripcion | TEXT | No |  |  | Descripción libre de la falla (mínimo 10 caracteres). |
 | latitud | NUMERIC(9,6) | No |  |  | Latitud GPS (WGS84) de la falla. En el mapa público se muestra sin datos del autor. |
 | longitud | NUMERIC(9,6) | No |  |  | Longitud GPS (WGS84) de la falla. |
-| fecha_reporte | TIMESTAMPTZ | No |  | now() | Momento en que se registró el reporte (sello de tiempo probatorio). |
+| fecha_reporte | DATE | No |  | CURRENT_DATE | Día en que se registró el reporte. |
 | nivel_gravedad | SMALLINT | Sí |  |  | Gravedad percibida por el ciudadano, 1 a 5 (opcional). No es el IRU. |
 
 **Restricciones:**
@@ -217,8 +217,8 @@ Fotografías de soporte de un reporte (1 reporte : N evidencias).
 | tipo_mime | VARCHAR(30) | No |  |  | Tipo de archivo permitido: image/jpeg, image/png o image/webp. |
 | tamano_bytes | INTEGER | No |  |  | Tamaño del archivo en bytes (máximo 10 MB). |
 | hash_sha256 | CHAR(64) | No | UQ |  | Huella SHA-256 del archivo; prueba de integridad y evita cargar la misma foto dos veces. |
-| fecha_captura | TIMESTAMPTZ | Sí |  |  | Fecha de toma de la foto según sus metadatos (si existen). [PERSONAL] Los metadatos EXIF pueden revelar ubicación. |
-| fecha_carga | TIMESTAMPTZ | No |  | now() | Momento en que la foto se subió a la plataforma. |
+| fecha_captura | DATE | Sí |  |  | Fecha de toma de la foto según sus metadatos (si existen). [PERSONAL] Los metadatos EXIF pueden revelar ubicación. |
+| fecha_carga | DATE | No |  | CURRENT_DATE | Día en que se subió la foto a la plataforma. |
 
 **Restricciones:**
 
@@ -246,7 +246,7 @@ Evaluación técnica de un reporte hecha por un operador; insumo del IRU.
 | gravedad | SMALLINT | Sí |  |  | Gravedad técnica 0-100. |
 | impacto | SMALLINT | Sí |  |  | Impacto potencial 0-100 (personas/vehículos expuestos). |
 | frecuencia | SMALLINT | Sí |  |  | Recurrencia del problema 0-100. |
-| fecha_evaluacion | TIMESTAMPTZ | No |  | now() | Momento de la evaluación. |
+| fecha_evaluacion | DATE | No |  | CURRENT_DATE | Fecha de la evaluación. |
 
 **Restricciones:**
 
@@ -273,7 +273,7 @@ Bitácora de cada cambio de estado de un reporte: quién, cuándo, de qué estad
 | id_estado_anterior | INTEGER | No | FK |  | Estado antes del cambio. |
 | id_estado_nuevo | INTEGER | No | FK |  | Estado después del cambio (distinto del anterior). |
 | id_usuario | INTEGER | No | FK |  | Operador o administrador que hizo el cambio. |
-| fecha_cambio | TIMESTAMPTZ | No |  | now() | Momento del cambio. |
+| fecha_cambio | DATE | No |  | CURRENT_DATE | Día del cambio de estado. |
 | observacion | TEXT | Sí |  |  | Justificación u observación del cambio. |
 
 **Restricciones:**
@@ -302,7 +302,7 @@ Relación M:N reflexiva entre reportes: similares o antecedentes de un incidente
 | id_reporte_relacionado | INTEGER | No | FK, PK |  | Reporte vinculado (en ANTECEDENTE, la condición previa). |
 | tipo_relacion | VARCHAR(12) | No |  | 'SIMILAR' | SIMILAR o ANTECEDENTE. |
 | origen | VARCHAR(10) | No |  | 'AUTOMATICO' | AUTOMATICO (lo calculó el sistema por cercanía) o MANUAL (lo vinculó un operador). |
-| fecha_vinculo | TIMESTAMPTZ | No |  | now() | Momento en que se creó el vínculo. |
+| fecha_vinculo | DATE | No |  | CURRENT_DATE | Día en que se creó el vínculo. |
 
 **Restricciones:**
 
@@ -326,7 +326,7 @@ Daño sufrido por una persona o bien a causa de una falla (especialización 1:1 
 | id_reporte | INTEGER | No | FK, UQ |  | Reporte de tipo INCIDENTE al que pertenece (1:1). |
 | tipo_reporte | VARCHAR(10) | No | FK | 'INCIDENTE' | Siempre INCIDENTE; existe solo para la FK compuesta que garantiza el tipo del reporte. |
 | id_entidad | INTEGER | Sí | FK |  | Entidad a la que se atribuye presuntamente la falla (nulo si aún no se identifica). |
-| fecha_hora_hecho | TIMESTAMPTZ | No |  |  | Fecha y hora exactas en que ocurrió el daño (puede ser anterior al reporte). Inicia el plazo de caducidad. |
+| fecha_hecho | DATE | No |  |  | Día en que ocurrió el daño (puede ser anterior al reporte). |
 | tipo_dano | VARCHAR(15) | No |  |  | LESION, DANO_MATERIAL o AMBOS. [SENSIBLE] si incluye lesión. |
 | descripcion_dano | TEXT | No |  |  | [SENSIBLE] Descripción del daño; puede incluir información de salud. Protección: no visible al rol de análisis ni en el mapa público. |
 | hubo_atencion_medica | BOOLEAN | No |  | false | [SENSIBLE] Si la persona recibió atención médica (dato de salud). |
@@ -372,10 +372,10 @@ Expediente legal creado a partir de un incidente viable (1:1 con incidentes).
 | id_incidente | INTEGER | No | FK, UQ |  | Incidente que origina el caso (UNIQUE: un incidente, un caso). |
 | id_estado_caso | INTEGER | No | FK |  | Estado actual del caso. |
 | id_operador | INTEGER | No | FK |  | Operador que validó el incidente del que nace el caso. |
-| fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento en que se abrió el caso. |
-| fecha_cierre | TIMESTAMPTZ | Sí |  |  | Momento de cierre (nulo mientras está abierto). |
+| fecha_creacion | DATE | No |  | CURRENT_DATE | Día en que se abrió el caso. |
+| fecha_cierre | DATE | Sí |  |  | Día de cierre (nulo mientras está abierto). |
 | observacion | TEXT | Sí |  |  | Notas internas del operador sobre el caso. |
-| fecha_consentimiento | TIMESTAMPTZ | Sí |  |  | Momento en que el ciudadano autorizó mostrar un resumen anónimo de su caso a los abogados aliados. |
+| fecha_consentimiento | DATE | Sí |  |  | Día en que el ciudadano autorizó mostrar un resumen anónimo de su caso a los abogados aliados. |
 
 **Restricciones:**
 
@@ -400,9 +400,9 @@ Envío de un caso a un abogado; unidad de facturación del negocio (cuota fija p
 | id_remision | INTEGER | No | PK | identidad | Identificador único de la remisión. |
 | id_caso | INTEGER | No | FK, UQ |  | Caso remitido. |
 | id_abogado | INTEGER | No | FK, UQ |  | Abogado que recibe el caso (no se repite el mismo abogado para el mismo caso). |
-| fecha_envio | TIMESTAMPTZ | No |  | now() | Momento del envío. |
+| fecha_envio | DATE | No |  | CURRENT_DATE | Día del envío. |
 | estado_remision | VARCHAR(10) | No |  | 'ENVIADA' | ENVIADA, ACEPTADA, RECHAZADA o VENCIDA. Solo una ACEPTADA por caso. |
-| fecha_respuesta | TIMESTAMPTZ | Sí |  |  | Momento en que el abogado aceptó o rechazó (nulo si no ha respondido). |
+| fecha_respuesta | DATE | Sí |  |  | Día en que el abogado aceptó o rechazó (nulo si no ha respondido). |
 | motivo_rechazo | TEXT | Sí |  |  | Motivo dado por el abogado al rechazar. |
 | valor_cobrado | NUMERIC(12,2) | No |  |  | Valor en pesos colombianos (COP) cobrado al abogado por el caso remitido. |
 
@@ -411,7 +411,7 @@ Envío de un caso a un abogado; unidad de facturación del negocio (cuota fija p
 - `ck_remisiones_estado`: `CHECK (((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'ACEPTADA'::character varying, 'RECHAZADA'::character varying, 'VENCIDA'::character varying])::text[])))`
 - `ck_remisiones_motivo`: `CHECK (((motivo_rechazo IS NULL) OR ((estado_remision)::text = 'RECHAZADA'::text)))`
 - `ck_remisiones_motivo_max`: `CHECK ((length(motivo_rechazo) <= 1000))`
-- `ck_remisiones_respuesta`: `CHECK (((((estado_remision)::text = ANY ((ARRAY['ENVIADA'::character varying, 'VENCIDA'::character varying])::text[])) AND (fecha_respuesta IS NULL)) OR (((estado_remision)::text = ANY ((ARRAY['ACEPTADA'::character varying, 'RECHAZADA'::character varying])::text[])) AND (fecha_respuesta IS NOT NULL) AND (fecha_respuesta >= fecha_envio))))`
+- `ck_remisiones_respuesta`: `CHECK (((((estado_remision)::text = ANY (ARRAY[('ENVIADA'::character varying)::text, ('VENCIDA'::character varying)::text])) AND (fecha_respuesta IS NULL)) OR (((estado_remision)::text = ANY (ARRAY[('ACEPTADA'::character varying)::text, ('RECHAZADA'::character varying)::text])) AND (fecha_respuesta IS NOT NULL) AND (fecha_respuesta >= fecha_envio))))`
 - `ck_remisiones_valor`: `CHECK ((valor_cobrado >= (0)::numeric))`
 - `fk_remisiones_abogado`: `FOREIGN KEY (id_abogado) REFERENCES abogados(id_abogado) ON DELETE RESTRICT`
 - `fk_remisiones_caso`: `FOREIGN KEY (id_caso) REFERENCES casos(id_caso) ON DELETE RESTRICT`
@@ -436,7 +436,7 @@ Versiones de configuración de cada índice (IRU o IVC): umbrales de nivel y cu�
 | umbral_alto | NUMERIC(5,2) | No |  | 50 | Desde este puntaje el nivel es ALTO (preliminar, por calibrar). |
 | umbral_critico | NUMERIC(5,2) | No |  | 75 | Desde este puntaje el nivel es CRÍTICO (preliminar, por calibrar). |
 | vigente | BOOLEAN | No |  | false | true = versión usada en los cálculos nuevos. Máximo una por índice. |
-| fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento de creación de la versión. |
+| fecha_creacion | DATE | No |  | CURRENT_DATE | Fecha de creación de la versión. |
 
 **Restricciones:**
 
@@ -479,7 +479,7 @@ Historial de cálculos de IRU/IVC por reporte, con el desglose de razones.
 | id_version | INTEGER | No | FK |  | Versión de parámetros usada (de ahí sale si es IRU o IVC). |
 | valor | NUMERIC(5,2) | No |  |  | Puntaje total 0-100. El nivel (Bajo/Medio/Alto/Crítico) se deriva con los umbrales de la versión, no se almacena. |
 | desglose | JSONB | No |  |  | JSON {variable: {valor_normalizado, peso, aporte}} para explicar el resultado. |
-| fecha_calculo | TIMESTAMPTZ | No |  | now() | Momento del cálculo. |
+| fecha_calculo | DATE | No |  | CURRENT_DATE | Fecha del cálculo. |
 
 **Restricciones:**
 
@@ -504,8 +504,8 @@ Interés de un abogado en tomar un caso. El ciudadano compara las postulaciones 
 | id_abogado | INTEGER | No | FK, UQ |  | Abogado que se postula (no puede postularse dos veces al mismo caso). |
 | mensaje | TEXT | No |  |  | Por qué el abogado quiere el caso y cómo lo llevaría (mínimo 20 caracteres). |
 | estado | VARCHAR(12) | No |  | 'PENDIENTE' | PENDIENTE, ELEGIDA (el ciudadano lo escogió), NO_ELEGIDA (escogió a otro) o RETIRADA (el abogado desistió). |
-| fecha_postulacion | TIMESTAMPTZ | No |  | now() | Momento de la postulación. |
-| fecha_resolucion | TIMESTAMPTZ | Sí |  |  | Momento en que la postulación dejó de estar pendiente. |
+| fecha_postulacion | DATE | No |  | CURRENT_DATE | Fecha de la postulación. |
+| fecha_resolucion | DATE | Sí |  |  | Fecha en que la postulación dejó de estar pendiente. |
 
 **Restricciones:**
 
@@ -524,16 +524,16 @@ Interés de un abogado en tomar un caso. El ciudadano compara las postulaciones 
 
 ## tokens_recuperacion
 
-Enlaces de un solo uso para restablecer la contraseña (vencen a los 30 minutos).
+Enlaces de un solo uso para restablecer la contraseña (vencen al comenzar el día siguiente).
 
 | Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
 |---|---|---|---|---|---|
 | id_token | INTEGER | No | PK | identidad | Identificador único del token. |
 | id_usuario | INTEGER | No | FK |  | Usuario que pidió restablecer su contraseña. |
 | hash_token | CHAR(64) | No | UQ |  | SHA-256 del token enviado por correo. Protección: el token en claro nunca se guarda. |
-| fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento de la solicitud. |
-| fecha_expiracion | TIMESTAMPTZ | No |  |  | Después de este momento el enlace ya no sirve. |
-| fecha_uso | TIMESTAMPTZ | Sí |  |  | Momento en que se usó (nulo si no se ha usado). Un token usado no vuelve a servir. |
+| fecha_creacion | DATE | No |  | CURRENT_DATE | Fecha de la solicitud. |
+| fecha_expiracion | DATE | No |  |  | El enlace deja de servir al comenzar este día; vence el día siguiente a su solicitud. |
+| fecha_uso | DATE | Sí |  |  | Fecha en que se usó (nulo si no se ha usado). Un token usado no vuelve a servir. |
 
 **Restricciones:**
 
@@ -558,7 +558,7 @@ Calificación que el ciudadano da al abogado que llevó su caso (una por caso).
 | id_abogado | INTEGER | No | FK |  | Abogado calificado: el que el ciudadano eligió para el caso. |
 | puntaje | SMALLINT | No |  |  | De 1 (muy malo) a 5 (excelente) estrellas. |
 | comentario | TEXT | Sí |  |  | Por qué de la calificación (opcional). Se muestra a otros ciudadanos sin el nombre del autor. |
-| fecha | TIMESTAMPTZ | No |  | now() | Momento de la calificación. |
+| fecha | DATE | No |  | CURRENT_DATE | Fecha de la calificación. |
 
 **Restricciones:**
 
@@ -571,4 +571,43 @@ Calificación que el ciudadano da al abogado que llevó su caso (una por caso).
 **Índices adicionales:**
 
 - `ix_calificaciones_abogado`: `btree (id_abogado, fecha DESC)`
+
+## bloqueos_login
+
+Contador persistente de intentos fallidos de inicio de sesión y bloqueos progresivos.
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| correo | VARCHAR(150) | No | PK |  |  |
+| intentos_fallidos | INTEGER | No |  |  |  |
+| bloqueado_hasta | DATE | Sí |  |  | Último día de un bloqueo temporal; nulo si no hay bloqueo temporal. |
+| bloqueado_permanente | BOOLEAN | No |  | false |  |
+
+**Restricciones:**
+
+- `ck_bloqueos_login_estado`: `CHECK (((bloqueado_permanente AND (bloqueado_hasta IS NULL) AND (intentos_fallidos = 15)) OR ((NOT bloqueado_permanente) AND (intentos_fallidos < 15))))`
+- `ck_bloqueos_login_intentos`: `CHECK (((intentos_fallidos >= 1) AND (intentos_fallidos <= 15)))`
+
+## notificaciones
+
+Avisos privados al autor cuando cambia el estado de uno de sus reportes.
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| id_notificacion | INTEGER | No | PK | identidad |  |
+| id_usuario | INTEGER | No | FK, UQ |  | Ciudadano destinatario de la notificación. |
+| id_historial | INTEGER | No | FK, UQ |  | Cambio de estado que originó el aviso. |
+| fecha_creacion | DATE | No |  | CURRENT_DATE | Día en que se generó la notificación. |
+| fecha_lectura | DATE | Sí |  |  | Día en que el ciudadano la marcó como leída; NULL indica pendiente. |
+
+**Restricciones:**
+
+- `fk_notificaciones_historial`: `FOREIGN KEY (id_historial) REFERENCES historial_estados(id_historial) ON DELETE CASCADE`
+- `fk_notificaciones_usuario`: `FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE`
+- `uq_notificaciones_usuario_historial`: `UNIQUE (id_usuario, id_historial)`
+
+**Índices adicionales:**
+
+- `ix_notificaciones_no_leidas`: `btree (id_usuario) WHERE (fecha_lectura IS NULL)`
+- `ix_notificaciones_usuario_recientes`: `btree (id_usuario, fecha_creacion DESC)`
 

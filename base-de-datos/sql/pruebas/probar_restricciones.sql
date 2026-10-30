@@ -30,7 +30,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT pg_temp.debe_fallar('incidente colgado de un reporte de CONDICION (FK compuesta)', 'fk_incidentes_reporte',
-  $q$INSERT INTO incidentes (id_reporte, fecha_hora_hecho, tipo_dano, descripcion_dano)
+  $q$INSERT INTO incidentes (id_reporte, fecha_hecho, tipo_dano, descripcion_dano)
      VALUES ((SELECT min(id_reporte) FROM reportes WHERE tipo_reporte = 'CONDICION'), now(), 'LESION', 'Caída del peatón en el hueco')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('cambiar a CONDICION un reporte que ya tiene incidente', 'fk_incidentes_reporte',
@@ -110,7 +110,7 @@ SELECT pg_temp.debe_fallar('token de recuperación guardado en claro (no es un h
   $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, 'MiTokenSecreto', now() + interval '30 minutes')$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('token que vence antes de crearse', 'ck_tokens_vigencia',
-  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), now() - interval '1 minute')$q$)
+  $q$INSERT INTO tokens_recuperacion (id_usuario, hash_token, fecha_expiracion) VALUES (1, repeat('b', 64), CURRENT_DATE - 1)$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('calificación de 6 estrellas', 'ck_calificaciones_puntaje',
   $q$UPDATE calificaciones SET puntaje = 6 WHERE id_calificacion = (SELECT min(id_calificacion) FROM calificaciones)$q$)
@@ -142,5 +142,23 @@ SELECT pg_temp.debe_fallar('presentación de abogado de más de 600 caracteres',
   $q$UPDATE abogados SET presentacion = repeat('x', 601) WHERE id_abogado = 1$q$);
 SELECT pg_temp.debe_fallar('postulación de más de 1500 caracteres', 'ck_postulaciones_mensaje_max',
   $q$UPDATE postulaciones SET mensaje = repeat('x', 1501) WHERE id_postulacion = 1$q$);
+
+-- Migración 015: notificaciones privadas
+SELECT pg_temp.debe_fallar('notificación duplicada para el mismo ciudadano y cambio', 'uq_notificaciones_usuario_historial',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT id_usuario, id_historial FROM notificaciones LIMIT 1$q$);
+SELECT pg_temp.debe_fallar('notificación con destinatario inexistente', 'fk_notificaciones_usuario',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT (SELECT max(id_usuario) + 1000 FROM usuarios), id_historial FROM historial_estados LIMIT 1$q$);
+SELECT pg_temp.debe_fallar('notificación con cambio de estado inexistente', 'fk_notificaciones_historial',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT id_usuario, (SELECT max(id_historial) + 1000 FROM historial_estados) FROM usuarios LIMIT 1$q$);
+
+-- Migraciones 014 y 017: bloqueo de inicio de sesión
+SELECT pg_temp.debe_fallar('intentos fallidos por debajo del mínimo', 'ck_bloqueos_login_intentos',
+  $q$INSERT INTO bloqueos_login (correo, intentos_fallidos) VALUES ('prueba.limite.inferior@reda.test', 0)$q$);
+SELECT pg_temp.debe_fallar('bloqueo permanente con menos de 15 intentos', 'ck_bloqueos_login_estado',
+  $q$INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_permanente)
+     VALUES ('prueba.estado.invalido@reda.test', 14, true)$q$);
 
 ROLLBACK;
