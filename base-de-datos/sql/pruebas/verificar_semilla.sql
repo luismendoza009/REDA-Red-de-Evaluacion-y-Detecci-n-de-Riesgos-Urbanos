@@ -93,6 +93,14 @@ WHERE ec.nombre <> 'Cerrado'
                   AND rm.estado_remision = 'ACEPTADA')
    OR ca.fecha < c.fecha_cierre;
 
+\echo '16. Cada cálculo de índice es posterior a su reporte y su valor es la suma de los aportes del desglose. Esperado: 0'
+SELECT count(*) FROM calculos_indice ci JOIN reportes r USING (id_reporte)
+WHERE ci.fecha_calculo < r.fecha_reporte
+   OR abs(ci.valor - (SELECT sum((d.value ->> 'aporte')::numeric) FROM jsonb_each(ci.desglose) d)) > 0.01;
+
+\echo '17. Ningún token de recuperación es anterior al registro de su usuario. Esperado: 0'
+SELECT count(*) FROM tokens_recuperacion t JOIN usuarios u USING (id_usuario) WHERE t.fecha_creacion < u.fecha_registro;
+
 \echo 'Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)'
 SELECT i.id_incidente, count(rr.*) AS antecedentes, min(rc.fecha_reporte)::date AS primero
 FROM incidentes i
