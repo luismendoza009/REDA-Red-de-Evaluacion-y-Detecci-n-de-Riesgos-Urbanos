@@ -51,15 +51,15 @@
 
 3a. Regla: la gravedad que da el ciudadano va de 1 a 5  ->  ck_reportes_gravedad
 psql:sql/pruebas/demostracion_tres_casos.sql:64: ERROR:  el nuevo registro para la relación «reportes» viola la restricción «check» «ck_reportes_gravedad»
-DETAIL:  La fila que falla contiene (138, 11, 1, 1, 1, CONDICION, Hueco enorme frente al colegio, 10.463100, -73.253200, 2026-10-30 01:35:08.143534-05, 7).
+DETALLE:  La fila que falla contiene (138, 11, 1, 1, 1, CONDICION, Hueco enorme frente al colegio, 10.463100, -73.253200, 2026-10-30, 7).
 3b. Regla: un reporte es evidencia; no se borra la categoría que lo clasifica  ->  fk_reportes_categoria (ON DELETE RESTRICT)
 psql:sql/pruebas/demostracion_tres_casos.sql:67: ERROR:  update or delete on table "categorias" violates RESTRICT setting of foreign key constraint "fk_reportes_categoria" on table "reportes"
-DETAIL:  Key (id_categoria)=(1) is referenced from table "reportes".
+DETALLE:  Key (id_categoria)=(1) is referenced from table "reportes".
 3c. Regla: un caso solo lo puede aceptar UN abogado  ->  uq_remisiones_una_aceptada
 psql:sql/pruebas/demostracion_tres_casos.sql:75: ERROR:  llave duplicada viola restricción de unicidad «uq_remisiones_una_aceptada»
-DETAIL:  Ya existe la llave (id_caso)=(1).
+DETALLE:  Ya existe la llave (id_caso)=(1).
 3d. Regla: solo un reporte de tipo INCIDENTE puede tener datos de daño  ->  fk_incidentes_reporte (FK compuesta)
 psql:sql/pruebas/demostracion_tres_casos.sql:79: ERROR:  inserción o actualización en la tabla «incidentes» viola la llave foránea «fk_incidentes_reporte»
-DETAIL:  La llave (id_reporte, tipo_reporte)=(1, INCIDENTE) no está presente en la tabla «reportes».
+DETALLE:  La llave (id_reporte, tipo_reporte)=(1, INCIDENTE) no está presente en la tabla «reportes».
 
 Fin: las cuatro sentencias del punto 3 deben haber mostrado ERROR con el nombre de su restricción.
