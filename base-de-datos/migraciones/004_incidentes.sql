@@ -16,7 +16,7 @@ CREATE TABLE incidentes (
     id_reporte            INT           NOT NULL,
     tipo_reporte          VARCHAR(10)   NOT NULL DEFAULT 'INCIDENTE',
     id_entidad            INT,
-    fecha_hora_hecho      TIMESTAMPTZ   NOT NULL,
+    fecha_hecho           DATE          NOT NULL,
     tipo_dano             VARCHAR(15)   NOT NULL,
     descripcion_dano      TEXT          NOT NULL,
     hubo_atencion_medica  BOOLEAN       NOT NULL DEFAULT false,
@@ -36,7 +36,7 @@ COMMENT ON COLUMN incidentes.id_incidente IS 'Identificador único del incidente
 COMMENT ON COLUMN incidentes.id_reporte IS 'Reporte de tipo INCIDENTE al que pertenece (1:1).';
 COMMENT ON COLUMN incidentes.tipo_reporte IS 'Siempre INCIDENTE; existe solo para la FK compuesta que garantiza el tipo del reporte.';
 COMMENT ON COLUMN incidentes.id_entidad IS 'Entidad a la que se atribuye presuntamente la falla (nulo si aún no se identifica).';
-COMMENT ON COLUMN incidentes.fecha_hora_hecho IS 'Fecha y hora exactas en que ocurrió el daño (puede ser anterior al reporte). Inicia el plazo de caducidad.';
+COMMENT ON COLUMN incidentes.fecha_hecho IS 'Día en que ocurrió el daño (puede ser anterior al reporte).';
 COMMENT ON COLUMN incidentes.tipo_dano IS 'LESION, DANO_MATERIAL o AMBOS. [SENSIBLE] si incluye lesión.';
 COMMENT ON COLUMN incidentes.descripcion_dano IS '[SENSIBLE] Descripción del daño; puede incluir información de salud. Protección: no visible al rol de análisis ni en el mapa público.';
 COMMENT ON COLUMN incidentes.hubo_atencion_medica IS '[SENSIBLE] Si la persona recibió atención médica (dato de salud).';

@@ -19,7 +19,7 @@ CREATE TABLE versiones_indice (
     umbral_alto      NUMERIC(5,2)  NOT NULL DEFAULT 50,
     umbral_critico   NUMERIC(5,2)  NOT NULL DEFAULT 75,
     vigente          BOOLEAN       NOT NULL DEFAULT false,
-    fecha_creacion   TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    fecha_creacion   DATE          NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT uq_versiones_indice UNIQUE (nombre_indice, numero_version),
     CONSTRAINT ck_versiones_nombre CHECK (nombre_indice IN ('IRU', 'IVC')),
     CONSTRAINT ck_versiones_numero CHECK (numero_version >= 1),
@@ -38,7 +38,7 @@ COMMENT ON COLUMN versiones_indice.umbral_medio IS 'Desde este puntaje el nivel 
 COMMENT ON COLUMN versiones_indice.umbral_alto IS 'Desde este puntaje el nivel es ALTO (preliminar, por calibrar).';
 COMMENT ON COLUMN versiones_indice.umbral_critico IS 'Desde este puntaje el nivel es CRÍTICO (preliminar, por calibrar).';
 COMMENT ON COLUMN versiones_indice.vigente IS 'true = versión usada en los cálculos nuevos. Máximo una por índice.';
-COMMENT ON COLUMN versiones_indice.fecha_creacion IS 'Momento de creación de la versión.';
+COMMENT ON COLUMN versiones_indice.fecha_creacion IS 'Fecha de creación de la versión.';
 
 -- Peso de cada variable dentro de una versión. Índice = Σ (peso_i × valor_i), con Σ pesos = 1.
 -- Que los pesos de una versión sumen 1 es una regla entre filas: no se puede con CHECK;
@@ -67,7 +67,7 @@ CREATE TABLE calculos_indice (
     id_version     INT           NOT NULL,
     valor          NUMERIC(5,2)  NOT NULL,
     desglose       JSONB         NOT NULL,
-    fecha_calculo  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    fecha_calculo  DATE          NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT ck_calculos_valor CHECK (valor BETWEEN 0 AND 100),
     CONSTRAINT ck_calculos_desglose CHECK (jsonb_typeof(desglose) = 'object'),
     CONSTRAINT fk_calculos_reporte FOREIGN KEY (id_reporte) REFERENCES reportes         (id_reporte) ON DELETE CASCADE,
@@ -79,4 +79,4 @@ COMMENT ON COLUMN calculos_indice.id_reporte IS 'Reporte calculado (IRU para con
 COMMENT ON COLUMN calculos_indice.id_version IS 'Versión de parámetros usada (de ahí sale si es IRU o IVC).';
 COMMENT ON COLUMN calculos_indice.valor IS 'Puntaje total 0-100. El nivel (Bajo/Medio/Alto/Crítico) se deriva con los umbrales de la versión, no se almacena.';
 COMMENT ON COLUMN calculos_indice.desglose IS 'JSON {variable: {valor_normalizado, peso, aporte}} para explicar el resultado.';
-COMMENT ON COLUMN calculos_indice.fecha_calculo IS 'Momento del cálculo.';
+COMMENT ON COLUMN calculos_indice.fecha_calculo IS 'Fecha del cálculo.';

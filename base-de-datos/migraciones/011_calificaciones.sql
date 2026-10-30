@@ -14,7 +14,7 @@ CREATE TABLE calificaciones (
     id_abogado       INT          NOT NULL,
     puntaje          SMALLINT     NOT NULL,
     comentario       TEXT,
-    fecha            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    fecha            DATE         NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT uq_calificaciones_caso UNIQUE (id_caso),
     CONSTRAINT ck_calificaciones_puntaje CHECK (puntaje BETWEEN 1 AND 5),
     CONSTRAINT ck_calificaciones_comentario CHECK (comentario IS NULL OR length(trim(comentario)) BETWEEN 3 AND 1000),
@@ -31,7 +31,7 @@ COMMENT ON COLUMN calificaciones.id_caso IS 'Caso calificado (UNIQUE: una califi
 COMMENT ON COLUMN calificaciones.id_abogado IS 'Abogado calificado: el que el ciudadano eligió para el caso.';
 COMMENT ON COLUMN calificaciones.puntaje IS 'De 1 (muy malo) a 5 (excelente) estrellas.';
 COMMENT ON COLUMN calificaciones.comentario IS 'Por qué de la calificación (opcional). Se muestra a otros ciudadanos sin el nombre del autor.';
-COMMENT ON COLUMN calificaciones.fecha IS 'Momento de la calificación.';
+COMMENT ON COLUMN calificaciones.fecha IS 'Fecha de la calificación.';
 
 -- Reputación de cada abogado, lista para mostrar al ciudadano que compara postulaciones.
 CREATE VIEW v_reputacion_abogados AS
