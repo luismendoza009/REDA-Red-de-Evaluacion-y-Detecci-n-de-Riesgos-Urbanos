@@ -1,0 +1,100 @@
+﻿
+=== 1. Base vacia + migraciones + semilla (reda_verificacion)
+Recreando la base 'reda_verificacion' desde cero...
+  + 001_catalogos.sql
+  + 002_usuarios.sql
+  + 003_reportes.sql
+  + 004_incidentes.sql
+  + 005_casos.sql
+  + 006_indices_priorizacion.sql
+  + 007_indices.sql
+  + 008_vistas.sql
+  + 009_situacion_casos_mapa.sql
+  + 010_postulaciones_y_cuentas.sql
+  + 011_calificaciones.sql
+  + 012_ubicacion_zonas.sql
+  + 013_foto_perfil.sql
+  + 014_textos_acotados.sql
+Cargando datos semilla...
+  + 01_catalogos.sql
+  + 02_usuarios.sql
+  + 03_reportes.sql
+  + 04_incidentes.sql
+  + 05_casos.sql
+  + 99_secuencias.sql
+Listo. Base 'reda_verificacion' en localhost:5432
+
+=== 2. Pruebas negativas de restricciones
+Rechazadas por la restriccion esperada: 35
+
+=== 3. Coherencia de la semilla (cada comprobacion debe dar 0)
+1. Estado actual del reporte = último estado del historial (o Pendiente si no tiene historial). Esperado: 0
+              0
+2. El historial encadena: el estado anterior de cada cambio es el nuevo del cambio previo. Esperado: 0
+      0
+3. Ningún cambio de estado es anterior a la creación del reporte. Esperado: 0
+     0
+4. Todo reporte INCIDENTE tiene su fila en incidentes (regla que irá en un trigger en la Entrega 3). Esperado: 0
+     0
+5. El hecho ocurre antes de reportarlo. Esperado: 0
+     0
+6. Los ANTECEDENTE son condiciones NO rechazadas de la misma categoría, a <= 100 m y anteriores al hecho. Esperado: 0
+     0
+7. Un reporte no lo crea alguien registrado después. Esperado: 0
+     0
+8. Los casos solo se abren sobre incidentes validados y después de la validación. Esperado: 0
+     0
+9. Los pesos de cada versión de índice suman 1 (regla que irá en un trigger en la Entrega 3). Esperado: 0
+     0
+10. Remisiones: se envían después de abrir el caso. Esperado: 0
+     0
+11. Solo evalúan y cambian estados usuarios OPERADOR o ADMINISTRADOR. Esperado: 0
+     0
+12. Toda remisión ACEPTADA corresponde a la postulación ELEGIDA del mismo abogado. Esperado: 0
+     0
+13. Casos con abogado: exactamente una postulación elegida; casos buscando abogado: todas pendientes. Esperado: 0
+     0
+14. Solo se postulan abogados activos (verificados). Esperado: 0
+     0
+15. Solo se califica un caso cerrado y al abogado que el ciudadano eligió. Esperado: 0
+     0
+16. Cada cálculo de índice es posterior a su reporte y su valor es la suma de los aportes del desglose. Esperado: 0
+     0
+17. Ningún token de recuperación es anterior al registro de su usuario. Esperado: 0
+     0
+Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)
+ id_incidente | antecedentes |  primero   
+--------------+--------------+------------
+           18 |            4 | 2026-05-19
+
+=== 4. Verificacion cruzada del banco de consultas (todas deben ser t)
+Verificaciones: 10 - no coinciden: 0
+
+=== 5. Filas por tabla
+abogados                5
+calculos_indice         96
+calificaciones          5
+casos                   10
+categorias              8
+entidades_publicas      7
+estados                 6
+estados_caso            6
+evaluaciones            96
+evidencias              214
+historial_estados       311
+incidentes              18
+parametros_indice       32
+postulaciones           22
+remisiones              6
+reportes                137
+reportes_relacionados   45
+roles                   5
+testigos                13
+tokens_recuperacion     6
+usuarios                55
+versiones_indice        5
+zonas                   30
+
+Base reda_verificacion eliminada.
+
+RESULTADO: la base se reconstruye desde cero y pasa todas las verificaciones
