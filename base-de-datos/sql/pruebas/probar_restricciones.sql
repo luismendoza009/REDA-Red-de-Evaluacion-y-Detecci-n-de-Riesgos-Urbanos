@@ -84,10 +84,10 @@ SELECT pg_temp.debe_fallar('la misma foto (mismo hash) cargada dos veces', 'uq_e
      SELECT id_reporte, ruta_imagen || '.copia', tipo_mime, tamano_bytes, hash_sha256 FROM evidencias LIMIT 1$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('dos versiones vigentes del IRU', 'uq_versiones_una_vigente',
-  $q$INSERT INTO versiones_indice (nombre_indice, numero_version, descripcion, vigente) VALUES ('IRU', 2, 'prueba', true)$q$)
+  $q$INSERT INTO versiones_indice (nombre_indice, numero_version, descripcion, vigente) VALUES ('IRU', 9, 'prueba de vigencia', true)$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('umbrales de nivel desordenados', 'ck_versiones_umbrales',
-  $q$INSERT INTO versiones_indice (nombre_indice, numero_version, descripcion, umbral_medio, umbral_alto) VALUES ('IVC', 9, 'prueba', 60, 40)$q$)
+  $q$INSERT INTO versiones_indice (nombre_indice, numero_version, descripcion, umbral_medio, umbral_alto) VALUES ('IVC', 9, 'prueba de umbrales', 60, 40)$q$)
 UNION ALL
 SELECT pg_temp.debe_fallar('segundo caso para el mismo incidente', 'uq_casos_incidente',
   $q$INSERT INTO casos (id_incidente, id_estado_caso, id_operador) SELECT id_incidente, 1, id_operador FROM casos LIMIT 1$q$)
@@ -134,5 +134,13 @@ SELECT pg_temp.debe_fallar('foto de perfil en un formato no permitido', 'ck_usua
   $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/x.gif', foto_perfil_mime = 'image/gif', fecha_foto_perfil = now() WHERE id_usuario = 1$q$);
 SELECT pg_temp.debe_fallar('dos usuarios con el mismo archivo de foto', 'uq_usuarios_foto',
   $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/igual.jpg', foto_perfil_mime = 'image/jpeg', fecha_foto_perfil = now() WHERE id_usuario IN (1, 2)$q$);
+
+-- Migración 014: textos acotados
+SELECT pg_temp.debe_fallar('descripción de reporte de más de 2000 caracteres', 'ck_reportes_descripcion_max',
+  $q$UPDATE reportes SET descripcion = repeat('hueco ', 400) WHERE id_reporte = 1$q$);
+SELECT pg_temp.debe_fallar('presentación de abogado de más de 600 caracteres', 'ck_abogados_presentacion',
+  $q$UPDATE abogados SET presentacion = repeat('x', 601) WHERE id_abogado = 1$q$);
+SELECT pg_temp.debe_fallar('postulación de más de 1500 caracteres', 'ck_postulaciones_mensaje_max',
+  $q$UPDATE postulaciones SET mensaje = repeat('x', 1501) WHERE id_postulacion = 1$q$);
 
 ROLLBACK;

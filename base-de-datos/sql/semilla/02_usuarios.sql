@@ -67,3 +67,11 @@ INSERT INTO abogados (id_abogado, id_usuario, tarjeta_profesional, especialidad,
   (4, 9, '282272', 'Responsabilidad del Estado', 'Valledupar', true, 4, 'Abogado joven, cercano y con disponibilidad inmediata para revisar su caso.'),
   (5, 10, '369267', 'Derecho administrativo', 'Valledupar', false, 2, 'Recién vinculado a la red; en verificación de tarjeta profesional.');
 
+INSERT INTO tokens_recuperacion (id_token, id_usuario, hash_token, fecha_creacion, fecha_expiracion, fecha_uso) VALUES
+  (1, 17, '2fdaa90768b7f1efce8324d398d7fc0a6c0fa0fa3a31931f98573495aded20c5', '2026-06-04T08:00:00-05:00', '2026-06-04T08:30:00-05:00', '2026-06-04T08:05:00-05:00'),
+  (2, 23, '9918dac1b7b137392aa2da1e22533f9465836bed52c424b612f9ad5fe6aa0dd9', '2026-06-19T09:00:00-05:00', '2026-06-19T09:30:00-05:00', NULL),
+  (3, 29, '1c82fcc886cd0942cbc7e762841e8be1ff325fadfa67d22647b713520f85a9ba', '2026-07-09T10:00:00-05:00', '2026-07-09T10:30:00-05:00', '2026-07-09T10:07:00-05:00'),
+  (4, 35, '062683024e0cfa70f9872a846cbfda780eeea30eddd001662eb3293b727081c7', '2026-07-29T11:00:00-05:00', '2026-07-29T11:30:00-05:00', '2026-07-29T11:08:00-05:00'),
+  (5, 41, '1595f9c8b4e25714baf4b06e076a72e388e3ed3d76dd3debb94eb69e7c4aa1e8', '2026-08-19T12:00:00-05:00', '2026-08-19T12:30:00-05:00', NULL),
+  (6, 47, '1320575a56776cf70c0f5765ad42ccaf5560e32ec19796cd10678514563fe0cf', '2026-09-15T13:00:00-05:00', '2026-09-15T13:30:00-05:00', '2026-09-15T13:10:00-05:00');
+

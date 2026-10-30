@@ -15,6 +15,7 @@ Genera los datos semilla SIMULADOS de REDA (sql/semilla/*.sql).
 Uso:  python scripts/generar_semilla.py
 """
 import hashlib
+import json
 import math
 import os
 import random
@@ -531,6 +532,71 @@ def main():
         for k, r in enumerate(lista, 1):
             r[0] = k
 
+    # Desde aquí no se usa random: lo que sigue se agregó después y no debe cambiar los datos anteriores.
+    # --------------------------------------------------------------- más casos cerrados y calificados
+    # Para tener 5 calificaciones: se cierra el caso 2, se califica el 5 y se abre (y cierra) un caso para el
+    # incidente validado del reporte 125, que no tenía. La demo de "calificar en vivo" pasa al caso 6.
+    def cerrar_y_calificar(cid, dias_cierre, puntaje, comentario):
+        k = next(i for i, c in enumerate(casos) if c[0] == cid)
+        c = casos[k]
+        rem = next(r for r in remisiones if r[1] == cid and r[4] == "ACEPTADA")
+        cierre = c[5] or rem[5] + timedelta(days=dias_cierre)
+        if c[5] is None:
+            casos[k] = (cid, c[1], C_CERR, c[3], c[4], cierre, "Conciliación con la entidad; el caso termina.", c[7])
+        calificaciones.append([len(calificaciones) + 1, cid, rem[2], puntaje, comentario, cierre + timedelta(days=2)])
+
+    inc6 = next(i for i in incidentes if i[1] == 125)
+    validacion = [h for h in historial if h[1] == 125 and h[3] == VAL][-1]
+    cid = len(casos) + 1
+    creacion = validacion[5] + timedelta(hours=20)
+    casos.append((cid, inc6[0], C_ACEP, validacion[4], creacion, None,
+                  "Incidente con antecedentes previos en el punto." if ante_por_reporte.get(125, 0) else "Incidente sin antecedentes registrados.",
+                  creacion))
+    eleccion = creacion + timedelta(days=2)
+    for k, (id_abogado, horas, estado) in enumerate([(1, 5, "ELEGIDA"), (4, 26, "NO_ELEGIDA")]):
+        postulaciones.append([len(postulaciones) + 1, cid, id_abogado, MENSAJES[k], estado, creacion + timedelta(hours=horas), eleccion])
+    remisiones.append([len(remisiones) + 1, cid, 1, eleccion, "ACEPTADA", eleccion, None, tarifa[inc6[5]]])
+
+    cerrar_y_calificar(2, 35, 5, COMENTARIOS[5][0])
+    cerrar_y_calificar(5, 0, 3, COMENTARIOS[3][0])
+    cerrar_y_calificar(cid, 30, 5, COMENTARIOS[5][1])
+
+    # --------------------------------------------------------------- cálculos del IRU (versión 1, vigente)
+    # Uno por reporte evaluado, en el momento de la evaluación, con la fórmula descrita en parametros_indice.
+    PESOS_IRU = {"gravedad_evaluada": 0.25, "reportes_cercanos": 0.20, "antiguedad_sin_atencion": 0.20,
+                 "trafico_zona": 0.15, "cercania_colegios_salud": 0.10, "historial_incidentes_zona": 0.10}
+    hecho_de = {i[1]: i[4] for i in incidentes}
+    calculos = []
+    for ev in evaluaciones:
+        rep, t = por_id[ev[1]], ev[6]
+        z = ZONAS[rep[3] - 1]
+        cercanos = sum(1 for o in reportes if o[0] != rep[0] and o[2] == rep[2] and o[9] <= t and
+                       haversine_m(float(rep[7]), float(rep[8]), float(o[7]), float(o[8])) <= RADIO_ANTECEDENTE_M)
+        inc_zona = sum(1 for o in reportes if o[5] == "INCIDENTE" and o[3] == rep[3] and
+                       t - timedelta(days=365) <= hecho_de[o[0]] <= t)
+        normalizado = {
+            "gravedad_evaluada": (ev[3] + ev[4]) / 2,
+            "reportes_cercanos": min(100, cercanos * 20),
+            "antiguedad_sin_atencion": min(100, (t - rep[9]).days / 180 * 100),
+            "trafico_zona": (z[4] - 1) * 25,
+            "cercania_colegios_salud": min(100, (z[5] + z[6]) * 20),
+            "historial_incidentes_zona": min(100, inc_zona * 20),
+        }
+        desglose = {v: {"valor_normalizado": round(n, 2), "peso": PESOS_IRU[v], "aporte": round(n * PESOS_IRU[v], 2)}
+                    for v, n in normalizado.items()}
+        valor = min(100, round(sum(d["aporte"] for d in desglose.values()), 2))
+        calculos.append((len(calculos) + 1, rep[0], 1, valor, json.dumps(desglose, ensure_ascii=False),
+                         t + timedelta(minutes=1)))
+
+    # --------------------------------------------------------------- tokens de recuperación
+    # Solo se guarda el SHA-256 del token. Todos están vencidos (duran 30 min); unos se usaron y otros no.
+    tokens = []
+    for k, (dias, usado) in enumerate([(95, True), (110, False), (130, True), (150, True), (171, False), (198, True)], 1):
+        uid = ciudadanos[k * 6]
+        creado = INICIO + timedelta(days=dias, hours=k)
+        tokens.append((k, uid, hashlib.sha256(f"token-demo-{k}".encode()).hexdigest(), creado,
+                       creado + timedelta(minutes=30), creado + timedelta(minutes=4 + k) if usado else None))
+
     # --------------------------------------------------------------- archivos
     cab = ("-- DATOS SIMULADOS generados por scripts/generar_semilla.py (no editar a mano).\n"
            "-- Ninguna persona es real. Ver documentacion/datos_simulados.md\n\n")
@@ -552,6 +618,10 @@ def main():
         f.write(inserts("versiones_indice", ["id_version", "nombre_indice", "numero_version", "descripcion", "vigente", "fecha_creacion"], [
             (1, "IRU", 1, "Pesos iniciales por criterio del equipo; pendientes de validación con expertos (AHP).", True, v),
             (2, "IVC", 1, "Pesos iniciales por criterio del equipo; pendientes de validación con abogados (AHP).", True, v),
+            # propuestas en estudio (no vigentes): muestran que los pesos se versionan sin perder los anteriores
+            (3, "IRU", 2, "Propuesta: más peso a la gravedad evaluada por el operador. En estudio.", False, v + timedelta(days=150)),
+            (4, "IVC", 2, "Propuesta: más peso a los antecedentes previos, que prueban que la entidad sabía. En estudio.", False, v + timedelta(days=160)),
+            (5, "IRU", 3, "Propuesta: más peso a los reportes cercanos y menos al tráfico (dato simulado). En estudio.", False, v + timedelta(days=230)),
         ]))
         f.write(inserts("parametros_indice", ["id_version", "variable", "peso", "descripcion"], [
             (1, "gravedad_evaluada", 0.25, "Promedio de gravedad e impacto de la última evaluación del operador (0-100)."),
@@ -567,6 +637,25 @@ def main():
             (2, "atencion_medica", 0.10, "Hubo atención médica registrada = 100; si no = 0."),
             (2, "testigos", 0.10, "Número de testigos; 2 o más = 100."),
             (2, "oportunidad_plazo", 0.10, "Tiempo restante del plazo de caducidad (por verificar con abogado); recién ocurrido = 100."),
+            (3, "gravedad_evaluada", 0.30, "Igual que en la versión 1."),
+            (3, "reportes_cercanos", 0.20, "Igual que en la versión 1."),
+            (3, "antiguedad_sin_atencion", 0.15, "Igual que en la versión 1."),
+            (3, "trafico_zona", 0.15, "Igual que en la versión 1. [SIMULADO]"),
+            (3, "cercania_colegios_salud", 0.10, "Igual que en la versión 1. [SIMULADO]"),
+            (3, "historial_incidentes_zona", 0.10, "Igual que en la versión 1."),
+            (4, "dano_documentado", 0.20, "Igual que en la versión 1."),
+            (4, "calidad_evidencia", 0.10, "Igual que en la versión 1."),
+            (4, "antecedentes_previos", 0.25, "Igual que en la versión 1."),
+            (4, "antiguedad_primer_antecedente", 0.15, "Igual que en la versión 1."),
+            (4, "atencion_medica", 0.10, "Igual que en la versión 1."),
+            (4, "testigos", 0.10, "Igual que en la versión 1."),
+            (4, "oportunidad_plazo", 0.10, "Igual que en la versión 1."),
+            (5, "gravedad_evaluada", 0.25, "Igual que en la versión 1."),
+            (5, "reportes_cercanos", 0.25, "Igual que en la versión 1."),
+            (5, "antiguedad_sin_atencion", 0.20, "Igual que en la versión 1."),
+            (5, "trafico_zona", 0.10, "Igual que en la versión 1. [SIMULADO]"),
+            (5, "cercania_colegios_salud", 0.10, "Igual que en la versión 1. [SIMULADO]"),
+            (5, "historial_incidentes_zona", 0.10, "Igual que en la versión 1."),
         ]))
 
     with open(os.path.join(SALIDA, "02_usuarios.sql"), "w", encoding="utf-8") as f:
@@ -574,6 +663,8 @@ def main():
         f.write(inserts("usuarios", ["id_usuario", "nombre", "correo", "password_hash", "id_rol", "fecha_registro", "activo", "fecha_consentimiento"], usuarios))
         f.write(inserts("abogados", ["id_abogado", "id_usuario", "tarjeta_profesional", "especialidad", "ciudad", "activo",
                                      "anios_experiencia", "presentacion"], abogados))
+        f.write(inserts("tokens_recuperacion", ["id_token", "id_usuario", "hash_token", "fecha_creacion", "fecha_expiracion",
+                                                "fecha_uso"], tokens))
 
     with open(os.path.join(SALIDA, "03_reportes.sql"), "w", encoding="utf-8") as f:
         f.write(cab)
@@ -585,6 +676,8 @@ def main():
                                               "fecha_cambio", "observacion"], historial))
         f.write(inserts("evaluaciones", ["id_evaluacion", "id_reporte", "id_usuario", "gravedad", "impacto", "frecuencia",
                                          "fecha_evaluacion"], evaluaciones))
+        f.write(inserts("calculos_indice", ["id_calculo", "id_reporte", "id_version", "valor", "desglose", "fecha_calculo"],
+                        calculos))
 
     with open(os.path.join(SALIDA, "04_incidentes.sql"), "w", encoding="utf-8") as f:
         f.write(cab)

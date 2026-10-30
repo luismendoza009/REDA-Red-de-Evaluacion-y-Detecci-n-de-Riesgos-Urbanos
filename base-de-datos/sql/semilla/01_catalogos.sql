@@ -77,7 +77,10 @@ INSERT INTO entidades_publicas (id_entidad, nombre, tipo, ciudad) VALUES
 
 INSERT INTO versiones_indice (id_version, nombre_indice, numero_version, descripcion, vigente, fecha_creacion) VALUES
   (1, 'IRU', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con expertos (AHP).', true, '2026-02-01T08:00:00-05:00'),
-  (2, 'IVC', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con abogados (AHP).', true, '2026-02-01T08:00:00-05:00');
+  (2, 'IVC', 1, 'Pesos iniciales por criterio del equipo; pendientes de validación con abogados (AHP).', true, '2026-02-01T08:00:00-05:00'),
+  (3, 'IRU', 2, 'Propuesta: más peso a la gravedad evaluada por el operador. En estudio.', false, '2026-07-01T08:00:00-05:00'),
+  (4, 'IVC', 2, 'Propuesta: más peso a los antecedentes previos, que prueban que la entidad sabía. En estudio.', false, '2026-07-11T08:00:00-05:00'),
+  (5, 'IRU', 3, 'Propuesta: más peso a los reportes cercanos y menos al tráfico (dato simulado). En estudio.', false, '2026-09-19T08:00:00-05:00');
 
 INSERT INTO parametros_indice (id_version, variable, peso, descripcion) VALUES
   (1, 'gravedad_evaluada', 0.25, 'Promedio de gravedad e impacto de la última evaluación del operador (0-100).'),
@@ -92,5 +95,24 @@ INSERT INTO parametros_indice (id_version, variable, peso, descripcion) VALUES
   (2, 'antiguedad_primer_antecedente', 0.15, 'Días entre el primer antecedente y el hecho; 120 o más = 100.'),
   (2, 'atencion_medica', 0.1, 'Hubo atención médica registrada = 100; si no = 0.'),
   (2, 'testigos', 0.1, 'Número de testigos; 2 o más = 100.'),
-  (2, 'oportunidad_plazo', 0.1, 'Tiempo restante del plazo de caducidad (por verificar con abogado); recién ocurrido = 100.');
+  (2, 'oportunidad_plazo', 0.1, 'Tiempo restante del plazo de caducidad (por verificar con abogado); recién ocurrido = 100.'),
+  (3, 'gravedad_evaluada', 0.3, 'Igual que en la versión 1.'),
+  (3, 'reportes_cercanos', 0.2, 'Igual que en la versión 1.'),
+  (3, 'antiguedad_sin_atencion', 0.15, 'Igual que en la versión 1.'),
+  (3, 'trafico_zona', 0.15, 'Igual que en la versión 1. [SIMULADO]'),
+  (3, 'cercania_colegios_salud', 0.1, 'Igual que en la versión 1. [SIMULADO]'),
+  (3, 'historial_incidentes_zona', 0.1, 'Igual que en la versión 1.'),
+  (4, 'dano_documentado', 0.2, 'Igual que en la versión 1.'),
+  (4, 'calidad_evidencia', 0.1, 'Igual que en la versión 1.'),
+  (4, 'antecedentes_previos', 0.25, 'Igual que en la versión 1.'),
+  (4, 'antiguedad_primer_antecedente', 0.15, 'Igual que en la versión 1.'),
+  (4, 'atencion_medica', 0.1, 'Igual que en la versión 1.'),
+  (4, 'testigos', 0.1, 'Igual que en la versión 1.'),
+  (4, 'oportunidad_plazo', 0.1, 'Igual que en la versión 1.'),
+  (5, 'gravedad_evaluada', 0.25, 'Igual que en la versión 1.'),
+  (5, 'reportes_cercanos', 0.25, 'Igual que en la versión 1.'),
+  (5, 'antiguedad_sin_atencion', 0.2, 'Igual que en la versión 1.'),
+  (5, 'trafico_zona', 0.1, 'Igual que en la versión 1. [SIMULADO]'),
+  (5, 'cercania_colegios_salud', 0.1, 'Igual que en la versión 1. [SIMULADO]'),
+  (5, 'historial_incidentes_zona', 0.1, 'Igual que en la versión 1.');
 
