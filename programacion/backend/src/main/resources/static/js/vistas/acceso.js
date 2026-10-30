@@ -24,6 +24,8 @@ function enviarCon(form, accion) {
         clearInterval(intervaloCuenta);
         mostrarErrores(form, error);
         const mensaje = form.querySelector(".error");
+        const cuentaRegresiva = form.querySelector(".cuenta-regresiva");
+        if (cuentaRegresiva) cuentaRegresiva.hidden = true;
         if (Number.isInteger(error.intentosRestantes)) {
           mensaje.textContent = error.intentosRestantes > 0
             ? `${error.message}. Te quedan ${error.intentosRestantes} ${error.intentosRestantes === 1 ? "intento" : "intentos"} antes del siguiente bloqueo.`
@@ -31,9 +33,7 @@ function enviarCon(form, accion) {
         }
         if (Number.isInteger(error.segundosRestantes) && error.segundosRestantes > 0) {
           let restantes = error.segundosRestantes;
-          const detalleIntentos = Number.isInteger(error.intentosRestantes)
-            ? ` Te quedan ${error.intentosRestantes} intentos antes del siguiente bloqueo.`
-            : "";
+          if (cuentaRegresiva) cuentaRegresiva.hidden = false;
           const actualizar = () => {
             if (!form.isConnected) {
               clearInterval(intervaloCuenta);
@@ -41,9 +41,20 @@ function enviarCon(form, accion) {
             }
             const minutos = String(Math.floor(restantes / 60)).padStart(2, "0");
             const segundos = String(restantes % 60).padStart(2, "0");
-            mensaje.textContent = restantes > 0
-              ? `Demasiados intentos. Intenta de nuevo en ${minutos}:${segundos}.${detalleIntentos}`
-              : `Ya puedes intentar iniciar sesión de nuevo.${detalleIntentos}`;
+            const texto = restantes > 0
+              ? `Tiempo restante de la pausa: ${minutos}:${segundos}.`
+              : "La pausa terminó. Ya puedes intentar iniciar sesión de nuevo.";
+            if (cuentaRegresiva) {
+              cuentaRegresiva.textContent = texto;
+              if (restantes === 0) {
+                mensaje.textContent = "Ya puedes intentar iniciar sesión de nuevo.";
+                cuentaRegresiva.hidden = true;
+              }
+            } else {
+              mensaje.textContent = restantes > 0
+                ? `Demasiados intentos. Intenta de nuevo en ${minutos}:${segundos}.`
+                : texto;
+            }
             restantes--;
             if (restantes < 0) clearInterval(intervaloCuenta);
           };
@@ -67,18 +78,23 @@ export function entrar(contenedor, _params, { mensaje } = {}) {
     <p class="texto-2">Entra para ver el mapa, tus reportes y tus casos.</p>
     ${mensaje ? `<p class="nota">${escapar(mensaje)}</p>` : ""}
     <form id="f-entrar" class="formulario" novalidate>
-      <label>Correo<input type="email" name="correo" autocomplete="username" required></label>
+      <label for="correo-login">Correo</label>
+      <input id="correo-login" type="email" name="correo" autocomplete="username"
+        aria-describedby="error-login" required>
       <div class="campo-con-etiqueta">
         <label for="password-login">Contraseña</label>
         <span class="campo-password">
-        <input id="password-login" type="password" name="password" autocomplete="current-password" required>
-        <button class="alternar-password" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-alternar-password>
+        <input id="password-login" type="password" name="password" autocomplete="current-password"
+          aria-describedby="error-login" required>
+        <button class="alternar-password" type="button" aria-label="Mostrar contraseña"
+          aria-controls="password-login" aria-pressed="false" data-alternar-password>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           <svg viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m3 3 18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a14.8 14.8 0 0 1-3.1 3.8M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 3.2-.5"/></svg>
         </button>
         </span>
       </div>
-      <p class="error" role="alert"></p>
+      <p id="error-login" class="error" role="alert" aria-atomic="true"></p>
+      <p class="error cuenta-regresiva" role="timer" aria-live="off" hidden></p>
       <button class="boton boton-claro boton-ancho" type="submit">Entrar</button>
     </form>
     <p class="enlaces"><a href="#/recuperar">¿Olvidaste tu contraseña?</a></p>
