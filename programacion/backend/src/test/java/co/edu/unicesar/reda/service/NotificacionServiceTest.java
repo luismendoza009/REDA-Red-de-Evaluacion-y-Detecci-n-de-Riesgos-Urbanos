@@ -57,9 +57,10 @@ class NotificacionServiceTest {
 
         assertEquals(1, respuesta.noLeidas());
         assertEquals(1, respuesta.items().size());
-        assertEquals(15, respuesta.items().getFirst().idReporte());
-        assertEquals("Pendiente", respuesta.items().getFirst().estadoAnterior());
-        assertEquals("En revisión", respuesta.items().getFirst().estadoNuevo());
+        var primera = respuesta.items().get(0);
+        assertEquals(15, primera.idReporte());
+        assertEquals("Pendiente", primera.estadoAnterior());
+        assertEquals("En revisión", primera.estadoNuevo());
         verify(notificaciones).findByDestinatario_IdOrderByFechaCreacionDesc(eq(42), any(Pageable.class));
     }
 
