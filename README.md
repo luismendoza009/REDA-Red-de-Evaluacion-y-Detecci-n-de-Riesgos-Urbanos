@@ -18,7 +18,7 @@ esas fallas). El sistema vincula cada incidente con los reportes previos del mis
 
 ```
 base-de-datos/            BASE DE DATOS I
-├─ migraciones/           DDL numerado (001_ … 013_) ejecutable en orden sobre base vacía
+├─ migraciones/           DDL numerado (001_ … 014_) ejecutable en orden sobre base vacía
 ├─ sql/                   semilla, consultas, índices, pruebas, herramientas
 ├─ scripts/               migrar.ps1 y generadores (semilla, diccionario, diagrama, documento)
 ├─ diagramas/             diagrama EER (.drawio editable + .png) y su especificación JSON
@@ -74,12 +74,13 @@ Contraseña de todas: `Reda2026*` (datos simulados, ninguna persona es real).
 | Ciudadana (caso demo) | `lorena.cuello53@correo.test` | Incidente en el Centro con 4 reportes previos desde el 19 de mayo; sus fotos privadas; subir su foto de perfil |
 | Ciudadano | `oscar.castro21@correo.test` | Caso con 3 abogados postulados: comparar foto, insignia de verificado y reputación, y **elegir** |
 | Ciudadano | `jose.onate33@correo.test` | Caso con 2 abogados postulados (Luis Oñate, 4,0 ★, y María Rincones) |
-| Ciudadana | `ana.arzuaga37@correo.test` | Caso cerrado sin calificar: **calificar** al abogado |
+| Ciudadana | `ana.arzuaga37@correo.test` | Caso cerrado y ya calificado (3 ★): ver su calificación |
+| Ciudadana | `lorena.quintero18@correo.test` | Caso 6 en curso con María Rincones: cuando ella lo cierre, **calificar** a la abogada |
 | Operadora | `lorena.arzuaga2@correo.test` | Bandeja de revisión: validar el incidente demo (#137) |
 | Abogado verificado | `jorge.gutierrez6@correo.test` | Casos disponibles (resumen anónimo) y postularse; editar su perfil y su foto |
 | Abogado verificado | `luis.onate7@correo.test` | Postulado en 2 casos; calificación 4,0 de un cliente |
-| Abogada verificada | `maria.rincones8@correo.test` | Mis casos: expediente completo del caso 6, cerrar caso |
-| Abogada verificada | `rosa.zuleta9@correo.test` | Caso 2 en curso (expediente) |
+| Abogada verificada | `maria.rincones8@correo.test` | Mis casos: expediente completo del caso 6, **cerrar caso** (luego Lorena Quintero lo califica) |
+| Abogada verificada | `rosa.zuleta9@correo.test` | Caso 2 cerrado con 5 ★ de su cliente |
 | Abogado sin verificar | `jesus.zuleta10@correo.test` | Cuenta pendiente: no puede postularse, subir foto ni editar su perfil |
 | Administrador | `luis.fuentes1@correo.test` | Verificar abogados (al verificar a Jesús Zuleta se le habilita el perfil) |
 
@@ -89,8 +90,9 @@ Las fotos de perfil no vienen en la semilla (no se usan fotos de personas): se s
 
 ```powershell
 cd base-de-datos            # con PGPASSWORD definido
-psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql        # 15 comprobaciones de coherencia
-psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 32 pruebas negativas
+psql -U postgres -d reda -f sql\pruebas\verificar_semilla.sql        # 17 comprobaciones de coherencia
+psql -U postgres -d reda -f sql\pruebas\probar_restricciones.sql     # 35 pruebas negativas
+psql -U postgres -d reda -f sql\pruebas\demostracion_tres_casos.sql  # guion de la sustentación: relación con varias, con ninguna y rechazos
 psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificación cruzada del banco
 .\scripts\verificar_desde_cero.ps1   # todo lo anterior sobre una base aparte creada desde cero (no toca 'reda')
 
