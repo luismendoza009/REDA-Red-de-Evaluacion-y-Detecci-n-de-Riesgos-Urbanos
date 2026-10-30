@@ -135,4 +135,12 @@ SELECT pg_temp.debe_fallar('foto de perfil en un formato no permitido', 'ck_usua
 SELECT pg_temp.debe_fallar('dos usuarios con el mismo archivo de foto', 'uq_usuarios_foto',
   $q$UPDATE usuarios SET foto_perfil = 'perfiles/2026/10/igual.jpg', foto_perfil_mime = 'image/jpeg', fecha_foto_perfil = now() WHERE id_usuario IN (1, 2)$q$);
 
+-- Migración 014: textos acotados
+SELECT pg_temp.debe_fallar('descripción de reporte de más de 2000 caracteres', 'ck_reportes_descripcion_max',
+  $q$UPDATE reportes SET descripcion = repeat('hueco ', 400) WHERE id_reporte = 1$q$);
+SELECT pg_temp.debe_fallar('presentación de abogado de más de 600 caracteres', 'ck_abogados_presentacion',
+  $q$UPDATE abogados SET presentacion = repeat('x', 601) WHERE id_abogado = 1$q$);
+SELECT pg_temp.debe_fallar('postulación de más de 1500 caracteres', 'ck_postulaciones_mensaje_max',
+  $q$UPDATE postulaciones SET mensaje = repeat('x', 1501) WHERE id_postulacion = 1$q$);
+
 ROLLBACK;
