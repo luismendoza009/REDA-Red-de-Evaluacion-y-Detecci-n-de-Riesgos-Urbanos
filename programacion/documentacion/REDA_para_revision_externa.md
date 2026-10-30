@@ -186,16 +186,16 @@ Navegador (HTML + CSS + JavaScript con módulos, sin framework; Leaflet 1.9.4 + 
         │  HTTP/JSON, token JWT en la cabecera
 API REST: Java 17 + Spring Boot 3.5 (Spring Web, Data JPA, Security, Validation, springdoc/Swagger)
         │  JPA para el CRUD + SQL explícito (JdbcTemplate) para mapa y búsqueda de antecedentes
-PostgreSQL 18 (migraciones SQL numeradas 001–012, sin Flyway)
+PostgreSQL 18 (migraciones SQL numeradas 001–013, sin Flyway)
 ```
 - La interfaz la sirve el mismo Spring Boot (`src/main/resources/static`): una URL, un comando. SPA con rutas `#/`,
   un módulo JS por vista, el menú cambia según el rol (el backend vuelve a verificar cada permiso).
 - Capas del backend: `controller` (delgados) → `service` (un servicio por caso de uso) → `model` (entidades con
-  comportamiento, sin setters) + `repository`; transversales `dto`, `exception` (jerarquía propia + manejador global único),
+  comportamiento, sin setters) + `repository`; entrada y salida en `peticion` (formularios validados) y `respuesta` (JSON devuelto); transversales `exception` (jerarquía propia + manejador global único),
   `security` (JWT, BCrypt, límite de intentos), `config`.
 - Patrones documentados con auditoría "hallazgo → corrección": Experto, Creador, Controlador, Alta cohesión, Bajo acoplamiento,
   Fabricación pura, Indirección, Variaciones protegidas; SRP, OCP, LSP, ISP, DIP.
-- Pruebas: 77 unitarias (dominio sin base de datos, servicios con Mockito) y 16 de integración (HTTP → JPA → PostgreSQL real).
+- Pruebas: 81 unitarias (dominio sin base de datos, servicios con Mockito) y 17 de integración (HTTP → JPA → PostgreSQL real).
 
 ---
 

@@ -96,6 +96,7 @@ psql -U postgres -d reda -f sql\consultas\verificacion_consultas.sql # verificac
 
 cd ..\programacion\backend
 mvn test                                  # 81 pruebas unitarias
+$env:REDA_DB_CLAVE = "<clave>"; $env:REDA_JWT_SECRETO = "<secreto de 32+ caracteres>"
 mvn verify -Pintegracion                  # + 17 de integración contra PostgreSQL (base recién creada)
 ```
 
