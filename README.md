@@ -31,7 +31,7 @@ programacion/             PROGRAMACIÓN 3
 
 ## Cómo correrlo (Windows, PowerShell)
 
-Requisitos: PostgreSQL 16+, Java 25 (LTS), Maven. La primera vez Maven descarga dependencias.
+Requisitos: PostgreSQL 16+, Java 17 (LTS), Maven. La primera vez Maven descarga dependencias.
 
 **Atajo (un solo comando):** pide la clave de PostgreSQL la primera vez, aplica las migraciones pendientes y arranca
 el servidor. Con `-Recrear` reconstruye la base desde cero con los datos de demostración.
