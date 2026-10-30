@@ -3,7 +3,7 @@
 > La política del curso exige declarar **para qué** se
 > usó IA, **en qué partes** y **cómo se verificó**. Cada integrante debe poder explicar cualquier línea.
 
-**Herramienta:** Claude (Anthropic), mediante Claude Code en VS Code.
+**Herramientas:** Claude (Anthropic), mediante Claude Code en VS Code, para el desarrollo técnico descrito en esta declaración. ChatGPT (OpenAI) se utilizó como apoyo conversacional individual de Carlos para revisar y actualizar la documentación de la Entrega 2, según se detalla en su fila.
 
 ## Base de Datos I
 
@@ -12,7 +12,7 @@
 | Migraciones 001–014 | Redactó el DDL a partir del esquema de la Entrega 1 y de las decisiones del grupo (enfoque probatorio, elección del abogado por el ciudadano, calificaciones, topes de los textos) | Se ejecutan en orden sobre una base vacía de PostgreSQL 18 (`scripts/migrar.ps1 -Recrear` y `scripts/verificar_desde_cero.ps1`). 35 pruebas negativas (`sql/pruebas/probar_restricciones.sql`) comprueban que cada restricción clave rechaza datos inválidos y que la detiene la restricción esperada |
 | `scripts/migrar.ps1` | Lo escribió | Se ejecutó sobre base vacía y se volvió a ejecutar para comprobar que no reaplica migraciones |
 | Generador y datos semilla | Escribió el generador en Python | 17 comprobaciones de coherencia (`sql/pruebas/verificar_semilla.sql`), todas en 0. Al agregar versiones, cálculos y tokens se comprobó con `git diff` que las filas anteriores no cambiaron |
-| Guion de demostración | Escribió `sql/pruebas/demostracion_tres_casos.sql` | **Pendiente: ejecutarlo con la semilla** y comprobar que las consultas devuelven filas y que las cuatro sentencias de rechazo terminan en ERROR con el nombre de su restricción |
+| Guion de demostración | Escribió `sql/pruebas/demostracion_tres_casos.sql` | Ejecutado con la semilla: las consultas muestran registros y las cuatro sentencias de rechazo terminan en ERROR con el nombre de su restricción. Evidencia: `documentacion/entrega2/evidencia_tres_casos.txt` |
 | Banco de consultas | Redactó las 10 consultas | Cada resultado se recalculó por otro camino SQL (`sql/consultas/verificacion_consultas.sql`). Las cifras de C02 y C07 se comprobaron a mano |
 | Evidencia de índices | Diseñó el experimento y escribió el script | Los planes de ejecución reales quedaron en `evidencia_indices.txt` |
 | Auditoría de normalización, correcciones, decisiones | Redactó los borradores | **Pendiente: revisión del grupo** |
@@ -49,4 +49,4 @@ que cada uno leyó y verificó lo que firma.
 | Rafael Alfonso Rivera Restrepo | Ejecutó `scripts/verificar_desde_cero.ps1` en su equipo (PostgreSQL 18) sobre una base vacía: las 14 migraciones y la semilla corren sin errores, 35 de 35 pruebas negativas rechazadas por la restricción esperada, 17 de 17 comprobaciones de la semilla en 0 y 10 de 10 consultas verificadas. Salida en `documentacion/entrega2/evidencia_verificacion.txt` | — | Sí |
 | Ivan Andrés Rodriguez Rodriguez | | | |
 | Luis Eliecer Mendoza Perpiñán | Revisó el repositorio contra la rúbrica de la Entrega 2 (esquema, restricciones, datos de prueba, sustentación y repositorio) ubicando cada criterio en las migraciones, la semilla, las pruebas y `decisiones.md`. Ejecutó en su equipo (PostgreSQL 18) `scripts/verificar_desde_cero.ps1` con las migraciones 001–014: 35 de 35 pruebas negativas rechazadas por la restricción esperada, 17 de 17 comprobaciones de la semilla en 0 y 10 de 10 consultas verificadas. Ejecutó `sql/pruebas/demostracion_tres_casos.sql`: las consultas devuelven filas y las cuatro sentencias de rechazo terminan en ERROR con el nombre de su restricción. La IA lo asistió con los comandos de terminal (Git, PowerShell y `psql`): actualizar ramas, ejecutar las verificaciones y crear las ramas y Pull Requests | — | Sí |
-| Carlos Eduardo Camelo Montaño | | | |
+| Carlos Eduardo Camelo Montaño | Revisó la documentación de la Entrega 2 con apoyo de ChatGPT; contrastó las cifras y rutas del generador con las evidencias versionadas; actualizó el generador para reflejar 14 migraciones, 35 pruebas negativas, 17 comprobaciones de semilla y 10 consultas verificadas; regeneró el Word y exportó el PDF desde Codespaces | Supervisó los ajustes documentales y ejecutó el generador y la exportación desde Codespaces | Pendiente de revisión visual final del Word y el PDF |
