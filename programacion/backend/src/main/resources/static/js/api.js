@@ -106,10 +106,36 @@ export const api = {
   // fotos (privadas)
   evidencias: (idReporte) => pedir(`/api/reportes/${idReporte}/evidencias`),
   archivo: (url) => pedir(url, { binario: true }),
-  subirFoto(idReporte, archivo) {
+  subirFoto(idReporte, archivo, alProgresar = () => {}) {
     const datos = new FormData();
     datos.append("archivo", archivo);
-    return pedir(`/api/reportes/${idReporte}/evidencias`, { metodo: "POST", formulario: datos });
+    const ruta = `/api/reportes/${idReporte}/evidencias`;
+    const s = sesion.actual();
+    return new Promise((resolver, rechazar) => {
+      const solicitud = new XMLHttpRequest();
+      solicitud.open("POST", ruta);
+      if (s?.token) solicitud.setRequestHeader("Authorization", `Bearer ${s.token}`);
+      solicitud.upload.addEventListener("progress", (evento) => {
+        alProgresar(evento.lengthComputable ? Math.round((evento.loaded / evento.total) * 100) : null);
+      });
+      solicitud.addEventListener("load", () => {
+        let respuesta = null;
+        try {
+          respuesta = solicitud.responseText ? JSON.parse(solicitud.responseText) : null;
+        } catch (error) {
+          rechazar(error);
+          return;
+        }
+        if (solicitud.status < 200 || solicitud.status >= 300) {
+          if (solicitud.status === 401 && s?.token) sesion.cerrar("Tu sesión venció. Vuelve a iniciar sesión.");
+          rechazar(new ErrorApi(solicitud.status, respuesta));
+          return;
+        }
+        resolver(respuesta);
+      });
+      solicitud.addEventListener("error", () => rechazar(new ErrorApi(0, null)));
+      solicitud.send(datos);
+    });
   },
   // casos
   solicitarAbogado: (idReporte) => post("/api/casos", { idReporte, autorizaCompartirResumen: true }),

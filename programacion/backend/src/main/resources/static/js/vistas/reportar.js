@@ -126,21 +126,28 @@ export async function mostrar(contenedor) {
   const selector = crearSelector(form, zonas);
   conectarTipo(form);
   conectarTestigos();
-  conectarFotos(fotos);
+  const actualizarProgresoFoto = conectarFotos(fotos);
   const borrarBorrador = conectarBorrador(form, selector);
   form.descripcion.addEventListener("input", () => { $("#contador").textContent = form.descripcion.value.length; });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     await conBotonOcupado(form.querySelector("button[type=submit]"), async () => {
+      const entradaFotos = $("#fotos");
+      const bloquearFotos = (bloquear) => {
+        entradaFotos.disabled = bloquear;
+        $$("[data-quitar]", $("#previas")).forEach((boton) => { boton.disabled = bloquear; });
+      };
+      bloquearFotos(true);
       try {
-        const resultado = await enviar(form, fotos);
+        const resultado = await enviar(form, fotos, actualizarProgresoFoto);
         const borradorEliminado = borrarBorrador();
         selector.remove();
         mapaPrincipal.invalidar();
         mostrarResultado(contenedor, resultado);
         if (!borradorEliminado) avisar("El reporte se envió, pero no se pudo borrar su copia local. Elimínala desde el formulario si este dispositivo es compartido.", "error");
       } catch (err) {
+        bloquearFotos(false);
         mostrarErrores(form, err);
         form.querySelector("[aria-invalid]")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -373,7 +380,9 @@ function conectarTestigos() {
 function conectarFotos(fotos) {
   const previas = $("#previas");
   const pintar = () => {
-    previas.innerHTML = fotos.map((f, i) => `<div class="previa"><img src="${f.url}" alt="Foto ${i + 1}">
+    previas.innerHTML = fotos.map((f, i) => `<div class="previa" data-foto-id="${f.id}"><img src="${f.url}" alt="Foto ${i + 1}">
+      <div class="previa-estado"><small data-foto-estado role="status">Lista para enviar</small>
+        <progress data-foto-progreso max="100" value="0" aria-label="Progreso de la foto ${i + 1}" hidden></progress></div>
       <button type="button" class="boton boton-icono" data-quitar="${i}" aria-label="Quitar foto ${i + 1}">✕</button></div>`).join("");
     $$("[data-quitar]", previas).forEach((b) => b.addEventListener("click", () => {
       const [quitada] = fotos.splice(Number(b.dataset.quitar), 1);
@@ -381,19 +390,31 @@ function conectarFotos(fotos) {
       pintar();
     }));
   };
+  const actualizarProgreso = (foto, porcentaje, texto) => {
+    const tarjeta = previas.querySelector(`[data-foto-id="${foto.id}"]`);
+    if (!tarjeta) return;
+    const progreso = $("[data-foto-progreso]", tarjeta);
+    const estado = $("[data-foto-estado]", tarjeta);
+    progreso.hidden = false;
+    if (porcentaje == null) progreso.removeAttribute("value");
+    else progreso.value = porcentaje;
+    estado.textContent = texto;
+  };
+  let siguienteId = 0;
   $("#fotos").addEventListener("change", (e) => {
     for (const archivo of e.target.files) {
       if (fotos.length >= MAX_FOTOS) { avisar(`Máximo ${MAX_FOTOS} fotos.`, "error"); break; }
       if (!TIPOS_FOTO.includes(archivo.type)) { avisar(`${archivo.name}: solo JPG, PNG o WEBP.`, "error"); continue; }
       if (archivo.size > MAX_BYTES) { avisar(`${archivo.name}: pesa más de 10 MB.`, "error"); continue; }
-      fotos.push({ archivo, url: URL.createObjectURL(archivo) });
+      fotos.push({ id: siguienteId++, archivo, url: URL.createObjectURL(archivo) });
     }
     e.target.value = "";
     pintar();
   });
+  return actualizarProgreso;
 }
 
-async function enviar(form, fotos) {
+async function enviar(form, fotos, actualizarProgreso) {
   const d = new FormData(form);
   if (!d.get("latitud")) {
     throw Object.assign(new Error("Marca en el mapa dónde está la falla."), { campos: {} });
@@ -424,8 +445,17 @@ async function enviar(form, fotos) {
   }
   // las fotos se suben después de crear el reporte; si alguna falla, el reporte ya existe
   const fallidas = [];
-  for (const f of fotos) {
-    try { await api.subirFoto(respuesta.reporte.id, f.archivo); } catch (e) { fallidas.push(`${f.archivo.name}: ${e.message}`); }
+  for (const [indice, f] of fotos.entries()) {
+    actualizarProgreso(f, null, `Subiendo foto ${indice + 1} de ${fotos.length}…`);
+    try {
+      await api.subirFoto(respuesta.reporte.id, f.archivo, (porcentaje) => {
+        actualizarProgreso(f, porcentaje, porcentaje == null ? "Subiendo foto…" : `Subiendo… ${porcentaje}%`);
+      });
+      actualizarProgreso(f, 100, "Foto subida correctamente.");
+    } catch (e) {
+      fallidas.push(`${f.archivo.name}: ${e.message}`);
+      actualizarProgreso(f, null, `No se pudo subir: ${e.message}`);
+    }
     URL.revokeObjectURL(f.url);
   }
   return { ...respuesta, fallidas, totalFotos: fotos.length };
