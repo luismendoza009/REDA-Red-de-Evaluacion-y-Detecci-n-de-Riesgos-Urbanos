@@ -101,6 +101,22 @@ WHERE ci.fecha_calculo < r.fecha_reporte
 \echo '17. Ningún token de recuperación es anterior al registro de su usuario. Esperado: 0'
 SELECT count(*) FROM tokens_recuperacion t JOIN usuarios u USING (id_usuario) WHERE t.fecha_creacion < u.fecha_registro;
 
+\echo '18. La semilla incluye notificaciones leídas y pendientes de sus autores. Esperado: 0'
+SELECT CASE WHEN count(*) >= 5
+                  AND count(*) FILTER (WHERE n.fecha_lectura IS NULL) > 0
+                  AND count(*) FILTER (WHERE n.fecha_lectura IS NOT NULL) > 0
+                  AND count(*) FILTER (WHERE n.id_usuario <> r.id_usuario) = 0
+            THEN 0 ELSE 1 END
+FROM notificaciones n
+JOIN historial_estados h USING (id_historial)
+JOIN reportes r USING (id_reporte);
+
+\echo '19. La semilla tiene bloqueos de prueba sin asociarlos a cuentas reales. Esperado: 0'
+SELECT CASE WHEN count(*) >= 5 AND count(*) FILTER (WHERE u.id_usuario IS NOT NULL) = 0
+            THEN 0 ELSE 1 END
+FROM bloqueos_login b
+LEFT JOIN usuarios u ON u.correo = b.correo;
+
 \echo 'Caso demo: antecedentes del incidente más reciente (esperado: 4, el primero el 2026-05-19)'
 SELECT i.id_incidente, count(rr.*) AS antecedentes, min(rc.fecha_reporte)::date AS primero
 FROM incidentes i

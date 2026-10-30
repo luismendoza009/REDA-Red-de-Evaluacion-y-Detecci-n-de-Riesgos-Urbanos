@@ -3,7 +3,7 @@
 > Generado automaticamente desde el esquema real (`scripts/generar_diccionario.ps1`). No editar a mano:
 > los significados vienen de los `COMMENT ON` de las migraciones.
 >
-> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_textos_acotados.sql
+> Migraciones aplicadas: 001_catalogos.sql, 002_usuarios.sql, 003_reportes.sql, 004_incidentes.sql, 005_casos.sql, 006_indices_priorizacion.sql, 007_indices.sql, 008_vistas.sql, 009_situacion_casos_mapa.sql, 010_postulaciones_y_cuentas.sql, 011_calificaciones.sql, 012_ubicacion_zonas.sql, 013_foto_perfil.sql, 014_bloqueos_login.sql, 015_notificaciones.sql, 016_textos_acotados.sql, 017_bloqueos_login_nombre_check.sql
 >
 > Etiquetas: **[PERSONAL]** dato personal (Ley 1581 de 2012) - **[SENSIBLE]** dato sensible de salud -
 > **[SIMULADO]** valor simulado para el proyecto de aula. La medida de proteccion se indica en cada columna.
@@ -571,4 +571,43 @@ Calificación que el ciudadano da al abogado que llevó su caso (una por caso).
 **Índices adicionales:**
 
 - `ix_calificaciones_abogado`: `btree (id_abogado, fecha DESC)`
+
+## bloqueos_login
+
+Contador persistente de intentos fallidos de inicio de sesión y bloqueos progresivos.
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| correo | VARCHAR(150) | No | PK |  |  |
+| intentos_fallidos | INTEGER | No |  |  |  |
+| bloqueado_hasta | TIMESTAMPTZ | Sí |  |  |  |
+| bloqueado_permanente | BOOLEAN | No |  | false |  |
+
+**Restricciones:**
+
+- `ck_bloqueos_login_estado`: `CHECK (((bloqueado_permanente AND (bloqueado_hasta IS NULL) AND (intentos_fallidos = 15)) OR ((NOT bloqueado_permanente) AND (intentos_fallidos < 15))))`
+- `ck_bloqueos_login_intentos`: `CHECK (((intentos_fallidos >= 1) AND (intentos_fallidos <= 15)))`
+
+## notificaciones
+
+Avisos privados al autor cuando cambia el estado de uno de sus reportes.
+
+| Columna | Tipo | Nulo | Claves | Defecto | Significado de negocio |
+|---|---|---|---|---|---|
+| id_notificacion | INTEGER | No | PK | identidad |  |
+| id_usuario | INTEGER | No | FK, UQ |  | Ciudadano destinatario de la notificación. |
+| id_historial | INTEGER | No | FK, UQ |  | Cambio de estado que originó el aviso. |
+| fecha_creacion | TIMESTAMPTZ | No |  | now() | Momento en que se generó la notificación. |
+| fecha_lectura | TIMESTAMPTZ | Sí |  |  | Momento en que el ciudadano la marcó como leída; NULL indica pendiente. |
+
+**Restricciones:**
+
+- `fk_notificaciones_historial`: `FOREIGN KEY (id_historial) REFERENCES historial_estados(id_historial) ON DELETE CASCADE`
+- `fk_notificaciones_usuario`: `FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE`
+- `uq_notificaciones_usuario_historial`: `UNIQUE (id_usuario, id_historial)`
+
+**Índices adicionales:**
+
+- `ix_notificaciones_no_leidas`: `btree (id_usuario) WHERE (fecha_lectura IS NULL)`
+- `ix_notificaciones_usuario_recientes`: `btree (id_usuario, fecha_creacion DESC)`
 

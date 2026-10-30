@@ -143,4 +143,22 @@ SELECT pg_temp.debe_fallar('presentación de abogado de más de 600 caracteres',
 SELECT pg_temp.debe_fallar('postulación de más de 1500 caracteres', 'ck_postulaciones_mensaje_max',
   $q$UPDATE postulaciones SET mensaje = repeat('x', 1501) WHERE id_postulacion = 1$q$);
 
+-- Migración 015: notificaciones privadas
+SELECT pg_temp.debe_fallar('notificación duplicada para el mismo ciudadano y cambio', 'uq_notificaciones_usuario_historial',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT id_usuario, id_historial FROM notificaciones LIMIT 1$q$);
+SELECT pg_temp.debe_fallar('notificación con destinatario inexistente', 'fk_notificaciones_usuario',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT (SELECT max(id_usuario) + 1000 FROM usuarios), id_historial FROM historial_estados LIMIT 1$q$);
+SELECT pg_temp.debe_fallar('notificación con cambio de estado inexistente', 'fk_notificaciones_historial',
+  $q$INSERT INTO notificaciones (id_usuario, id_historial)
+     SELECT id_usuario, (SELECT max(id_historial) + 1000 FROM historial_estados) FROM usuarios LIMIT 1$q$);
+
+-- Migraciones 014 y 017: bloqueo de inicio de sesión
+SELECT pg_temp.debe_fallar('intentos fallidos por debajo del mínimo', 'ck_bloqueos_login_intentos',
+  $q$INSERT INTO bloqueos_login (correo, intentos_fallidos) VALUES ('prueba.limite.inferior@reda.test', 0)$q$);
+SELECT pg_temp.debe_fallar('bloqueo permanente con menos de 15 intentos', 'ck_bloqueos_login_estado',
+  $q$INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_permanente)
+     VALUES ('prueba.estado.invalido@reda.test', 14, true)$q$);
+
 ROLLBACK;

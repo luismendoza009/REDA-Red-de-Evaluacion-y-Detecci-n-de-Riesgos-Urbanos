@@ -697,6 +697,47 @@ def main():
         f.write(inserts("remisiones", ["id_remision", "id_caso", "id_abogado", "fecha_envio", "estado_remision", "fecha_respuesta",
                                        "motivo_rechazo", "valor_cobrado"], remisiones))
 
+    with open(os.path.join(SALIDA, "06_notificaciones.sql"), "w", encoding="utf-8") as f:
+        f.write(cab)
+        f.write("""-- Cinco avisos para autores distintos; incluye estados leídos y pendientes.
+WITH candidatas AS (
+    SELECT h.id_historial,
+           r.id_usuario,
+           h.fecha_cambio,
+           row_number() OVER (PARTITION BY r.id_usuario ORDER BY h.fecha_cambio DESC, h.id_historial DESC) AS por_usuario
+    FROM historial_estados h
+    JOIN reportes r USING (id_reporte)
+),
+seleccionadas AS (
+    SELECT id_historial, id_usuario, fecha_cambio
+    FROM candidatas
+    WHERE por_usuario = 1
+    ORDER BY id_usuario
+    LIMIT 5
+),
+numeradas AS (
+    SELECT id_historial, id_usuario, fecha_cambio,
+           row_number() OVER (ORDER BY id_usuario) AS numero
+    FROM seleccionadas
+)
+INSERT INTO notificaciones (id_usuario, id_historial, fecha_creacion, fecha_lectura)
+SELECT id_usuario,
+       id_historial,
+       fecha_cambio,
+       CASE WHEN numero <= 2 THEN NULL ELSE fecha_cambio + interval '1 minute' END
+FROM numeradas;
+""")
+
+    with open(os.path.join(SALIDA, "07_bloqueos_login.sql"), "w", encoding="utf-8") as f:
+        f.write(cab)
+        f.write("""INSERT INTO bloqueos_login (correo, intentos_fallidos, bloqueado_hasta, bloqueado_permanente) VALUES
+  ('prueba.bloqueo.nuevo@reda.test', 1, NULL, false),
+  ('prueba.bloqueo.primero@reda.test', 5, now() + interval '3 minutes', false),
+  ('prueba.bloqueo.segundo@reda.test', 10, now() + interval '10 minutes', false),
+  ('prueba.bloqueo.casi@reda.test', 14, now() + interval '10 minutes', false),
+  ('prueba.bloqueo.permanente@reda.test', 15, NULL, true);
+""")
+
     with open(os.path.join(SALIDA, "99_secuencias.sql"), "w", encoding="utf-8") as f:
         f.write("-- La semilla inserta IDs explícitos; se ajustan las secuencias para que los\n"
                 "-- siguientes INSERT de la aplicación no choquen con ellos.\nDO $$\nBEGIN\n")

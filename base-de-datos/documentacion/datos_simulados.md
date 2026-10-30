@@ -16,6 +16,8 @@ Todos los datos de `sql/semilla/` son **simulados** y se generan con `scripts/ge
 | Tráfico, colegios y centros de salud por zona | Simulado | Marcados `[SIMULADO]` en el diccionario |
 | Nombres de entidades públicas | Reales o genéricos | La atribución de cada falla a una entidad es simulada. "Empresa prestadora del servicio de aseo" es genérica a propósito |
 | Reportes, fotos, incidentes, casos y remisiones | Simulado | Las rutas de las fotos no apuntan a archivos reales; los hashes se derivan del ID |
+| Notificaciones | Simulado | Cinco avisos se generan desde cambios de estado de reportes de sus autores, con casos leídos y pendientes |
+| Bloqueos de inicio de sesión | Prueba | Cinco direcciones `.test` sin cuenta asociada demuestran contadores progresivos y bloqueo temporal/permanente |
 | Pesos de los índices IRU/IVC | Criterio del equipo | Sin validar con expertos (ver abajo) |
 | Tarifas por caso remitido | Simulado | 200 000 / 120 000 COP, sin estudio de mercado |
 
